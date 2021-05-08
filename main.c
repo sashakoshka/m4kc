@@ -34,10 +34,8 @@ static int   gameLoop(
   SDL_Renderer*
 );
 
-static void drawChar (
-  SDL_Renderer*, Uint8[][8],
-  int, int, int
-);
+static void drawChar(SDL_Renderer*, Uint8[][8], int, int, int);
+static void drawStr(SDL_Renderer*, Uint8[][8], char*, int, int);
 
 /*
   Chunk
@@ -155,13 +153,14 @@ int main() {
   )) {
     
     // For testing the font
-    //drawChar(renderer, font, 1, 8, 8);
+    //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    //drawStr(renderer, font, "!\"#$%", 8, 8);
     
     SDL_PumpEvents();
     
     SDL_GetMouseState(&mouseX, &mouseY);
-    M[0] = 0;
-    M[1] = 0;
+    M[0]   = 0;
+    M[1]   = 0;
     
     M[2]   = mouseX;
     M[3]   = mouseY;
@@ -737,5 +736,20 @@ static void drawChar(SDL_Renderer *renderer, Uint8 font[][8],
       if((font[c][yy] >> (7 - xx)) & 0x1)
         SDL_RenderDrawPoint(renderer, x + xx, y + yy);
     }
+  }
+}
+
+
+/*
+  drawChar
+  Takes in a pointer to a renderer, a pointer to a font, a char,
+  and draws it at the specified x and y coordinates.
+*/
+static void drawStr(SDL_Renderer *renderer, Uint8 font[][8],
+  char *str, int x, int y
+) {
+  for(int xx = 0; str[xx] > 0; xx++) {
+    drawChar(renderer, font, str[xx], x, y);
+    x += 8;
   }
 }
