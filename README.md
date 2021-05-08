@@ -25,7 +25,7 @@ This project is an attempt to translate the game into C in order to increase its
 * Mobs and multiplayer (this would require changing the rendering engine to some degree)
 * Day/night??? I don't know whether or not this would change the look or feel too much.
 
-# Dependencies
+## Dependencies
 
 ### Bare minimum to make this code run
 * SDL2
