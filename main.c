@@ -34,8 +34,8 @@ static int   gameLoop(
   SDL_Renderer*
 );
 
-static void drawChar(SDL_Renderer*, Uint8[][8], int, int, int);
-static void drawStr(SDL_Renderer*, Uint8[][8], char*, int, int);
+static int drawChar(SDL_Renderer*, int, int, int);
+static int drawStr(SDL_Renderer*, char*, int, int);
 
 /*
   Chunk
@@ -153,8 +153,11 @@ int main() {
   )) {
     
     // For testing the font
-    //SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    //drawStr(renderer, font, "!\"#$%", 8, 8);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    drawStr(renderer, " !\"#$%&'()*+,-./", 0, 0);
+    drawStr(renderer, "0123456789:;<=>?",  0, 8);
+    drawStr(renderer, "@ABCDEFGHIJKLMNO",  0, 16);
+    drawStr(renderer, "PQRSTUVWXYZ[\\]^_", 0, 24);
     
     SDL_PumpEvents();
     
@@ -725,10 +728,11 @@ static float perlin2d(float x, float y, int seed) {
 
 /*
   drawChar
-  Takes in a pointer to a renderer, a pointer to a font, a char,
-  and draws it at the specified x and y coordinates.
+  Takes in a pointer to a renderer, a charachter (as an int),
+  draws it at the specified x and y coordinates, and then returns
+  the charachter's width.
 */
-static void drawChar(SDL_Renderer *renderer, Uint8 font[][8],
+static int drawChar(SDL_Renderer *renderer,
   int c, int x, int y
 ) {
   for(int yy = 0; yy < 8; yy++) {
@@ -737,19 +741,22 @@ static void drawChar(SDL_Renderer *renderer, Uint8 font[][8],
         SDL_RenderDrawPoint(renderer, x + xx, y + yy);
     }
   }
+  
+  return font[c][8];
 }
 
-
 /*
-  drawChar
-  Takes in a pointer to a renderer, a pointer to a font, a char,
-  and draws it at the specified x and y coordinates.
+  drawStr
+  Takes in a pointer to a renderer, a string, draws it at the
+  specified x and y coordinates, and then returns the x position
+  it left off on.
 */
-static void drawStr(SDL_Renderer *renderer, Uint8 font[][8],
+static int drawStr(SDL_Renderer *renderer,
   char *str, int x, int y
 ) {
-  for(int xx = 0; str[xx] > 0; xx++) {
-    drawChar(renderer, font, str[xx], x, y);
-    x += 8;
+  while(*str > 0) {
+    x += drawChar(renderer, *(str++), x, y);
   }
+  
+  return x;
 }
