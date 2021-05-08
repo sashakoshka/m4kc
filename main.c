@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "minecraftfont.h"
 
 /*
   Minecraft 4k, C edition. Version 0.2
@@ -31,6 +32,11 @@ static int   gameLoop(
   int*,
   int*,
   SDL_Renderer*
+);
+
+static void drawChar (
+  SDL_Renderer*, Uint8[][8],
+  int, int, int
 );
 
 /*
@@ -84,8 +90,7 @@ int main() {
   int    world[262144] = {0};
   int textures[12288]  = {0};
   
-  //unsigned const int SEED = 18295169;
-  unsigned const int SEED = 2048;
+  unsigned const int SEED = 18295169;
   
   const int BUFFER_W     = 214;
   const int BUFFER_H     = 120;
@@ -100,13 +105,17 @@ int main() {
   
   //----  initializing SDL  ----//
   
+  // There are a couple things here that are commented out to cut
+  // down executable size. If you are trying to solve a problem,
+  // just comment them back in.
+  
   SDL_Window   *window   = NULL;
   SDL_Renderer *renderer = NULL;
   const Uint8  *keyboard = SDL_GetKeyboardState(NULL);
   SDL_Event event;
   
   if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-    printf("cant make window\n");
+    //printf("cant make window\n");
     goto exit;
   }
   
@@ -116,7 +125,7 @@ int main() {
     SDL_WINDOW_SHOWN
   );
   if(window == NULL) {
-    printf("%s\n", SDL_GetError());
+    //printf("%s\n", SDL_GetError());
     goto exit;
   }
   
@@ -124,10 +133,12 @@ int main() {
     window,
     -1, 0
   );
+  /*
   if(renderer == NULL) {
     printf("%s\n", SDL_GetError());
     goto exit;
   }
+  */
   SDL_RenderSetScale(renderer, BUFFER_SCALE, BUFFER_SCALE);
   
    //----   main game loop   ----//
@@ -142,6 +153,10 @@ int main() {
     textures,
     renderer
   )) {
+    
+    // For testing the font
+    //drawChar(renderer, font, 1, 8, 8);
+    
     SDL_PumpEvents();
     
     SDL_GetMouseState(&mouseX, &mouseY);
@@ -397,9 +412,9 @@ static int gameLoop(
                 i6,
                 i7,
                 i8,
-                i9,
+                pixelX,
                 i10,
-                i11,
+                pixelY,
                 i12,
                 i13,
                 i14,
@@ -440,8 +455,8 @@ static int gameLoop(
   
   while (SDL_GetTicks() - l > 10L) {
     // Looking around
-    f16 = (M[2] - BUFFER_W * 2) / 214.0F * 2.0F;
-    f17 = (M[3] - BUFFER_H * 2) / 120.0F * 2.0F;
+    f16 = (M[2] - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
+    f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
     f15 = sqrt(f16 * f16 + f17 * f17) - 1.2F;
     if (f15 < 0.0F)
       f15 = 0.0F;
@@ -515,23 +530,23 @@ static int gameLoop(
   for (k = 0; k < 12; k++) {
     m = (int)(f1 + (k >> 0 & 0x1) * 0.6F - 0.3F) - 64;
     i10 = (int)(f2 + ((k >> 2) - 1) * 0.8F + 0.65F) - 64;
-    i11 = (int)(f3 + (k >> 1 & 0x1) * 0.6F - 0.3F) - 64;
+    pixelY = (int)(f3 + (k >> 1 & 0x1) * 0.6F - 0.3F) - 64;
     if (m >= 0
       && i10 >= 0
-      && i11 >= 0
+      && pixelY >= 0
       && m   < 64
       && i10 < 64
-      && i11 < 64
+      && pixelY < 64
     ) {
-      setBlock(world, m, i10, i11, 0);
+      setBlock(world, m, i10, pixelY, 0);
     }
   }
   
   i8 = -1.0F;
-  for (i9 = 0; i9 < BUFFER_W; i9++) {
-    f18 = (i9 - 107) / 90.0F;
-    for (i11 = 0; i11 < BUFFER_H; i11++) {
-      f20 = (i11 - 60) / 90.0F;
+  for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
+    f18 = (pixelX - 107) / 90.0F;
+    for (pixelY = 0; pixelY < BUFFER_H; pixelY++) {
+      f20 = (pixelY - 60) / 90.0F;
       f21 = 1.0F;
       f22 = f21 * f12 + f20 * f11;
       f23 = f20 * f12 - f21 * f11;
@@ -607,7 +622,7 @@ static int gameLoop(
                 i6 + i7 * 16 + i25 * 256 * 3
               ]; 
             }
-            if (f33 < f26 && i9 == M[2] / 4 && i11 == M[3] / 4) {
+            if (f33 < f26 && pixelX == M[2] / 4 && pixelY == M[3] / 4) {
               i8 = i24;
               i5 = 1;
               if (f27 > 0.0F)
@@ -640,7 +655,7 @@ static int gameLoop(
         pixelR, pixelG, pixelB, 255
       );
       
-      SDL_RenderDrawPoint(renderer, i9, i11);
+      SDL_RenderDrawPoint(renderer, pixelX, pixelY);
       
       i4 = i8;
     }
@@ -707,4 +722,20 @@ static float perlin2d(float x, float y, int seed) {
   }
 
   return fin/div;
+}
+
+/*
+  drawChar
+  Takes in a pointer to a renderer, a pointer to a font, a char,
+  and draws it at the specified x and y coordinates.
+*/
+static void drawChar(SDL_Renderer *renderer, Uint8 font[][8],
+  int c, int x, int y
+) {
+  for(int yy = 0; yy < 8; yy++) {
+    for(int xx = 0; xx < 8; xx++) {
+      if((font[c][yy] >> (7 - xx)) & 0x1)
+        SDL_RenderDrawPoint(renderer, x + xx, y + yy);
+    }
+  }
 }
