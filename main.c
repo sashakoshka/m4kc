@@ -128,6 +128,7 @@ int main() {
     printf("%s\n", SDL_GetError());
     goto exit;
   }
+  SDL_RenderSetScale(renderer, BUFFER_SCALE, BUFFER_SCALE);
   
    //----   main game loop   ----//
   
@@ -391,12 +392,6 @@ static int gameLoop(
   
   static int    k,
                 m,
-                pointX,
-                pointY,
-                pointXMax,
-                pointYMax,
-                xBegin,
-                yBegin,
                 i4,
                 i5,
                 i6,
@@ -411,9 +406,7 @@ static int gameLoop(
                 i15,
                 i16,
                 i17,
-                pixelR,
-                pixelG,
-                pixelB,
+                blockFace,
                 i21,
                 i22,
                 i23,
@@ -445,7 +438,7 @@ static int gameLoop(
   
   // Proccess user input
   
-  do {
+  while (SDL_GetTicks() - l > 10L) {
     // Looking around
     f16 = (M[2] - BUFFER_W * 2) / 214.0F * 2.0F;
     f17 = (M[3] - BUFFER_H * 2) / 120.0F * 2.0F;
@@ -462,7 +455,7 @@ static int gameLoop(
     }
     
     // Moving around
-    l += 12;
+    l += 10L;
     f13 = 0.0;
     f14 = 0.0;
     f14 += (M[119] - M[115]) * 0.02;
@@ -507,7 +500,7 @@ static int gameLoop(
       f3 = f19;
     }
     label208:;
-  } while (SDL_GetTicks() - l > 4);
+  };
   
   i6 = 0;
   i7 = 0;
@@ -537,7 +530,7 @@ static int gameLoop(
   i8 = -1.0F;
   for (i9 = 0; i9 < BUFFER_W; i9++) {
     f18 = (i9 - 107) / 90.0F;
-    for (i11 = 0; i11 < 120; i11++) {
+    for (i11 = 0; i11 < BUFFER_H; i11++) {
       f20 = (i11 - 60) / 90.0F;
       f21 = 1.0F;
       f22 = f21 * f12 + f20 * f11;
@@ -548,20 +541,20 @@ static int gameLoop(
       i17 = 255;
       d = 20.0D;
       f26 = 5.0F;
-      for (pixelR = 0; pixelR < 3; pixelR++) {
+      for (blockFace = 0; blockFace < 3; blockFace++) {
         f27 = f24;
-        if (pixelR == 1)
+        if (blockFace == 1)
           f27 = f23; 
-        if (pixelR == 2)
+        if (blockFace == 2)
           f27 = f25; 
         f28 = 1.0F / ((f27 < 0.0F) ? -f27 : f27);
         f29 = f24 * f28;
         f30 = f23 * f28;
         f31 = f25 * f28;
         f32 = f1 - (int)f1;
-        if (pixelR == 1)
+        if (blockFace == 1)
           f32 = f2 - (int)f2; 
-        if (pixelR == 2)
+        if (blockFace == 2)
           f32 = f3 - (int)f3; 
         if (f27 > 0.0F)
           f32 = 1.0F - f32; 
@@ -570,11 +563,11 @@ static int gameLoop(
         f35 = f2 + f30 * f32;
         f36 = f3 + f31 * f32;
         if (f27 < 0.0F) {
-          if (pixelR == 0)
+          if (blockFace == 0)
             f34--; 
-          if (pixelR == 1)
+          if (blockFace == 1)
             f35--; 
-          if (pixelR == 2)
+          if (blockFace == 2)
             f36--; 
         } 
         while (f33 < d) {
@@ -595,7 +588,7 @@ static int gameLoop(
           if (i25 > 0) {
             i6 = (int)((f34 + f36) * 16.0F) & 0xF;
             i7 = ((int)(f35 * 16.0F) & 0xF) + 16;
-            if (pixelR == 1) {
+            if (blockFace == 1) {
               i6 = (int)(f34 * 16.0F) & 0xF;
               i7 = (int)(f36 * 16.0F) & 0xF;
               if (f30 < 0.0F)
@@ -619,13 +612,13 @@ static int gameLoop(
               i5 = 1;
               if (f27 > 0.0F)
                 i5 = -1; 
-              i5 <<= 6 * pixelR;
+              i5 <<= 6 * blockFace;
               f26 = f33;
             } 
             if (pixelColor > 0) {
               i16 = pixelColor;
               i17 = 255 - (int)(f33 / 20.0F * 255.0F);
-              i17 = i17 * (255 - (pixelR + 2) % 3 * 50) / 255;
+              i17 = i17 * (255 - (blockFace + 2) % 3 * 50) / 255;
               d = f33;
             } 
           } 
@@ -636,30 +629,22 @@ static int gameLoop(
         } 
       }
       
-      // getting pixel RGB
+      static int pixelR, pixelG, pixelB;
+      
       pixelR = (i16 >> 16 & 0xFF) * i17 / 255;
       pixelG = (i16 >> 8 & 0xFF)  * i17 / 255;
       pixelB = (i16 & 0xFF)       * i17 / 255;
-      
-      xBegin = i9  * BUFFER_SCALE;
-      yBegin = i11 * BUFFER_SCALE;
-      pointXMax = xBegin + BUFFER_SCALE;
-      pointYMax = yBegin + BUFFER_SCALE;
       
       SDL_SetRenderDrawColor(
         renderer,
         pixelR, pixelG, pixelB, 255
       );
-      for(pointX = xBegin; pointX < pointXMax; pointX++) {
-        for(pointY = yBegin; pointY < pointYMax; pointY++) {
-          SDL_RenderDrawPoint(renderer, pointX, pointY);
-        }
-      }
+      
+      SDL_RenderDrawPoint(renderer, i9, i11);
       
       i4 = i8;
     }
   }
-  
   init = 0;
   return 1;
 }
