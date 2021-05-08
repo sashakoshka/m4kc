@@ -1,5 +1,7 @@
 # M4KC
+
 ![Grass block icon](icon.png)
+
 *Minecraft 4K - C Rewrite*
 
 For those who don't know, Minecraft 4K was a stripped down version of Minecraft submitted by Notch to the [Java 4K Game Programming Contest](https://en.wikipedia.org/wiki/Java_4K_Game_Programming_Contest), where each submission had to be under 4 kilobytes in size. Its wiki page can be found [here](https://minecraft.fandom.com/wiki/Minecraft_4k).
