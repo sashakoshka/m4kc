@@ -1,5 +1,5 @@
 # M4KC
-Minecraft 4K - C Rewrite
+*Minecraft 4K - C Rewrite*
 
 For those who don't know, Minecraft 4K was a stripped down version of Minecraft submitted by Notch to the [Java 4K Game Programming Contest](https://en.wikipedia.org/wiki/Java_4K_Game_Programming_Contest), where each submission had to be under 4 kilobytes in size. Its wiki page can be found [here](https://minecraft.fandom.com/wiki/Minecraft_4k).
 
@@ -24,15 +24,16 @@ This project is an attempt to translate the game into C in order to increase its
 
 # Dependencies
 
-Bare minimum to make this code run:
+### Bare minimum to make this code run
 * SDL2
 * A C compiler
 
-To get it down to a small size, you need:
+### To get it down to a small size, you need
 * gcc (have not tried the flags with other compilers)
 * gzexe
 
 # Places
 
 There is a forum thread for this project [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/3081789-minecraft-4k-c-rewrite)
+
 I will be uploading binaries [here](https://holanet.xyz/soft/m4kc/)
