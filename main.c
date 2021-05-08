@@ -1,5 +1,4 @@
 #include <SDL2/SDL.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -18,21 +17,67 @@
   notice.
 */
 
-static int randm(int);
+static int   randm(int);
 static float perlin2d(float, float, int);
-static bool setBlock(int*, int, int, int, int);
-static void genMap(unsigned int, int, int*);
-static void genTextures(unsigned int, int*);
-static bool gameLoop(
+static int   setBlock(int*, int, int, int, int);
+static void  genMap(unsigned int, int, int*);
+static void  genTextures(unsigned int, int*);
+static int   gameLoop(
   int,
   int,
   int,
-  unsigned const int,
+  unsigned int,
   int*,
   int*,
   int*,
   SDL_Renderer*
 );
+
+/*
+  Chunk
+  Stores a 64x64x64 array of blocks. This will be useful when
+  there are chunks.
+*/
+struct Chunk {
+  int blocks[262144];
+};
+
+/*
+  Player
+  Stores player data. This will be passed as reference to game
+  loop.
+*/
+struct Player {
+  float xPos;
+  float yPos;
+  float zPos;
+  float xRot;
+  float yRot;
+  float zRot;
+  
+  unsigned int health;
+  unsigned int xp;
+};
+
+/*
+  InvSlot
+  This will be used to store a single stack in the player's
+  inventory.
+*/
+struct InvSlot {
+  unsigned int amount:6;
+  unsigned int blockid;
+} pack;
+
+/*
+  Inventory
+  This will be used to store the player's inventory.
+*/
+struct Inventory {
+  struct InvSlot slots[27];
+  struct InvSlot hotbar[9];
+  struct InvSlot armor[4];
+};
 
 int main() {
   int        M[128]    = {0};
@@ -65,7 +110,7 @@ int main() {
     goto exit;
   }
   
-  window = SDL_CreateWindow("Minecraft",
+  window = SDL_CreateWindow("M4KC",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
     BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
     SDL_WINDOW_SHOWN
@@ -232,7 +277,7 @@ static void genTextures(unsigned int SEED, int *textures) {
   Returns true if the block could be set, otherwise returns
   false.
 */
-static bool setBlock(
+static int setBlock(
   int *world,
   int x, int y, int z,
   int block
@@ -242,9 +287,9 @@ static bool setBlock(
     && z > -1 && z < 64
   ) {
     world[x + y * 64 + z * 4096] = block;
-    return true;
+    return 1;
   } else {
-    return false;
+    return 0;
   }
 }
 
@@ -292,7 +337,7 @@ static void genMap(unsigned int SEED, int type, int *world) {
   If by chance the game ends, it returns false - which should
   terminate the main while loop and end the program.
 */
-static bool gameLoop(
+static int gameLoop(
   int BUFFER_W,
   int BUFFER_H,
   int BUFFER_SCALE,
@@ -366,9 +411,9 @@ static bool gameLoop(
                 i15,
                 i16,
                 i17,
-                i18,
-                i19,
-                i20,
+                pixelR,
+                pixelG,
+                pixelB,
                 i21,
                 i22,
                 i23,
@@ -378,7 +423,7 @@ static bool gameLoop(
   
   static double d;
   
-  static bool init = true;
+  static int init = 1;
   if(init) {
     f1 = 96.5F;
     f2 = 65.0F;
@@ -392,9 +437,6 @@ static bool gameLoop(
     f8 = 0.0F;
     l = SDL_GetTicks();
   }
-  
-  // TODO: port main game loop, with repaired controls. ALL VARS
-  // MUST BE STATIC!!!!!!!!!!!!!!!!!
   
   f9  = sin(f7),
   f10 = cos(f7),
@@ -506,20 +548,20 @@ static bool gameLoop(
       i17 = 255;
       d = 20.0D;
       f26 = 5.0F;
-      for (i18 = 0; i18 < 3; i18++) {
+      for (pixelR = 0; pixelR < 3; pixelR++) {
         f27 = f24;
-        if (i18 == 1)
+        if (pixelR == 1)
           f27 = f23; 
-        if (i18 == 2)
+        if (pixelR == 2)
           f27 = f25; 
         f28 = 1.0F / ((f27 < 0.0F) ? -f27 : f27);
         f29 = f24 * f28;
         f30 = f23 * f28;
         f31 = f25 * f28;
         f32 = f1 - (int)f1;
-        if (i18 == 1)
+        if (pixelR == 1)
           f32 = f2 - (int)f2; 
-        if (i18 == 2)
+        if (pixelR == 2)
           f32 = f3 - (int)f3; 
         if (f27 > 0.0F)
           f32 = 1.0F - f32; 
@@ -528,11 +570,11 @@ static bool gameLoop(
         f35 = f2 + f30 * f32;
         f36 = f3 + f31 * f32;
         if (f27 < 0.0F) {
-          if (i18 == 0)
+          if (pixelR == 0)
             f34--; 
-          if (i18 == 1)
+          if (pixelR == 1)
             f35--; 
-          if (i18 == 2)
+          if (pixelR == 2)
             f36--; 
         } 
         while (f33 < d) {
@@ -553,7 +595,7 @@ static bool gameLoop(
           if (i25 > 0) {
             i6 = (int)((f34 + f36) * 16.0F) & 0xF;
             i7 = ((int)(f35 * 16.0F) & 0xF) + 16;
-            if (i18 == 1) {
+            if (pixelR == 1) {
               i6 = (int)(f34 * 16.0F) & 0xF;
               i7 = (int)(f36 * 16.0F) & 0xF;
               if (f30 < 0.0F)
@@ -577,13 +619,13 @@ static bool gameLoop(
               i5 = 1;
               if (f27 > 0.0F)
                 i5 = -1; 
-              i5 <<= 6 * i18;
+              i5 <<= 6 * pixelR;
               f26 = f33;
             } 
             if (pixelColor > 0) {
               i16 = pixelColor;
               i17 = 255 - (int)(f33 / 20.0F * 255.0F);
-              i17 = i17 * (255 - (i18 + 2) % 3 * 50) / 255;
+              i17 = i17 * (255 - (pixelR + 2) % 3 * 50) / 255;
               d = f33;
             } 
           } 
@@ -595,16 +637,19 @@ static bool gameLoop(
       }
       
       // getting pixel RGB
-      i18 = (i16 >> 16 & 0xFF) * i17 / 255;
-      i19 = (i16 >> 8 & 0xFF)  * i17 / 255;
-      i20 = (i16 & 0xFF)       * i17 / 255;
+      pixelR = (i16 >> 16 & 0xFF) * i17 / 255;
+      pixelG = (i16 >> 8 & 0xFF)  * i17 / 255;
+      pixelB = (i16 & 0xFF)       * i17 / 255;
       
       xBegin = i9  * BUFFER_SCALE;
       yBegin = i11 * BUFFER_SCALE;
       pointXMax = xBegin + BUFFER_SCALE;
       pointYMax = yBegin + BUFFER_SCALE;
       
-      SDL_SetRenderDrawColor(renderer, i18, i19, i20, 255);
+      SDL_SetRenderDrawColor(
+        renderer,
+        pixelR, pixelG, pixelB, 255
+      );
       for(pointX = xBegin; pointX < pointXMax; pointX++) {
         for(pointY = yBegin; pointY < pointYMax; pointY++) {
           SDL_RenderDrawPoint(renderer, pointX, pointY);
@@ -615,8 +660,8 @@ static bool gameLoop(
     }
   }
   
-  init = false;
-  return true;
+  init = 0;
+  return 1;
 }
 
 static int noise2(int x, int y, Uint8 *hash, int seed) {
