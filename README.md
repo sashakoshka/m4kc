@@ -35,7 +35,7 @@ This project is an attempt to translate the game into C in order to increase its
 * gcc (have not tried the flags with other compilers)
 * gzexe
 
-# Places
+## Places
 
 There is a forum thread for this project [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/3081789-minecraft-4k-c-rewrite)
 
