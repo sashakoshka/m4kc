@@ -18,17 +18,21 @@
   notice.
 */
 
+struct Chunk;
+struct Player;
+struct InvSlot;
+struct Inventory;
+
 static int   randm(int);
 static float perlin2d(float, float, int);
 static int   setBlock(int*, int, int, int, int);
 static void  genMap(unsigned int, int, int*);
-static void  genTextures(unsigned int, int*);
+static void  genTextures(unsigned int);
 static int   gameLoop(
   int,
   int,
   int,
   unsigned int,
-  int*,
   int*,
   int*,
   SDL_Renderer*
@@ -38,6 +42,9 @@ static int drawChar (SDL_Renderer*,   int, int, int);
 static int drawStr  (SDL_Renderer*, char*, int, int);
 static int button   (SDL_Renderer*, char*,
   int, int, int, int, int
+);
+static int drawSlot (SDL_Renderer*, struct InvSlot*,
+  int, int, int, int
 );
 
 /*
@@ -86,10 +93,13 @@ struct Inventory {
   struct InvSlot armor[4];
 };
 
+// Global variable because so many things use it. Also may get
+// its own header file at some point.
+int textures[12288] = {0};
+
 int main() {
   int        M[128]    = {0};
   int    world[262144] = {0};
-  int textures[12288]  = {0};
   
   unsigned const int SEED = 18295169;
   
@@ -101,8 +111,8 @@ int main() {
   
   //---- generating assets  ----//
   
-  genMap(SEED, 1, world);
-  genTextures(SEED, textures);
+  genMap(SEED, 0, world);
+  genTextures(SEED);
   
   //----  initializing SDL  ----//
   
@@ -152,7 +162,6 @@ int main() {
     SEED,
     M,
     world,
-    textures,
     renderer
   )) {
     
@@ -173,7 +182,7 @@ int main() {
       switch (event.type) {
         case SDL_QUIT:
           goto exit;
-          break;
+          
         case SDL_MOUSEBUTTONDOWN:
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
@@ -183,6 +192,10 @@ int main() {
               M[0] = 1;
               break;
           }
+          break;
+          
+        case SDL_MOUSEWHEEL:
+          M[4] = event.wheel.y;
           break;
       }
     }
@@ -210,7 +223,7 @@ static int randm(int max) {
   Takes in a seed and an array where the textures should go.
   Generates game textures in that array.
 */
-static void genTextures(unsigned int SEED, int *textures) {
+static void genTextures(unsigned int SEED) {
   srand(SEED);
   static int j  = 0,
              k  = 0,
@@ -357,7 +370,6 @@ static int gameLoop(
   unsigned int SEED,
   int *M,
   int *world,
-  int *textures,
   SDL_Renderer *renderer
 ) {
   // We dont want to have to pass all of these by reference, so
@@ -404,6 +416,7 @@ static int gameLoop(
   
   static int    k,
                 m,
+                i,
                 i4,
                 i5,
                 i6,
@@ -425,11 +438,16 @@ static int gameLoop(
                 i24,
                 i25,
                 pixelColor,
-                paused;
+                paused,
+                hotbarSelect;
   
   static double d;
   
-  static SDL_Rect background;
+  static SDL_Rect backgroundRect;
+  static SDL_Rect hotbarRect;
+  static SDL_Rect hotbarSelectRect;
+  
+  static struct Inventory inventory;
   
   static int init = 1;
   if(init) {
@@ -444,13 +462,32 @@ static int gameLoop(
     f7 = 0.0F;
     f8 = 0.0F;
     l = SDL_GetTicks();
-    
-    background.x = 0;
-    background.y = 0;
-    background.w = BUFFER_W;
-    background.h = BUFFER_H;
-    
     paused = 0;
+    hotbarSelect = 0;
+    
+    backgroundRect.x = 0;
+    backgroundRect.y = 0;
+    backgroundRect.w = BUFFER_W;
+    backgroundRect.h = BUFFER_H;
+    
+    hotbarRect.x = BUFFER_W / 2 - 77;
+    hotbarRect.y = BUFFER_H - 18;
+    hotbarRect.w = 154;
+    hotbarRect.h = 18;
+    
+    hotbarSelectRect.y = hotbarRect.y;
+    hotbarSelectRect.w = 18;
+    hotbarSelectRect.h = 18;
+    
+    inventory.hotbar[0].blockid = 1;
+    inventory.hotbar[1].blockid = 2;
+    inventory.hotbar[2].blockid = 4;
+    inventory.hotbar[3].blockid = 5;
+    inventory.hotbar[4].blockid = 7;
+    inventory.hotbar[5].blockid = 8;
+    inventory.hotbar[6].blockid = 9;
+    inventory.hotbar[7].blockid = 10;
+    inventory.hotbar[8].blockid = 11;
   }
   
   f9  = sin(f7),
@@ -470,6 +507,14 @@ static int gameLoop(
   while(SDL_GetTicks() - l > 10L) {
     l += 10L;
     if(!paused) {
+      // Scroll wheel
+      if(M[4] != 0) {
+        hotbarSelect -= M[4];
+        hotbarSelect %= 9;
+        if(hotbarSelect < 0) hotbarSelect = 9;
+        M[4] = 0;
+      }
+      
       // Looking around
       f16 = (M[2] - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
       f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
@@ -541,7 +586,7 @@ static int gameLoop(
       M[1] = 0;
     } 
     if (M[0] > 0 && i4 > 0) {
-      world[i4 + i5] = 1;
+      world[i4 + i5] = inventory.hotbar[hotbarSelect].blockid;
       M[0] = 0;
     }
   }
@@ -662,15 +707,12 @@ static int gameLoop(
         } 
       }
       
-      static int pixelR, pixelG, pixelB;
-      
-      pixelR = (i16 >> 16 & 0xFF);
-      pixelG = (i16 >> 8 & 0xFF);
-      pixelB = (i16 & 0xFF);
-      
       SDL_SetRenderDrawColor(
         renderer,
-        pixelR, pixelG, pixelB, i17
+        (i16 >> 16 & 0xFF),
+        (i16 >> 8 & 0xFF),
+        (i16 & 0xFF),
+        i17
       );
       
       SDL_RenderDrawPoint(renderer, pixelX, pixelY);
@@ -683,9 +725,29 @@ static int gameLoop(
   M[2] /= BUFFER_SCALE;
   M[3] /= BUFFER_SCALE;
   
+  // Hotbar
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+  SDL_RenderFillRect(renderer, &hotbarRect);
+  
+  hotbarSelectRect.x = BUFFER_W / 2 - 77 + hotbarSelect * 17;
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderDrawRect(renderer, &hotbarSelectRect);
+  
+  // TODO: make this more optimized
+  for(i = 0; i < 9; i++)
+    drawSlot(
+      renderer,
+      &inventory.hotbar[i], 
+      BUFFER_W / 2 - 76 + i * 17,
+      BUFFER_H - 17,
+      M[2],
+      M[3]
+    );
+  
+  // Pause menu
   if(paused) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-    SDL_RenderFillRect(renderer, &background);
+    SDL_RenderFillRect(renderer, &backgroundRect);
     
     if(button(renderer, "Resume",
       BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
@@ -862,6 +924,47 @@ static int button(SDL_Renderer *renderer,
   else
     SDL_SetRenderDrawColor(renderer, 0,   0,   0,   255);
   SDL_RenderDrawRect(renderer, &rect);
+  
+  return hover;
+}
+
+/*
+  drawSlot
+  Takes in a pointer to a renderer, an InvSlot, draws the item
+  with the specified x and y coordinates and width, and then 
+  returns wether or not the specified mouse coordinates are
+  within it.
+*/
+static int drawSlot(SDL_Renderer *renderer,
+  struct InvSlot *slot, int x, int y, int mouseX, int mouseY
+) {
+  static int hover,
+             i,
+             xx,
+             yy,
+             color;
+  
+  hover =
+    mouseX >= x      &&
+    mouseY >= y      &&
+    mouseX <  x + 16 &&
+    mouseY <  y + 16 ;
+  
+  i = slot->blockid * 256 * 3;
+  for(yy = 0; yy < 16; yy++)
+    for(xx = 0; xx < 16; xx++) {
+      color = textures[i];
+      SDL_SetRenderDrawColor(
+        renderer,
+        (color >> 16 & 0xFF),
+        (color >> 8 & 0xFF),
+        (color & 0xFF),
+        255
+      );
+      if(color > 0)
+        SDL_RenderDrawPoint(renderer, x + xx, y + yy);
+      i++;
+    }
   
   return hover;
 }
