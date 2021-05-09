@@ -40,3 +40,27 @@ This project is an attempt to translate the game into C in order to increase its
 There is a forum thread for this project [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/3081789-minecraft-4k-c-rewrite)
 
 I will be uploading binaries [here](https://holanet.xyz/soft/m4kc/)
+
+## Game info
+
+Some extra info about the game.
+
+### All blocks by ID
+ ID | Block
+----|--------
+  0 | Air
+  1 | Grass
+  2 | Dirt
+  3 | Stone
+  4 | Bricks
+  5 | Dirt
+  6 | Wood
+  7 | Leaves
+  8 | Dirt
+  9 | Dirt
+ 10 | Dirt
+ 11 | Dirt
+ 12 | Dirt
+ 13 | Dirt
+ 14 | Dirt
+ 15 | Dirt
