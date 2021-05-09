@@ -24,8 +24,17 @@ struct InvSlot;
 struct Inventory;
 
 static int   randm(int);
+static int   nmod(int, int);
 static float perlin2d(float, float, int);
 static int   setBlock(int*, int, int, int, int);
+static int   getBlock(int*, int, int, int);
+static void  setCube(
+  int*,
+  int, int, int,
+  int, int, int,
+  int, int
+);
+static void  genStructure(int*, int, int, int, int);
 static void  genMap(unsigned int, int, int*);
 static void  genTextures(unsigned int);
 static int   gameLoop(
@@ -111,14 +120,14 @@ int main() {
   
   //---- generating assets  ----//
   
-  genMap(SEED, 0, world);
+  genMap(SEED, 1, world);
   genTextures(SEED);
   
   //----  initializing SDL  ----//
   
-  // There are a couple things here that are commented out to cut
-  // down executable size. If you are trying to solve a problem,
-  // just comment them back in.
+  // There are a couple things here that are commented out to
+  // cut down executable size. If you are trying to solve a
+  // problem, just comment them back in.
   
   SDL_Window   *window   = NULL;
   SDL_Renderer *renderer = NULL;
@@ -219,6 +228,17 @@ static int randm(int max) {
 }
 
 /*
+  nmod
+  Modulo operator that acts like java.
+*/
+static int nmod(int left, int right) {
+  left %= right;
+  if(left < 0)
+    left += right;
+  return left;
+}
+
+/*
   genTextures
   Takes in a seed and an array where the textures should go.
   Generates game textures in that array.
@@ -301,7 +321,9 @@ static void genTextures(unsigned int SEED) {
   setBlock
   Takes in a world array, xyz coordinates, and a block id.
   Returns true if the block could be set, otherwise returns
-  false.
+  false. Eventually will add block to a stack of set requests if
+  the chunk is not loaded, and will set the block when the chunk
+  loads.
 */
 static int setBlock(
   int *world,
@@ -320,13 +342,76 @@ static int setBlock(
 }
 
 /*
+  getBlock
+  Takes in a world array, xyz coordinates, and outputs the block
+  id there. Eventually will return -1 if chunk is not loaded
+*/
+static int getBlock(
+  int *world,
+  int x, int y, int z
+) {
+  if (x < 0
+    || y < 0
+    || z < 0
+    || x >= 64
+    || y >= 64
+    || z >= 64
+  ) return 0;
+  return world[x + y * 64 + z * 4096];
+}
+
+/*
+  setCube
+  Takes in a world array, xyz coordinates, dimensions, and fills
+  in a cube with the specified block. If force is true, blocks
+  other than air will be filled.
+*/
+static void setCube(
+  int *world,
+  int x, int y, int z,
+  int w, int h, int l,
+  int block,
+  int force
+) {
+  static int xx, yy, zz;
+  x--; y--; z--;
+  for(xx = w + x; xx > x; xx--)
+  for(yy = h + y; yy > y; yy--)
+  for(zz = l + z; zz > z; zz--)
+  if(force || getBlock(world, xx, yy, zz) < 1)
+    setBlock(world, xx, yy, zz, block);
+}
+
+/*
+  genStructure
+  Takes in a world array, xyz coordinates, and generates the
+  specified structure.
+*/
+static void genStructure(
+  int *world,
+  int x, int y, int z,
+  int type
+) {
+  static int i;
+  switch(type) {
+    case 0: // tree
+      for(i = randm(2) + 4; i > 0; i--) {
+        setBlock(world, x, y--, z, 7);
+      }
+      setCube(world, x - 2, y + 1, z - 2, 5, 2, 5, 8, 0);
+      setCube(world, x - 1, y - 1, z - 1, 3, 2, 3, 8, 0);
+      break;
+  }
+}
+
+/*
   genMap
   Takes in a seed and a world array. World is 64x64x64 blocks.
   Fills the world array with generated "terrain".
 */
-static void genMap(unsigned int SEED, int type, int *world) {
-  srand(SEED);
-  static int heightmap[64][64];
+static void genMap(unsigned int seed, int type, int *world) {
+  srand(seed);
+  static int heightmap[64][64], i, x, z;
   
   switch(type) {
     case 0:
@@ -337,11 +422,14 @@ static void genMap(unsigned int SEED, int type, int *world) {
               randm(2) == 0 ? randm(8) : 0);
       break;
     case 1:
+      // Generate heightmap
       for(int x = 0; x < 64; x++)
         for(int z = 0; z < 64; z++) {
           heightmap[x][z] =
-            perlin2d(x, z, SEED) * 16 + 24;
+            perlin2d(x, z, seed) * 16 + 24;
         }
+      
+      // Make terrain from heightmap
       for(int x = 0; x < 64; x++)
         for(int y = 0; y < 64; y++)
           for(int z = 0; z < 64; z++)
@@ -353,6 +441,18 @@ static void genMap(unsigned int SEED, int type, int *world) {
               setBlock(world, x, y, z, 1);
             else
               setBlock(world, x, y, z, 0);
+      
+      // Generate structures
+      for(i = randm(8) + 64; i > 0; i--) {
+        x = randm(64);
+        z = randm(64);
+        genStructure(
+          world,
+          x, heightmap[x][z] - 1, z,
+          0
+        );
+      }
+      
       break;
   }
 }
@@ -488,6 +588,16 @@ static int gameLoop(
     inventory.hotbar[6].blockid = 9;
     inventory.hotbar[7].blockid = 10;
     inventory.hotbar[8].blockid = 11;
+    
+    inventory.hotbar[0].amount  = 63;
+    inventory.hotbar[1].amount  = 63;
+    inventory.hotbar[2].amount  = 63;
+    inventory.hotbar[3].amount  = 63;
+    inventory.hotbar[4].amount  = 63;
+    inventory.hotbar[5].amount  = 63;
+    inventory.hotbar[6].amount  = 63;
+    inventory.hotbar[7].amount  = 63;
+    inventory.hotbar[8].amount  = 63;
   }
   
   f9  = sin(f7),
@@ -510,8 +620,7 @@ static int gameLoop(
       // Scroll wheel
       if(M[4] != 0) {
         hotbarSelect -= M[4];
-        hotbarSelect %= 9;
-        if(hotbarSelect < 0) hotbarSelect = 9;
+        hotbarSelect = nmod(hotbarSelect, 9);
         M[4] = 0;
       }
       
@@ -547,9 +656,15 @@ static int gameLoop(
         f17 = f2 + f5 * ((m + 1) % 3 / 2);
         f19 = f3 + f6 * ((m + 2) % 3 / 2);
         for (i12 = 0; i12 < 12; i12++) {
-          i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6F - 0.3F) - 64;
-          i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8F + 0.65F) - 64;
-          i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6F - 0.3F) - 64;
+          i13 =
+            (int)
+            (f16 + (i12 >> 0 & 0x1) * 0.6F - 0.3F) - 64;
+          i14 =
+            (int)
+            (f17 + ((i12 >> 2) - 1) * 0.8F + 0.65F) - 64;
+          i15 =
+            (int)
+            (f19 + (i12 >> 1 & 0x1) * 0.6F - 0.3F) - 64;
           if (i13 < 0
             || i14 < 0
             || i15 < 0
@@ -594,7 +709,8 @@ static int gameLoop(
     m = (int)(f1 + (k >> 0 & 0x1) * 0.6F - 0.3F) - 64;
     i10 = (int)(f2 + ((k >> 2) - 1) * 0.8F + 0.65F) - 64;
     pixelY = (int)(f3 + (k >> 1 & 0x1) * 0.6F - 0.3F) - 64;
-    if (m >= 0
+    if (
+      m >= 0
       && i10 >= 0
       && pixelY >= 0
       && m   < 64
@@ -605,6 +721,7 @@ static int gameLoop(
     }
   }
   
+  // Cast rays
   i8 = -1.0F;
   for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
     f18 = (pixelX - 107) / 90.0F;
@@ -652,17 +769,8 @@ static int gameLoop(
           i21 = (int)f34 - 64;
           i22 = (int)f35 - 64;
           i23 = (int)f36 - 64;
-          if (i21 < 0
-            || i22 < 0
-            || i23 < 0
-            || i21 >= 64
-            || i22 >= 64
-            || i23 >= 64
-          ) {
-            break;
-          }
           i24 = i21 + i22 * 64 + i23 * 4096;
-          i25 = world[i24];
+          i25 = getBlock(world, i21, i22, i23);
           if (i25 > 0) {
             i6 = (int)((f34 + f36) * 16.0F) & 0xF;
             i7 = ((int)(f35 * 16.0F) & 0xF) + 16;
@@ -674,8 +782,9 @@ static int gameLoop(
             }
             // Block outline color
             pixelColor = 0xFFFFFF;
-            if (i24 != i4
-              || (i6 > 0
+            if (i24 != i4 // block face is not selected
+               || (
+                   i6 > 0  
                 && i7 % 16 > 0
                 && i6 < 15
                 && i7 % 16 < 15
@@ -685,7 +794,10 @@ static int gameLoop(
                 i6 + i7 * 16 + i25 * 256 * 3
               ]; 
             }
-            if (f33 < f26 && pixelX == M[2] / 4 && pixelY == M[3] / 4) {
+            if (
+              f33 < f26
+              && pixelX == M[2] / 4 && pixelY == M[3] / 4
+            ) {
               i8 = i24;
               i5 = 1;
               if (f27 > 0.0F)
@@ -696,7 +808,10 @@ static int gameLoop(
             if (pixelColor > 0) {
               i16 = pixelColor;
               i17 = 255 - (int)(f33 / 20.0F * 255.0F);
-              i17 = i17 * (255 - (blockFace + 2) % 3 * 50) / 255;
+              i17 =
+                i17
+                * (255 - (blockFace + 2) % 3 * 50)
+                / 255;
               d = f33;
             } 
           } 
