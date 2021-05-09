@@ -663,7 +663,7 @@ static int gameLoop(
   
   // Clear screen
   
-  timeCoef  = (float)(gameTime % 16384) / 16384;
+  timeCoef  = (float)(gameTime % 102944) / 16384;
   timeCoef  = sin(timeCoef);
   timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
   timeCoef  = (timeCoef + 1) / 2;
