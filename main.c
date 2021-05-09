@@ -151,14 +151,6 @@ int main() {
     textures,
     renderer
   )) {
-    
-    // For testing the font
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    drawStr(renderer, " !\"#$%&'()*+,-./", 0, 0);
-    drawStr(renderer, "0123456789:;<=>?",  0, 8);
-    drawStr(renderer, "@ABCDEFGHIJKLMNO",  0, 16);
-    drawStr(renderer, "PQRSTUVWXYZ[\\]^_", 0, 24);
-    
     SDL_PumpEvents();
     
     SDL_GetMouseState(&mouseX, &mouseY);
