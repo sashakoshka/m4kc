@@ -29,7 +29,7 @@ static int   nmod(int, int);
 static float perlin2d(float, float, int);
 static int   setBlock(int*, int, int, int, int, int);
 static int   getBlock(int*, int, int, int);
-static void  setCube(
+static int   setCube(
   int*,
   int, int, int,
   int, int, int,
@@ -111,7 +111,8 @@ int main() {
   int        M[128]    = {0};
   int    world[262144] = {0};
   
-  unsigned const int SEED = 18295169;
+  //unsigned const int SEED = 18295169;
+  unsigned const int SEED = 45390874;
   
   const int BUFFER_W     = 214;
   const int BUFFER_H     = 120;
@@ -332,13 +333,15 @@ static int setBlock(
   int block,
   int force
 ) {
+  static int b;
+  b = getBlock(world, x, y, z) < 1;
   if  (x > -1 && x < 64
     && y > -1 && y < 64
     && z > -1 && z < 64
-    && (force || getBlock(world, x, y, z) < 1)
+    && (force || b)
   ) {
     world[x + y * 64 + z * 4096] = block;
-    return 1;
+    return b;
   } else {
     return 0;
   }
@@ -367,21 +370,23 @@ static int getBlock(
   setCube
   Takes in a world array, xyz coordinates, dimensions, and fills
   in a cube with the specified block. If force is true, blocks
-  other than air will be filled.
+  other than air will be filled. If no blocks were previously
+  air, returns false.
 */
-static void setCube(
+static int setCube(
   int *world,
   int x, int y, int z,
   int w, int h, int l,
   int block,
   int force
 ) {
-  static int xx, yy, zz;
-  x--; y--; z--;
+  static int xx, yy, zz, b;
+  x--; y--; z--; b = 0;
   for(xx = w + x; xx > x; xx--)
   for(yy = h + y; yy > y; yy--)
   for(zz = l + z; zz > z; zz--)
-    setBlock(world, xx, yy, zz, block, force);
+    b |= setBlock(world, xx, yy, zz, block, force);
+  return b;
 }
 
 /*
@@ -394,7 +399,7 @@ static void genStructure(
   int x, int y, int z,
   int type
 ) {
-  static int i;
+  static int i, b;
   /*
     Structure ideas
     
@@ -418,15 +423,18 @@ static void genStructure(
       break;
     
     case 1: // pyramid
-      for(i = 8 + randm(12); i > 0; i-= 2)
-        setCube(
+      y -= 5 + randm(2);
+      b = 1;
+      for(i = 1; b > 0; i+= 2)
+        b &= setCube(
           world,
           x - i / 2,
-          y--,
+          y++,
           z - i / 2,
           i, 1, i,
           5, 1
         );
+      break;
   }
 }
 
@@ -605,7 +613,7 @@ static int gameLoop(
     f7 = 0.0F;
     f8 = 0.0F;
     l = SDL_GetTicks();
-    gameTime = 0;
+    gameTime = 2048;
     
     paused = 0;
     hotbarSelect = 0;
