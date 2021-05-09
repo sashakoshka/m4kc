@@ -34,8 +34,11 @@ static int   gameLoop(
   SDL_Renderer*
 );
 
-static int drawChar(SDL_Renderer*, int, int, int);
-static int drawStr(SDL_Renderer*, char*, int, int);
+static int drawChar (SDL_Renderer*,   int, int, int);
+static int drawStr  (SDL_Renderer*, char*, int, int);
+static int button   (SDL_Renderer*, char*,
+  int, int, int, int, int
+);
 
 /*
   Chunk
@@ -94,7 +97,7 @@ int main() {
   const int BUFFER_H     = 120;
   const int BUFFER_SCALE = 4;
   
-  int mouseX, mouseY;
+  int mouseX = 0, mouseY = 0;
   
   //---- generating assets  ----//
   
@@ -138,6 +141,7 @@ int main() {
   }
   */
   SDL_RenderSetScale(renderer, BUFFER_SCALE, BUFFER_SCALE);
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   
    //----   main game loop   ----//
   
@@ -151,15 +155,14 @@ int main() {
     textures,
     renderer
   )) {
-    SDL_PumpEvents();
     
+    SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
-    M[0]   = 0;
-    M[1]   = 0;
     
     M[2]   = mouseX;
     M[3]   = mouseY;
     
+    M[27]  = keyboard[SDL_SCANCODE_ESCAPE];
     M[32]  = keyboard[SDL_SCANCODE_SPACE];
     M[119] = keyboard[SDL_SCANCODE_W];
     M[115] = keyboard[SDL_SCANCODE_S];
@@ -421,9 +424,12 @@ static int gameLoop(
                 i23,
                 i24,
                 i25,
-                pixelColor;
+                pixelColor,
+                paused;
   
   static double d;
+  
+  static SDL_Rect background;
   
   static int init = 1;
   if(init) {
@@ -438,6 +444,13 @@ static int gameLoop(
     f7 = 0.0F;
     f8 = 0.0F;
     l = SDL_GetTicks();
+    
+    background.x = 0;
+    background.y = 0;
+    background.w = BUFFER_W;
+    background.h = BUFFER_H;
+    
+    paused = 0;
   }
   
   f9  = sin(f7),
@@ -445,81 +458,92 @@ static int gameLoop(
   f11 = sin(f8),
   f12 = cos(f8);
   
-  // Proccess user input
+  // Clear screen
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderClear(renderer);
   
-  while (SDL_GetTicks() - l > 10L) {
-    // Looking around
-    f16 = (M[2] - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
-    f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
-    f15 = sqrt(f16 * f16 + f17 * f17) - 1.2F;
-    if (f15 < 0.0F)
-      f15 = 0.0F;
-    if (f15 > 0.0F) {
-      f7 += f16 * f15 / 400.0F;
-      f8 -= f17 * f15 / 400.0F;
-      if (f8 < -1.57F)
-        f8 = -1.57F;
-      if (f8 > 1.57F)
-        f8 = 1.57F;
-    }
-    
-    // Moving around
+  if(M[27]) {
+    paused = 1;
+  }
+  
+  // Proccess user input
+  while(SDL_GetTicks() - l > 10L) {
     l += 10L;
-    f13 = 0.0;
-    f14 = 0.0;
-    f14 += (M[119] - M[115]) * 0.02;
-    f13 += (M[100] - M[97]) * 0.02;
-    f4 *= 0.5;
-    f5 *= 0.99;
-    f6 *= 0.5;
-    f4 += f9 * f14 + f10 * f13;
-    f6 += f10 * f14 - f9 * f13;
-    f5 += 0.003;
-    
-    for (m = 0; m < 3; m++) {
-      f16 = f1 + f4 * ((m + 2) % 3 / 2);
-      f17 = f2 + f5 * ((m + 1) % 3 / 2);
-      f19 = f3 + f6 * ((m + 2) % 3 / 2);
-      for (i12 = 0; i12 < 12; i12++) {
-        i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6F - 0.3F) - 64;
-        i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8F + 0.65F) - 64;
-        i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6F - 0.3F) - 64;
-        if (i13 < 0
-          || i14 < 0
-          || i15 < 0
-          || i13 >= 64
-          || i14 >= 64
-          || i15 >= 64
-          || world[i13 + i14 * 64 + i15 * 4096] > 0
-        ) {
-          if (m != 1) {
+    if(!paused) {
+      // Looking around
+      f16 = (M[2] - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
+      f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
+      f15 = sqrt(f16 * f16 + f17 * f17) - 1.2F;
+      if (f15 < 0.0F)
+        f15 = 0.0F;
+      if (f15 > 0.0F) {
+        f7 += f16 * f15 / 400.0F;
+        f8 -= f17 * f15 / 400.0F;
+        if (f8 < -1.57F)
+          f8 = -1.57F;
+        if (f8 > 1.57F)
+          f8 = 1.57F;
+      }
+      
+      // Moving around
+      f13 = 0.0;
+      f14 = 0.0;
+      f14 += (M[119] - M[115]) * 0.02;
+      f13 += (M[100] - M[97]) * 0.02;
+      f4 *= 0.5;
+      f5 *= 0.99;
+      f6 *= 0.5;
+      f4 += f9 * f14 + f10 * f13;
+      f6 += f10 * f14 - f9 * f13;
+      f5 += 0.003;
+      
+      for (m = 0; m < 3; m++) {
+        f16 = f1 + f4 * ((m + 2) % 3 / 2);
+        f17 = f2 + f5 * ((m + 1) % 3 / 2);
+        f19 = f3 + f6 * ((m + 2) % 3 / 2);
+        for (i12 = 0; i12 < 12; i12++) {
+          i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6F - 0.3F) - 64;
+          i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8F + 0.65F) - 64;
+          i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6F - 0.3F) - 64;
+          if (i13 < 0
+            || i14 < 0
+            || i15 < 0
+            || i13 >= 64
+            || i14 >= 64
+            || i15 >= 64
+            || world[i13 + i14 * 64 + i15 * 4096] > 0
+          ) {
+            if (m != 1) {
+              goto label208;
+            }
+            if (M[32] > 0 && f5 > 0.0F) {
+              M[32] = 0;
+              f5 = -0.1F;
+              goto label208;
+            } 
+            f5 = 0.0F;
             goto label208;
           }
-          if (M[32] > 0 && f5 > 0.0F) {
-            M[32] = 0;
-            f5 = -0.1F;
-            goto label208;
-          } 
-          f5 = 0.0F;
-          goto label208;
         }
+        f1 = f16;
+        f2 = f17;
+        f3 = f19;
       }
-      f1 = f16;
-      f2 = f17;
-      f3 = f19;
+      label208:;
     }
-    label208:;
   };
   
   i6 = 0;
   i7 = 0;
-  if (M[1] > 0 && i4 > 0) {
-    world[i4] = 0;
-    M[1] = 0;
-  } 
-  if (M[0] > 0 && i4 > 0) {
-    world[i4 + i5] = 1;
-    M[0] = 0;
+  if(!paused) {
+    if (M[1] > 0 && i4 > 0) {
+      world[i4] = 0;
+      M[1] = 0;
+    } 
+    if (M[0] > 0 && i4 > 0) {
+      world[i4 + i5] = 1;
+      M[0] = 0;
+    }
   }
   for (k = 0; k < 12; k++) {
     m = (int)(f1 + (k >> 0 & 0x1) * 0.6F - 0.3F) - 64;
@@ -640,13 +664,13 @@ static int gameLoop(
       
       static int pixelR, pixelG, pixelB;
       
-      pixelR = (i16 >> 16 & 0xFF) * i17 / 255;
-      pixelG = (i16 >> 8 & 0xFF)  * i17 / 255;
-      pixelB = (i16 & 0xFF)       * i17 / 255;
+      pixelR = (i16 >> 16 & 0xFF);
+      pixelG = (i16 >> 8 & 0xFF);
+      pixelB = (i16 & 0xFF);
       
       SDL_SetRenderDrawColor(
         renderer,
-        pixelR, pixelG, pixelB, 255
+        pixelR, pixelG, pixelB, i17
       );
       
       SDL_RenderDrawPoint(renderer, pixelX, pixelY);
@@ -655,6 +679,34 @@ static int gameLoop(
     }
   }
   init = 0;
+  
+  M[2] /= BUFFER_SCALE;
+  M[3] /= BUFFER_SCALE;
+  
+  if(paused) {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+    SDL_RenderFillRect(renderer, &background);
+    
+    if(button(renderer, "Resume",
+      BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
+    ) {
+      paused = 0;
+    }
+    
+    button(renderer, "Options",
+      BUFFER_W / 2 - 64, 42, 128, M[2], M[3]
+    );
+    
+    if(button(renderer, "Exit",
+      BUFFER_W / 2 - 64, 64, 128, M[2], M[3]) && M[1]
+    ) {
+      return 0;
+    }
+  }
+  
+  if(M[1]) M[1] = 0;
+  if(M[2]) M[2] = 0;
+  
   return 1;
 }
 
@@ -751,4 +803,65 @@ static int drawStr(SDL_Renderer *renderer,
   }
   
   return x;
+}
+
+/*
+  button
+  Takes in a pointer to a renderer, a string, draws a button with
+  the specified x and y coordinates and width, and then returns
+  wether or not the specified mouse coordinates are within it.
+*/
+static int button(SDL_Renderer *renderer,
+  char *str, int x, int y, int w, int mouseX, int mouseY
+) {
+  int hover =
+    mouseX >= x      &&
+    mouseY >= y      &&
+    mouseX <  x + w  &&
+    mouseY <  y + 16 ;
+  
+  char *strsave = str;
+  int len = 0;
+  while(*str > 0) {
+    len += font[(int)*(str++)][8];
+  }
+  str = strsave;
+  
+  SDL_Rect rect;
+  rect.x = x;
+  rect.y = y;
+  rect.w = w;
+  rect.h = 16;
+  
+  if(hover)
+    SDL_SetRenderDrawColor(renderer, 116, 134, 230, 255);
+  else
+    SDL_SetRenderDrawColor(renderer, 139, 139, 139, 255);
+  SDL_RenderFillRect(renderer, &rect);
+  
+  x += (w - len) / 2 + 1;
+  y += 5;
+  
+  if(hover)
+    SDL_SetRenderDrawColor(renderer, 63,  63,  40,  255);
+  else
+    SDL_SetRenderDrawColor(renderer, 56,  56,  56,  255);
+  drawStr(renderer, str, x, y);
+  
+  x--;
+  y--;
+  
+  if(hover)
+    SDL_SetRenderDrawColor(renderer, 255, 255, 160, 255);
+  else
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  drawStr(renderer, str, x, y);
+  
+  if(hover)
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  else
+    SDL_SetRenderDrawColor(renderer, 0,   0,   0,   255);
+  SDL_RenderDrawRect(renderer, &rect);
+  
+  return hover;
 }
