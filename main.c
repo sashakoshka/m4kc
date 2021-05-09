@@ -567,8 +567,9 @@ static int gameLoop(
                 i13,
                 i14,
                 i15,
-                i16,
-                i17,
+                finalPixelColor,
+                pixelMist,
+                pixelShade,
                 blockFace,
                 i21,
                 i22,
@@ -647,7 +648,12 @@ static int gameLoop(
   f12 = cos(f8);
   
   // Clear screen
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  
+  // FOR DAY:
+  SDL_SetRenderDrawColor(renderer, 153, 204, 255, 255);
+  // FOR NIGHT:
+  //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  
   SDL_RenderClear(renderer);
   
   if(M[27]) {
@@ -773,8 +779,8 @@ static int gameLoop(
       f23 = f20 * f12 - f21 * f11;
       f24 = f18 * f10 + f22 * f9;
       f25 = f22 * f10 - f18 * f9;
-      i16 = 0;
-      i17 = 255;
+      finalPixelColor = 0;
+      pixelMist = 255;
       d = 20.0D;
       f26 = 5.0F;
       for (blockFace = 0; blockFace < 3; blockFace++) {
@@ -847,12 +853,9 @@ static int gameLoop(
               f26 = f33;
             } 
             if (pixelColor > 0) {
-              i16 = pixelColor;
-              i17 = 255 - (int)(f33 / 20.0F * 255.0F);
-              i17 =
-                i17
-                * (255 - (blockFace + 2) % 3 * 50)
-                / 255;
+              finalPixelColor = pixelColor;
+              pixelMist = 255 - (int)(f33 / 20.0F * 255.0F);
+              pixelShade = 255 - (blockFace + 2) % 3 * 50;
               d = f33;
             } 
           } 
@@ -863,13 +866,13 @@ static int gameLoop(
         } 
       }
       
-      if(i16 > 0) {
+      if(finalPixelColor > 0) {
         SDL_SetRenderDrawColor(
           renderer,
-          (i16 >> 16 & 0xFF),
-          (i16 >> 8 & 0xFF),
-          (i16 & 0xFF),
-          fogLog ? sqrt(i17) * 16 : i17
+          (finalPixelColor >> 16 & 0xFF) * pixelShade / 255,
+          (finalPixelColor >> 8 & 0xFF) * pixelShade / 255,
+          (finalPixelColor & 0xFF) * pixelShade / 255,
+          fogLog ? sqrt(pixelMist) * 16 : pixelMist
         );
         
         SDL_RenderDrawPoint(renderer, pixelX, pixelY);
