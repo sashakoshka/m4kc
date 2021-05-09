@@ -26,7 +26,7 @@ struct Inventory;
 static int   randm(int);
 static int   nmod(int, int);
 static float perlin2d(float, float, int);
-static int   setBlock(int*, int, int, int, int);
+static int   setBlock(int*, int, int, int, int, int);
 static int   getBlock(int*, int, int, int);
 static void  setCube(
   int*,
@@ -323,16 +323,18 @@ static void genTextures(unsigned int SEED) {
   Returns true if the block could be set, otherwise returns
   false. Eventually will add block to a stack of set requests if
   the chunk is not loaded, and will set the block when the chunk
-  loads.
+  loads. If force is true, blocks other than air will be set.
 */
 static int setBlock(
   int *world,
   int x, int y, int z,
-  int block
+  int block,
+  int force
 ) {
   if  (x > -1 && x < 64
     && y > -1 && y < 64
     && z > -1 && z < 64
+    && (force || getBlock(world, x, y, z) < 1)
   ) {
     world[x + y * 64 + z * 4096] = block;
     return 1;
@@ -378,8 +380,7 @@ static void setCube(
   for(xx = w + x; xx > x; xx--)
   for(yy = h + y; yy > y; yy--)
   for(zz = l + z; zz > z; zz--)
-  if(force || getBlock(world, xx, yy, zz) < 1)
-    setBlock(world, xx, yy, zz, block);
+    setBlock(world, xx, yy, zz, block, force);
 }
 
 /*
@@ -393,14 +394,38 @@ static void genStructure(
   int type
 ) {
   static int i;
+  /*
+    Structure ideas
+    
+    * obelisks
+    * villages
+    * giant trees with villages in them
+    * brick houses
+    * statues
+    * mineshafts
+    * bridges
+    * fortresses
+    
+  */
   switch(type) {
     case 0: // tree
       for(i = randm(2) + 4; i > 0; i--) {
-        setBlock(world, x, y--, z, 7);
+        setBlock(world, x, y--, z, 7, 1);
       }
       setCube(world, x - 2, y + 1, z - 2, 5, 2, 5, 8, 0);
       setCube(world, x - 1, y - 1, z - 1, 3, 2, 3, 8, 0);
       break;
+    
+    case 1: // pyramid
+      for(i = 8 + randm(12); i > 0; i-= 2)
+        setCube(
+          world,
+          x - i / 2,
+          y--,
+          z - i / 2,
+          i, 1, i,
+          5, 1
+        );
   }
 }
 
@@ -419,7 +444,7 @@ static void genMap(unsigned int seed, int type, int *world) {
         for(int y = 32; y < 64; y++)
           for(int z = 0; z < 64; z++)
             setBlock(world, x, y, z,
-              randm(2) == 0 ? randm(8) : 0);
+              randm(2) == 0 ? randm(8) : 0, 1);
       break;
     case 1:
       // Generate heightmap
@@ -434,22 +459,32 @@ static void genMap(unsigned int seed, int type, int *world) {
         for(int y = 0; y < 64; y++)
           for(int z = 0; z < 64; z++)
             if(y > heightmap[x][z] + 4)
-              setBlock(world, x, y, z, 4);
+              setBlock(world, x, y, z, 4, 1);
             else if(y > heightmap[x][z])
-              setBlock(world, x, y, z, 2);
+              setBlock(world, x, y, z, 2, 1);
             else if(y == heightmap[x][z])
-              setBlock(world, x, y, z, 1);
+              setBlock(world, x, y, z, 1, 1);
             else
-              setBlock(world, x, y, z, 0);
+              setBlock(world, x, y, z, 0, 1);
       
       // Generate structures
-      for(i = randm(8) + 64; i > 0; i--) {
+      for(i = randm(16) + 64; i > 0; i--) {
         x = randm(64);
         z = randm(64);
         genStructure(
           world,
           x, heightmap[x][z] - 1, z,
           0
+        );
+      }
+      
+      for(i = randm(4); i > 0; i--) {
+        x = randm(64);
+        z = randm(64);
+        genStructure(
+          world,
+          x, heightmap[x][z] + 1, z,
+          1
         );
       }
       
@@ -717,7 +752,7 @@ static int gameLoop(
       && i10 < 64
       && pixelY < 64
     ) {
-      setBlock(world, m, i10, pixelY, 0);
+      setBlock(world, m, i10, pixelY, 0, 1);
     }
   }
   
