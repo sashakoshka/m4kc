@@ -548,7 +548,8 @@ static int gameLoop(
                 f33,
                 f34,
                 f35,
-                f36;
+                f36,
+                timeCoef;
   
   static long   l;
   
@@ -649,8 +650,15 @@ static int gameLoop(
   
   // Clear screen
   
+  timeCoef = cos(SDL_GetTicks() / 1024) / 2 + 1;
   // FOR DAY:
-  SDL_SetRenderDrawColor(renderer, 153, 204, 255, 255);
+  SDL_SetRenderDrawColor(
+    renderer,
+    153 * timeCoef,
+    204 * timeCoef,
+    255 * timeCoef,
+    255
+  );
   // FOR NIGHT:
   //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   
