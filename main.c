@@ -435,6 +435,9 @@ static void genStructure(
   Fills the world array with generated "terrain".
 */
 static void genMap(unsigned int seed, int type, int *world) {
+  // when this is converted to genChunk, the seed will be
+  // multiplied by the x y and z coordinates.
+  
   srand(seed);
   static int heightmap[64][64], i, x, z;
   
@@ -574,7 +577,8 @@ static int gameLoop(
                 i25,
                 pixelColor,
                 paused,
-                hotbarSelect;
+                hotbarSelect,
+                fogLog;
   
   static double d;
   
@@ -633,6 +637,8 @@ static int gameLoop(
     inventory.hotbar[6].amount  = 63;
     inventory.hotbar[7].amount  = 63;
     inventory.hotbar[8].amount  = 63;
+    
+    fogLog = 0;
   }
   
   f9  = sin(f7),
@@ -857,15 +863,17 @@ static int gameLoop(
         } 
       }
       
-      SDL_SetRenderDrawColor(
-        renderer,
-        (i16 >> 16 & 0xFF),
-        (i16 >> 8 & 0xFF),
-        (i16 & 0xFF),
-        i17
-      );
-      
-      SDL_RenderDrawPoint(renderer, pixelX, pixelY);
+      if(i16 > 0) {
+        SDL_SetRenderDrawColor(
+          renderer,
+          (i16 >> 16 & 0xFF),
+          (i16 >> 8 & 0xFF),
+          (i16 & 0xFF),
+          fogLog ? sqrt(i17) * 16 : i17
+        );
+        
+        SDL_RenderDrawPoint(renderer, pixelX, pixelY);
+      }
       
       i4 = i8;
     }
