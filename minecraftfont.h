@@ -1,37 +1,12 @@
 /*
-  2D array, with 256 (planned) chars, where each char has an eight
-  8bit ints for each row of pixels.
+  2D array, with 256 (planned) chars, where each char has an
+  eight 8bit ints for each row of pixels.
 */
 
 Uint8 font[][9] = {
-  // NULL
   {0},
-  // CLEAR SMILEY FACE
-  {
-    0b01111110,
-    0b10000001,
-    0b10100101,
-    0b10000001,
-    0b10111101,
-    0b10011001,
-    0b10000001,
-    0b01111110,
-    
-    9
-  },
-  // OPAQUE SMILEY FACE
-  {
-    0b01111110,
-    0b11111111,
-    0b11011011,
-    0b11111111,
-    0b11000011,
-    0b11100111,
-    0b11111111,
-    0b01111110,
-    
-    9
-  },
+  {0},
+  {0},
   {0},
   {0},
   {0},
@@ -1127,7 +1102,7 @@ Uint8 font[][9] = {
     0b00100000,
     0,
     
-    6
+    4
   },
   // u
   {
