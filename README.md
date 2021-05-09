@@ -46,24 +46,37 @@ I will be uploading binaries [here](https://holanet.xyz/soft/m4kc/)
 Some extra info about the game.
 
 ### All blocks by ID
- ID | Block
-----|--------
-  0 | Air
-  1 | Grass
-  2 | Dirt
-  3 | Stone
-  4 | Bricks
-  5 | Dirt
-  6 | Wood
-  7 | Leaves
-  8 | Dirt
-  9 | Dirt
- 10 | Dirt
- 11 | Dirt
- 12 | Dirt
- 13 | Dirt
- 14 | Dirt
- 15 | Dirt
+ ID | Block  | Planned 
+----|--------|---------
+  0 | Air    | Air
+  1 | Grass  | Grass
+  2 | Dirt   | Stone
+  3 | Dirt   | Dirt
+  4 | Stone  | Cobblestone
+  5 | Bricks | Planks
+  6 | Dirt   | Sapling
+  7 | Wood   | Bedrock
+  8 | Leaves | Water
+  9 | Dirt   | Stationary water
+ 10 | Dirt   | Lava
+ 11 | Dirt   | Stationary lava
+ 12 | Dirt   | Sand
+ 13 | Dirt   | Gravel
+ 14 | Dirt   | Gold ore
+ 15 | Dirt   | Iron ore
+ 16 |        | Coal ore
+ 17 |        | Wood
+ 18 |        | Leaves
+ 19 |        | Sponge
+ 20 |        | Glass
+ 21 - 36 |   | Wool
+ 37 |        | Dandelion
+ 38 |        | Rose
+ 39 |        | Brown mushroom
+ 40 |        | Red mushroom
+ 41 |        | Gold block
+
+See [this list](https://www.minecraftforum.net/forums/minecraft-java-edition/discussion/114963-all-item-block-ids-in-one-place) for all planned items.
 
 ### Controls
 How to play the game.
