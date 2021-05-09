@@ -12,6 +12,7 @@
     sashakoshka (holanet.xyz)  - C port
     samsebe (minecraft forums) - deciphering the meaning of some
     of the code
+    gracie bell - daylight function
     https://gist.github.com/nowl/828013 - perlin noise
   
   If you distribute a modified copy of this just include this
@@ -551,7 +552,7 @@ static int gameLoop(
                 f36,
                 timeCoef;
   
-  static long   l;
+  static long   l, gameTime;
   
   static int    k,
                 m,
@@ -580,7 +581,8 @@ static int gameLoop(
                 pixelColor,
                 paused,
                 hotbarSelect,
-                fogLog;
+                fogLog,
+                drawDistance;
   
   static double d;
   
@@ -603,6 +605,8 @@ static int gameLoop(
     f7 = 0.0F;
     f8 = 0.0F;
     l = SDL_GetTicks();
+    gameTime = 0;
+    
     paused = 0;
     hotbarSelect = 0;
     
@@ -641,6 +645,7 @@ static int gameLoop(
     inventory.hotbar[8].amount  = 63;
     
     fogLog = 0;
+    drawDistance = 20;
   }
   
   f9  = sin(f7),
@@ -650,8 +655,11 @@ static int gameLoop(
   
   // Clear screen
   
-  timeCoef = (cos(SDL_GetTicks() / 16384) + 1 ) / 2;
-  // FOR DAY:
+  timeCoef  = (float)(gameTime % 16384) / 16384;
+  timeCoef  = sin(timeCoef);
+  timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
+  timeCoef  = (timeCoef + 1) / 2;
+  
   SDL_SetRenderDrawColor(
     renderer,
     153 * timeCoef,
@@ -659,8 +667,6 @@ static int gameLoop(
     255 * timeCoef,
     255
   );
-  // FOR NIGHT:
-  //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
   
   SDL_RenderClear(renderer);
   
@@ -668,8 +674,10 @@ static int gameLoop(
     paused = 1;
   }
   
-  // Proccess user input
+  // Things that should run at a constant speed, regardless of
+  // CPU power
   while(SDL_GetTicks() - l > 10L) {
+    gameTime++;
     l += 10L;
     if(!paused) {
       // Scroll wheel
@@ -789,7 +797,7 @@ static int gameLoop(
       f25 = f22 * f10 - f18 * f9;
       finalPixelColor = 0;
       pixelMist = 255;
-      d = 20.0D;
+      d = drawDistance;
       f26 = 5.0F;
       for (blockFace = 0; blockFace < 3; blockFace++) {
         f27 = f24;
@@ -862,8 +870,10 @@ static int gameLoop(
             } 
             if (pixelColor > 0) {
               finalPixelColor = pixelColor;
-              pixelMist = 255 - (int)(f33 / 20.0F * 255.0F);
-              pixelShade = 255 - (blockFace + 2) % 3 * 50;
+              pixelMist =
+                255 - (int)(f33 / (float)drawDistance * 255.0F);
+              pixelShade =
+                255 - (blockFace + 2) % 3 * 50;
               d = f33;
             } 
           } 
@@ -871,7 +881,7 @@ static int gameLoop(
           f35 += f30;
           f36 += f31;
           f33 += f28;
-        } 
+        }
       }
       
       if(finalPixelColor > 0) {
