@@ -64,3 +64,21 @@ Some extra info about the game.
  13 | Dirt
  14 | Dirt
  15 | Dirt
+
+### Controls
+How to play the game.
+
+#### Keyboard
+  Key  |    Action
+:-----:|---------------
+   W   | Move forward
+   S   | Move backward
+   A   | Strafe left
+   D   | Strafe right
+ Space | Jump
+  ESC  | Pause
+
+#### Mouse
+* Move mouse: Look around
+* Right click: Place block
+* Left click: Break block
