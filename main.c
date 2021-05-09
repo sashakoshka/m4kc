@@ -650,7 +650,7 @@ static int gameLoop(
   
   // Clear screen
   
-  timeCoef = cos(SDL_GetTicks() / 1024) / 2 + 1;
+  timeCoef = (cos(SDL_GetTicks() / 16384) + 1 ) / 2;
   // FOR DAY:
   SDL_SetRenderDrawColor(
     renderer,
