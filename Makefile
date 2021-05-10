@@ -10,6 +10,7 @@ m4kc:
 	$(CC) main.c -o m4kc $(CFLAGS) $(CFLAGS_COMPACT) $(LIBS)
 	strip m4kc -S --strip-unneeded --remove-section=.note.gnu.gold-version --remove-section=.comment --remove-section=.note --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag
 	gzexe m4kc
+	ls -l m4kc
 
 m4kc-large:
 	$(CC) main.c -o m4kc-large $(CFLAGS) $(LIBS)
