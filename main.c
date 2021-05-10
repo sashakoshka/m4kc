@@ -45,9 +45,11 @@ static int   gameLoop(
   unsigned int,
   int*,
   int*,
-  SDL_Renderer*
+  SDL_Renderer*,
+  SDL_Window*
 );
 
+static void strnum  (char*, int, int);
 static int drawChar (SDL_Renderer*,   int, int, int);
 static int drawStr  (SDL_Renderer*, char*, int, int);
 static int button   (SDL_Renderer*, char*,
@@ -173,14 +175,12 @@ int main() {
     SEED,
     M,
     world,
-    renderer
+    renderer,
+    window
   )) {
     
     SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
-    
-    M[2]   = mouseX;
-    M[3]   = mouseY;
     
     // Detect movement controls
     M[32]  = keyboard[SDL_SCANCODE_SPACE];
@@ -188,6 +188,11 @@ int main() {
     M[115] = keyboard[SDL_SCANCODE_S];
     M[97]  = keyboard[SDL_SCANCODE_A];
     M[100] = keyboard[SDL_SCANCODE_D];
+    
+    if(!SDL_GetRelativeMouseMode()) {
+      M[2] = mouseX;
+      M[3] = mouseY;
+    }
     
     while(SDL_PollEvent(&event)) {
       switch (event.type) {
@@ -204,16 +209,23 @@ int main() {
               break;
           }
           break;
-          
-          case SDL_KEYDOWN:
-            if(event.key.repeat == 0) {
-              // Detect UI hotkeys
-              M[27]  = keyboard[SDL_SCANCODE_ESCAPE];
-            }
-            break;
-          
+        
+        case SDL_KEYDOWN:
+          if(event.key.repeat == 0) {
+            // Detect UI hotkeys
+            M[27] = keyboard[SDL_SCANCODE_ESCAPE];
+          }
+          break;
+        
         case SDL_MOUSEWHEEL:
           M[4] = event.wheel.y;
+          break;
+        
+        case SDL_MOUSEMOTION:
+          if(SDL_GetRelativeMouseMode()) {
+            M[2] = event.motion.xrel;
+            M[3] = event.motion.yrel;
+          }
           break;
       }
     }
@@ -524,11 +536,13 @@ static int gameLoop(
   unsigned int SEED,
   int *M,
   int *world,
-  SDL_Renderer *renderer
+  SDL_Renderer *renderer,
+  SDL_Window   *window
 ) {
   // We dont want to have to pass all of these by reference, so
-  // have all of them as static variables and only set their
-  // values once.
+  // have all of them as static variables
+  
+  // TODO: Migrate simple default const values to definitions
   static float  f1,
                 f2,
                 f3,
@@ -605,9 +619,11 @@ static int gameLoop(
                 
                 hotbarSelect,
                 fogLog,
-                drawDistance;
+                drawDistance,
+                trapMouse = 0;
   
-  static char drawDistanceText[] = "Draw distance: 20\0";
+  static char drawDistanceText [] = "Draw distance: 20\0";
+  static char trapMouseText    [] = "Capture mouse: OFF";
   
   static double d;
   
@@ -714,8 +730,14 @@ static int gameLoop(
       }
       
       // Looking around
-      f16 = (M[2] - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
-      f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
+      if(trapMouse) {
+        f16 = (float)M[2] * 1.5;
+        f17 = (float)M[3] * 1.5;
+      } else {
+        f16 = (M[2] - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
+        f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
+      }
+      
       f15 = sqrt(f16 * f16 + f17 * f17) - 1.2F;
       if (f15 < 0.0F)
         f15 = 0.0F;
@@ -883,9 +905,20 @@ static int gameLoop(
                 i6 + i7 * 16 + i25 * 256 * 3
               ]; 
             }
+            // There must be a better way to do this check...
             if (
               f33 < f26
-              && pixelX == M[2] / 4 && pixelY == M[3] / 4
+              && (
+                (
+                   ! trapMouse
+                  && pixelX == M[2] / BUFFER_SCALE
+                  && pixelY == M[3] / BUFFER_SCALE
+                ) || (
+                     trapMouse
+                  && pixelX == BUFFER_W / 2
+                  && pixelY == BUFFER_H / 2
+                )
+              )
             ) {
               i8 = i24;
               i5 = 1;
@@ -908,6 +941,17 @@ static int gameLoop(
           f36 += f31;
           f33 += f28;
         }
+      }
+      
+      // TODO: make two ints to basically cache BUFFER_W and
+      // BUFFER_H both divided by 2 every frame
+      if(trapMouse && (
+        (pixelX == BUFFER_W / 2
+          && abs(BUFFER_H / 2 - pixelY) < 4) ||
+        (pixelY == BUFFER_H / 2
+          && abs(BUFFER_W / 2 - pixelX) < 4)
+      )) {
+        finalPixelColor = 16777216 - finalPixelColor;
       }
       
       if(finalPixelColor > 0) {
@@ -951,6 +995,7 @@ static int gameLoop(
   
   // In-game menus
   if(gamePopup) {
+    SDL_SetRelativeMouseMode(0);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
     SDL_RenderFillRect(renderer, &backgroundRect);
     
@@ -991,12 +1036,26 @@ static int gameLoop(
             case 64:
               drawDistance = 96;
               break;
+            case 96:
+              drawDistance = 128;
+              break;
             default:
               drawDistance = 20;
               break;
           }
-          // I cannot describe in words how proud I am of this.
-          sprintf(drawDistanceText + 15, "%d", drawDistance);
+          strnum(drawDistanceText, 15, drawDistance);
+        }
+        
+        if(button(renderer, trapMouseText,
+          BUFFER_W / 2 - 64, 42, 128, M[2], M[3]) && M[1]
+        ) {
+          if(trapMouse) {
+            trapMouse = 0;
+            sprintf(trapMouseText + 15, "OFF");
+          } else {
+            trapMouse = 1;
+            sprintf(trapMouseText + 15, "ON");
+          }
         }
         
         if(button(renderer, "Back",
@@ -1006,6 +1065,8 @@ static int gameLoop(
         }
         break;
     }
+  } else if(trapMouse) {
+    SDL_SetRelativeMouseMode(1);
   }
   
   if(M[1]) M[1] = 0;
@@ -1072,6 +1133,16 @@ static float perlin2d(float x, float y, int seed) {
   }
 
   return fin/div;
+}
+
+/*
+  strnum
+  Takes in a char array and an offset and puts the specifiec
+  number into it. Make sure there is sufficient space in the
+  string.
+*/
+static void strnum(char *ptr, int offset, int num) {
+  sprintf(ptr + offset, "%d", num);
 }
 
 /*
