@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=m4kc
+Comment=An implementation of Minecraft 4K in C
+Exec=m4kc
+Icon=/usr/share/icons/m4kc.png
+Terminal=false
+Type=Application
+Categories=Game
+Keywords=Game;Minecraft;Voxel
