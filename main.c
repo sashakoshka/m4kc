@@ -8,14 +8,14 @@
   Minecraft 4k, C edition. Version 0.2
   
   Credits:
-    Notch - creating the original game
-    sashakoshka (holanet.xyz)  - C port
-    samsebe (minecraft forums) - deciphering the meaning of some
-    of the code
+    notch       - creating the original game
+    sashakoshka - C port, modifications
+    samsebe     - deciphering the meaning of some of the code
     gracie bell - daylight function
+    segfault    - makefile
     https://gist.github.com/nowl/828013 - perlin noise
   
-  If you distribute a modified copy of this just include this
+  If you distribute a modified copy of this, just include this
   notice.
 */
 
@@ -113,8 +113,8 @@ int main() {
   int        M[128]    = {0};
   int    world[262144] = {0};
   
-  //unsigned const int SEED = 18295169;
-  unsigned const int SEED = 45390874;
+  //unsigned int seed = 18295169;
+  unsigned int seed = 45390874;
   
   const int BUFFER_W     = 214;
   const int BUFFER_H     = 120;
@@ -124,8 +124,8 @@ int main() {
   
   //---- generating assets  ----//
   
-  genMap(SEED, 1, world);
-  genTextures(SEED);
+  genMap(seed, 1, world);
+  genTextures(seed);
   
   //----  initializing SDL  ----//
   
@@ -172,7 +172,7 @@ int main() {
     BUFFER_W,
     BUFFER_H,
     BUFFER_SCALE,
-    SEED,
+    seed,
     M,
     world,
     renderer,
@@ -264,8 +264,8 @@ static int nmod(int left, int right) {
   Takes in a seed and an array where the textures should go.
   Generates game textures in that array.
 */
-static void genTextures(unsigned int SEED) {
-  srand(SEED);
+static void genTextures(unsigned int seed) {
+  srand(seed);
   static int j  = 0,
              k  = 0,
              m  = 0,
@@ -533,7 +533,7 @@ static int gameLoop(
   int BUFFER_W,
   int BUFFER_H,
   int BUFFER_SCALE,
-  unsigned int SEED,
+  unsigned int seed,
   int *M,
   int *world,
   SDL_Renderer *renderer,
