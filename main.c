@@ -19,27 +19,31 @@
   notice.
 */
 
-// TODO: Typedef all structs
-struct Chunk;
-struct Player;
-struct InvSlot;
-struct Inventory;
-typedef struct Coords coords;
+typedef struct _World     World;
+typedef struct _Player    Player;
+typedef struct _InvSlot   InvSlot;
+typedef struct _Inventory Inventory;
+typedef struct _Coords    Coords;
 
 static int   randm(int);
 static int   nmod(int, int);
 static float perlin2d(float, float, int);
-static int   setBlock(int*, int, int, int, int, int);
-static int   getBlock(int*, int, int, int);
+static int   setBlock(World*, int, int, int, int, int);
+static int   getBlock(World*, int, int, int);
 static int   setCube(
-  int*,
+  World*,
   int, int, int,
   int, int, int,
   int, int
 );
 static int   ch_setBlock(int*, int, int, int, int);
-static void  genStructure(int*, int, int, int, int);
-static void  genChunk(unsigned int, int*, int, int, int, int);
+static void  genStructure(World*, int, int, int, int);
+static void  genChunk(
+  unsigned int,
+  World*, int*,
+  int, int, int,
+  int
+);
 static void  genTextures(unsigned int);
 static int   gameLoop(
   int,
@@ -47,7 +51,7 @@ static int   gameLoop(
   int,
   unsigned int,
   int*,
-  int*,
+  World*,
   SDL_Renderer*,
   SDL_Window*
 );
@@ -58,24 +62,24 @@ static int drawStr  (SDL_Renderer*, char*, int, int);
 static int button   (SDL_Renderer*, char*,
   int, int, int, int, int
 );
-static int drawSlot (SDL_Renderer*, struct InvSlot*,
+static int drawSlot (SDL_Renderer*, InvSlot*,
   int, int, int, int
 );
 
 /*
-  World
+  _World
   Stores a chunk. This will eventually store multiple of them.
 */
-struct World {
+struct _World {
   int chunk[262144];
 };
 
 /*
-  Player
+  _Player
   Stores player data. This will be passed as reference to game
   loop.
 */
-struct Player {
+struct _Player {
   float xPos;
   float yPos;
   float zPos;
@@ -88,30 +92,30 @@ struct Player {
 };
 
 /*
-  InvSlot
+  _InvSlot
   This will be used to store a single stack in the player's
   inventory.
 */
-struct InvSlot {
+struct _InvSlot {
   unsigned int amount:6;
   unsigned int blockid;
 } pack;
 
 /*
-  Inventory
+  _Inventory
   This will be used to store the player's inventory.
 */
-struct Inventory {
-  struct InvSlot slots[27];
-  struct InvSlot hotbar[9];
-  struct InvSlot armor[4];
+struct _Inventory {
+  InvSlot slots[27];
+  InvSlot hotbar[9];
+  InvSlot armor[4];
 };
 
 /*
-  Coords
+  _Coords
   Stores xyz coordinates
 */
-struct Coords {
+struct _Coords {
   int x;
   int y;
   int z;
@@ -124,7 +128,7 @@ int textures[12288] = {0};
 int main() {
   int M[128] = {0};
   
-  struct World world = {{0}};
+  World world = {{0}};
   
   //unsigned int seed = 18295169;
   unsigned int seed = 45390874;
@@ -137,7 +141,7 @@ int main() {
   
   //---- generating assets  ----//
   
-  genChunk(seed, world.chunk, 0, 0, 0, 1);
+  genChunk(seed, &world, world.chunk, 0, 0, 0, 1);
   genTextures(seed);
   
   //----  initializing SDL  ----//
@@ -187,7 +191,7 @@ int main() {
     BUFFER_SCALE,
     seed,
     M,
-    world.chunk,
+    &world,
     renderer,
     window
   )) {
@@ -360,7 +364,7 @@ static void genTextures(unsigned int seed) {
   loads. If force is true, blocks other than air will be set.
 */
 static int setBlock(
-  int *world,
+  World *world,
   int x, int y, int z,
   int block,
   int force
@@ -373,7 +377,7 @@ static int setBlock(
     && z > -1 && z < 64
     && (force || b)
   ) {
-    world[x + y * 64 + z * 4096] = block;
+    world->chunk[x + y * 64 + z * 4096] = block;
     return b;
   } else {
     return 0;
@@ -386,7 +390,7 @@ static int setBlock(
   id there. Eventually will return -1 if chunk is not loaded
 */
 static int getBlock(
-  int *world,
+  World *world,
   int x, int y, int z
 ) {
   if (x < 0
@@ -396,7 +400,7 @@ static int getBlock(
     || y >= 64
     || z >= 64
   ) return 0;
-  return world[x + y * 64 + z * 4096];
+  return world->chunk[x + y * 64 + z * 4096];
 }
 
 /*
@@ -424,7 +428,7 @@ static int ch_setBlock(
   air, returns false.
 */
 static int setCube(
-  int *world,
+  World *world,
   int x, int y, int z,
   int w, int h, int l,
   int block,
@@ -445,7 +449,7 @@ static int setCube(
   specified structure.
 */
 static void genStructure(
-  int *world,
+  World *world,
   int x, int y, int z,
   int type
 ) {
@@ -495,6 +499,7 @@ static void genStructure(
 */
 static void genChunk(
   unsigned int seed,
+  World *world,
   int *chunk,
   int xOffset,
   int yOffset,
@@ -503,7 +508,7 @@ static void genChunk(
 ) {
   // To make sure structure generation accross chunks is
   // different, but predictable
-  srand(seed * xOffset * yOffset * zOffset);
+  srand(seed * (xOffset * yOffset * zOffset + 1));
   static int heightmap[64][64], i, x, z;
   
   switch(type) {
@@ -540,7 +545,7 @@ static void genChunk(
         x = randm(64);
         z = randm(64);
         genStructure(
-          chunk,
+          world,
           x, heightmap[x][z] - 1, z,
           0
         );
@@ -550,7 +555,7 @@ static void genChunk(
         x = randm(64);
         z = randm(64);
         genStructure(
-          chunk,
+          world,
           x, heightmap[x][z] + 1, z,
           1
         );
@@ -572,7 +577,7 @@ static int gameLoop(
   int BUFFER_SCALE,
   unsigned int seed,
   int *M,
-  int *world,
+  World *world,
   SDL_Renderer *renderer,
   SDL_Window   *window
 ) {
@@ -663,11 +668,11 @@ static int gameLoop(
   static SDL_Rect hotbarRect;
   static SDL_Rect hotbarSelectRect;
   
-  static struct Inventory inventory;
-  static coords blockSelect       = {0};
-  static coords blockSelectOffset = {0};
-  static coords coordPass         = {0};
-  static coords blockRayPosition  = {0};
+  static Inventory inventory;
+  static Coords blockSelect       = {0};
+  static Coords blockSelectOffset = {0};
+  static Coords coordPass         = {0};
+  static Coords blockRayPosition  = {0};
   
   static int init = 1;
   if(init) {
@@ -984,7 +989,7 @@ static int gameLoop(
               memcpy(
                 &coordPass,
                 &blockRayPosition,
-                sizeof(coords)
+                sizeof(Coords)
               );
               
               // Treating a coords set as an array and blockFace
@@ -1038,7 +1043,7 @@ static int gameLoop(
       
       // Pass info about selected block on
       blockSelected = selectedPass;
-      memcpy(&blockSelect, &coordPass, sizeof(coords));
+      memcpy(&blockSelect, &coordPass, sizeof(Coords));
     }
   }
   init = 0;
@@ -1321,7 +1326,7 @@ static int button(SDL_Renderer *renderer,
   within it.
 */
 static int drawSlot(SDL_Renderer *renderer,
-  struct InvSlot *slot, int x, int y, int mouseX, int mouseY
+  InvSlot *slot, int x, int y, int mouseX, int mouseY
 ) {
   static int hover,
              i,
