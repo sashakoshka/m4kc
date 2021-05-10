@@ -594,10 +594,20 @@ static int gameLoop(
                 i24,
                 i25,
                 pixelColor,
+                
+                /*
+                  0: Gameplay
+                  1: Pause menu
+                  2: In-game options menu
+                  3: Inventory
+                */
                 gamePopup,
+                
                 hotbarSelect,
                 fogLog,
                 drawDistance;
+  
+  static char drawDistanceText[] = "Draw distance: 20\0";
   
   static double d;
   
@@ -939,25 +949,62 @@ static int gameLoop(
       M[3]
     );
   
-  // Pause menu
+  // In-game menus
   if(gamePopup) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
     SDL_RenderFillRect(renderer, &backgroundRect);
     
-    if(button(renderer, "Resume",
-      BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
-    ) {
-      gamePopup = 0;
-    }
-    
-    button(renderer, "Options",
-      BUFFER_W / 2 - 64, 42, 128, M[2], M[3]
-    );
-    
-    if(button(renderer, "Exit",
-      BUFFER_W / 2 - 64, 64, 128, M[2], M[3]) && M[1]
-    ) {
-      return 0;
+    switch(gamePopup) {
+      // Pause menu
+      case 1:
+        if(button(renderer, "Resume",
+          BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
+        ) {
+          gamePopup = 0;
+        }
+        
+        if(button(renderer, "Options",
+          BUFFER_W / 2 - 64, 42, 128, M[2], M[3]) && M[1]
+        ) {
+          gamePopup = 2;
+        }
+        
+        if(button(renderer, "Exit",
+          BUFFER_W / 2 - 64, 64, 128, M[2], M[3]) && M[1]
+        ) {
+          return 0;
+        }
+        break;
+      
+      // Options
+      case 2:
+        if(button(renderer, drawDistanceText,
+          BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
+        ) {
+          switch(drawDistance) {
+            case 20:
+              drawDistance = 32;
+              break;
+            case 32:
+              drawDistance = 64;
+              break;
+            case 64:
+              drawDistance = 96;
+              break;
+            default:
+              drawDistance = 20;
+              break;
+          }
+          // I cannot describe in words how proud I am of this.
+          sprintf(drawDistanceText + 15, "%d", drawDistance);
+        }
+        
+        if(button(renderer, "Back",
+          BUFFER_W / 2 - 64, 64, 128, M[2], M[3]) && M[1]
+        ) {
+          gamePopup = 1;
+        }
+        break;
     }
   }
   
