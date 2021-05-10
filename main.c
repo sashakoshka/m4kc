@@ -182,7 +182,7 @@ int main() {
     M[2]   = mouseX;
     M[3]   = mouseY;
     
-    M[27]  = keyboard[SDL_SCANCODE_ESCAPE];
+    // Detect movement controls
     M[32]  = keyboard[SDL_SCANCODE_SPACE];
     M[119] = keyboard[SDL_SCANCODE_W];
     M[115] = keyboard[SDL_SCANCODE_S];
@@ -204,6 +204,13 @@ int main() {
               break;
           }
           break;
+          
+          case SDL_KEYDOWN:
+            if(event.key.repeat == 0) {
+              // Detect UI hotkeys
+              M[27]  = keyboard[SDL_SCANCODE_ESCAPE];
+            }
+            break;
           
         case SDL_MOUSEWHEEL:
           M[4] = event.wheel.y;
@@ -679,7 +686,8 @@ static int gameLoop(
   SDL_RenderClear(renderer);
   
   if(M[27]) {
-    gamePopup = 1;
+    gamePopup = gamePopup ? 0 : 1;
+    M[27] = 0;
   }
   
   // Things that should run at a constant speed, regardless of
