@@ -587,7 +587,7 @@ static int gameLoop(
                 i24,
                 i25,
                 pixelColor,
-                paused,
+                gamePopup,
                 hotbarSelect,
                 fogLog,
                 drawDistance;
@@ -615,7 +615,7 @@ static int gameLoop(
     l = SDL_GetTicks();
     gameTime = 2048;
     
-    paused = 0;
+    gamePopup = 0;
     hotbarSelect = 0;
     
     backgroundRect.x = 0;
@@ -679,7 +679,7 @@ static int gameLoop(
   SDL_RenderClear(renderer);
   
   if(M[27]) {
-    paused = 1;
+    gamePopup = 1;
   }
   
   // Things that should run at a constant speed, regardless of
@@ -687,7 +687,7 @@ static int gameLoop(
   while(SDL_GetTicks() - l > 10L) {
     gameTime++;
     l += 10L;
-    if(!paused) {
+    if(!gamePopup) {
       // Scroll wheel
       if(M[4] != 0) {
         hotbarSelect -= M[4];
@@ -766,7 +766,7 @@ static int gameLoop(
   
   i6 = 0;
   i7 = 0;
-  if(!paused) {
+  if(!gamePopup) {
     if (M[1] > 0 && i4 > 0) {
       world[i4] = 0;
       M[1] = 0;
@@ -932,14 +932,14 @@ static int gameLoop(
     );
   
   // Pause menu
-  if(paused) {
+  if(gamePopup) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
     SDL_RenderFillRect(renderer, &backgroundRect);
     
     if(button(renderer, "Resume",
       BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
     ) {
-      paused = 0;
+      gamePopup = 0;
     }
     
     button(renderer, "Options",
