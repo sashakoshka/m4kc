@@ -19,10 +19,12 @@
   notice.
 */
 
+// TODO: Typedef all structs
 struct Chunk;
 struct Player;
 struct InvSlot;
 struct Inventory;
+typedef struct Coords coords;
 
 static int   randm(int);
 static int   nmod(int, int);
@@ -35,8 +37,9 @@ static int   setCube(
   int, int, int,
   int, int
 );
+static int   ch_setBlock(int*, int, int, int, int);
 static void  genStructure(int*, int, int, int, int);
-static void  genMap(unsigned int, int, int*);
+static void  genChunk(unsigned int, int*, int, int, int, int);
 static void  genTextures(unsigned int);
 static int   gameLoop(
   int,
@@ -60,12 +63,11 @@ static int drawSlot (SDL_Renderer*, struct InvSlot*,
 );
 
 /*
-  Chunk
-  Stores a 64x64x64 array of blocks. This will be useful when
-  there are chunks.
+  World
+  Stores a chunk. This will eventually store multiple of them.
 */
-struct Chunk {
-  int blocks[262144];
+struct World {
+  int chunk[262144];
 };
 
 /*
@@ -105,13 +107,24 @@ struct Inventory {
   struct InvSlot armor[4];
 };
 
+/*
+  Coords
+  Stores xyz coordinates
+*/
+struct Coords {
+  int x;
+  int y;
+  int z;
+};
+
 // Global variable because so many things use it. Also may get
 // its own header file at some point.
 int textures[12288] = {0};
 
 int main() {
-  int        M[128]    = {0};
-  int    world[262144] = {0};
+  int M[128] = {0};
+  
+  struct World world = {{0}};
   
   //unsigned int seed = 18295169;
   unsigned int seed = 45390874;
@@ -124,7 +137,7 @@ int main() {
   
   //---- generating assets  ----//
   
-  genMap(seed, 1, world);
+  genChunk(seed, world.chunk, 0, 0, 0, 1);
   genTextures(seed);
   
   //----  initializing SDL  ----//
@@ -174,7 +187,7 @@ int main() {
     BUFFER_SCALE,
     seed,
     M,
-    world,
+    world.chunk,
     renderer,
     window
   )) {
@@ -354,6 +367,7 @@ static int setBlock(
 ) {
   static int b;
   b = getBlock(world, x, y, z) < 1;
+  
   if  (x > -1 && x < 64
     && y > -1 && y < 64
     && z > -1 && z < 64
@@ -383,6 +397,23 @@ static int getBlock(
     || z >= 64
   ) return 0;
   return world[x + y * 64 + z * 4096];
+}
+
+/*
+  ch_setBlock
+  Takes in a chunk array, xyz coordinates, and a block id.
+  Sets the block. For usage in terrain generation. Returns false
+  if the block was previously air.
+*/
+static int ch_setBlock(
+  int *chunk,
+  int x, int y, int z,
+  int block
+) {
+  static int b;
+  b = chunk[x + y * 64 + z * 4096] > 0;
+  chunk[x + y * 64 + z * 4096] = block;
+  return b;
 }
 
 /*
@@ -458,15 +489,21 @@ static void genStructure(
 }
 
 /*
-  genMap
-  Takes in a seed and a world array. World is 64x64x64 blocks.
-  Fills the world array with generated "terrain".
+  genChunk
+  Takes in a seed and a chunk array. Chunk is 64x64x64 blocks.
+  Fills the chunk array with generated terrain.
 */
-static void genMap(unsigned int seed, int type, int *world) {
-  // when this is converted to genChunk, the seed will be
-  // multiplied by the x y and z coordinates.
-  
-  srand(seed);
+static void genChunk(
+  unsigned int seed,
+  int *chunk,
+  int xOffset,
+  int yOffset,
+  int zOffset,
+  int type
+) {
+  // To make sure structure generation accross chunks is
+  // different, but predictable
+  srand(seed * xOffset * yOffset * zOffset);
   static int heightmap[64][64], i, x, z;
   
   switch(type) {
@@ -474,8 +511,8 @@ static void genMap(unsigned int seed, int type, int *world) {
       for(int x = 0; x < 64; x++)
         for(int y = 32; y < 64; y++)
           for(int z = 0; z < 64; z++)
-            setBlock(world, x, y, z,
-              randm(2) == 0 ? randm(8) : 0, 1);
+            ch_setBlock(chunk, x, y, z,
+              randm(2) == 0 ? randm(8) : 0);
       break;
     case 1:
       // Generate heightmap
@@ -490,20 +527,20 @@ static void genMap(unsigned int seed, int type, int *world) {
         for(int y = 0; y < 64; y++)
           for(int z = 0; z < 64; z++)
             if(y > heightmap[x][z] + 4)
-              setBlock(world, x, y, z, 4, 1);
+              ch_setBlock(chunk, x, y, z, 4);
             else if(y > heightmap[x][z])
-              setBlock(world, x, y, z, 2, 1);
+              ch_setBlock(chunk, x, y, z, 2);
             else if(y == heightmap[x][z])
-              setBlock(world, x, y, z, 1, 1);
+              ch_setBlock(chunk, x, y, z, 1);
             else
-              setBlock(world, x, y, z, 0, 1);
+              ch_setBlock(chunk, x, y, z, 0);
       
       // Generate structures
       for(i = randm(16) + 64; i > 0; i--) {
         x = randm(64);
         z = randm(64);
         genStructure(
-          world,
+          chunk,
           x, heightmap[x][z] - 1, z,
           0
         );
@@ -513,7 +550,7 @@ static void genMap(unsigned int seed, int type, int *world) {
         x = randm(64);
         z = randm(64);
         genStructure(
-          world,
+          chunk,
           x, heightmap[x][z] + 1, z,
           1
         );
@@ -586,11 +623,10 @@ static int gameLoop(
   static int    k,
                 m,
                 i,
-                i4,
-                i5,
+                blockSelected,
+                selectedPass,
                 i6,
                 i7,
-                i8,
                 pixelX,
                 i10,
                 pixelY,
@@ -602,10 +638,6 @@ static int gameLoop(
                 pixelMist,
                 pixelShade,
                 blockFace,
-                i21,
-                i22,
-                i23,
-                i24,
                 i25,
                 pixelColor,
                 
@@ -632,6 +664,10 @@ static int gameLoop(
   static SDL_Rect hotbarSelectRect;
   
   static struct Inventory inventory;
+  static coords blockSelect       = {0};
+  static coords blockSelectOffset = {0};
+  static coords coordPass         = {0};
+  static coords blockRayPosition  = {0};
   
   static int init = 1;
   if(init) {
@@ -641,8 +677,7 @@ static int gameLoop(
     f4 = 0.0F;
     f5 = 0.0F;
     f6 = 0.0F;
-    i4 = -1;
-    i5 = 0;
+    blockSelected = 0;
     f7 = 0.0F;
     f8 = 0.0F;
     l = SDL_GetTicks();
@@ -694,8 +729,7 @@ static int gameLoop(
   f11 = sin(f8),
   f12 = cos(f8);
   
-  // Clear screen
-  
+  // Skybox, basically
   timeCoef  = (float)(gameTime % 102944) / 16384;
   timeCoef  = sin(timeCoef);
   timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
@@ -782,7 +816,7 @@ static int gameLoop(
             || i13 >= 64
             || i14 >= 64
             || i15 >= 64
-            || world[i13 + i14 * 64 + i15 * 4096] > 0
+            || getBlock(world, i13, i14, i15) > 0
           ) {
             if (m != 1) {
               goto label208;
@@ -807,12 +841,23 @@ static int gameLoop(
   i6 = 0;
   i7 = 0;
   if(!gamePopup) {
-    if (M[1] > 0 && i4 > 0) {
-      world[i4] = 0;
+    if (M[1] > 0 && blockSelected) {
+      setBlock(
+        world,
+        blockSelect.x,
+        blockSelect.y,
+        blockSelect.z, 0, 1
+      );
       M[1] = 0;
     } 
-    if (M[0] > 0 && i4 > 0) {
-      world[i4 + i5] = inventory.hotbar[hotbarSelect].blockid;
+    if (M[0] > 0 && blockSelected) {
+      setBlock(
+        world,
+        blockSelect.x + blockSelectOffset.x,
+        blockSelect.y + blockSelectOffset.y,
+        blockSelect.z + blockSelectOffset.z,
+        inventory.hotbar[hotbarSelect].blockid, 1
+      );
       M[0] = 0;
     }
   }
@@ -828,12 +873,16 @@ static int gameLoop(
       && i10 < 64
       && pixelY < 64
     ) {
+      // TODO: Check if block is inside player before placing,
+      // NOT THIS LOL
       setBlock(world, m, i10, pixelY, 0, 1);
     }
   }
   
   // Cast rays
-  i8 = -1.0F;
+  // selectedPass passes wether or not a block is selected to
+  // the blockSelected variable
+  selectedPass = 0;
   for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
     f18 = (pixelX - 107) / 90.0F;
     for (pixelY = 0; pixelY < BUFFER_H; pixelY++) {
@@ -877,11 +926,16 @@ static int gameLoop(
             f36--; 
         } 
         while (f33 < d) {
-          i21 = (int)f34 - 64;
-          i22 = (int)f35 - 64;
-          i23 = (int)f36 - 64;
-          i24 = i21 + i22 * 64 + i23 * 4096;
-          i25 = getBlock(world, i21, i22, i23);
+          blockRayPosition.x = (int)f34 - 64;
+          blockRayPosition.y = (int)f35 - 64;
+          blockRayPosition.z = (int)f36 - 64;
+          
+          i25 = getBlock(
+            world,
+            blockRayPosition.x,
+            blockRayPosition.y,
+            blockRayPosition.z
+          );
           if (i25 > 0) {
             i6 = (int)((f34 + f36) * 16.0F) & 0xF;
             i7 = ((int)(f35 * 16.0F) & 0xF) + 16;
@@ -893,8 +947,13 @@ static int gameLoop(
             }
             // Block outline color
             pixelColor = 0xFFFFFF;
-            if (i24 != i4 // block face is not selected
-               || (
+            if (
+                (
+                  !blockSelected                      ||
+                  blockRayPosition.x != blockSelect.x ||
+                  blockRayPosition.y != blockSelect.y ||
+                  blockRayPosition.z != blockSelect.z
+                ) || (
                    i6 > 0  
                 && i7 % 16 > 0
                 && i6 < 15
@@ -905,6 +964,7 @@ static int gameLoop(
                 i6 + i7 * 16 + i25 * 256 * 3
               ]; 
             }
+            // See if the block is selected
             // There must be a better way to do this check...
             if (
               f33 < f26
@@ -920,11 +980,21 @@ static int gameLoop(
                 )
               )
             ) {
-              i8 = i24;
-              i5 = 1;
-              if (f27 > 0.0F)
-                i5 = -1; 
-              i5 <<= 6 * blockFace;
+              selectedPass = 1;
+              memcpy(
+                &coordPass,
+                &blockRayPosition,
+                sizeof(coords)
+              );
+              
+              // Treating a coords set as an array and blockFace
+              // as an index.
+              blockSelectOffset.x = 0;
+              blockSelectOffset.y = 0;
+              blockSelectOffset.z = 0;
+              *(&(blockSelectOffset.x) + blockFace)
+                = 1 - 2 * (f27 > 0.0);
+              
               f26 = f33;
             } 
             if (pixelColor > 0) {
@@ -958,15 +1028,17 @@ static int gameLoop(
         SDL_SetRenderDrawColor(
           renderer,
           (finalPixelColor >> 16 & 0xFF) * pixelShade / 255,
-          (finalPixelColor >> 8 & 0xFF) * pixelShade / 255,
-          (finalPixelColor & 0xFF) * pixelShade / 255,
+          (finalPixelColor >> 8  & 0xFF) * pixelShade / 255,
+          (finalPixelColor       & 0xFF) * pixelShade / 255,
           fogLog ? sqrt(pixelMist) * 16 : pixelMist
         );
         
         SDL_RenderDrawPoint(renderer, pixelX, pixelY);
       }
       
-      i4 = i8;
+      // Pass info about selected block on
+      blockSelected = selectedPass;
+      memcpy(&blockSelect, &coordPass, sizeof(coords));
     }
   }
   init = 0;
