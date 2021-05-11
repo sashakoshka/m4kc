@@ -24,7 +24,7 @@
   notice.
 */
 
-int   gameLoop(
+int gameLoop(
   int,
   int,
   int,
@@ -38,7 +38,10 @@ int   gameLoop(
 int main(int argc, char *argv[]) {
   int M[128] = {0};
   
-  World world = {{0}};
+  World world;
+  
+  for(int i = 0; i < 262144; i++)
+    world.chunk[i] = 0;
   
   //unsigned int seed = 18295169;
   unsigned int seed = 45390874;
@@ -141,9 +144,9 @@ int main(int argc, char *argv[]) {
           if(event.key.repeat == 0) {
             // Detect UI hotkeys
             M[27] = keyboard[SDL_SCANCODE_ESCAPE];
-            M[5] = keyboard[SDL_SCANCODE_F1];
-            M[6] = keyboard[SDL_SCANCODE_F2];
-            M[7] = keyboard[SDL_SCANCODE_F3];
+            M[5]  = keyboard[SDL_SCANCODE_F1];
+            M[6]  = keyboard[SDL_SCANCODE_F2];
+            M[7]  = keyboard[SDL_SCANCODE_F3];
           }
           break;
         
@@ -187,14 +190,14 @@ int gameLoop(
   // We dont want to have to pass all of these by reference, so
   // have all of them as static variables
   
-  static double f1 = 96.5,
-                f2 = 65.0,
-                f3 = 96.5,
-                f4 = 0,
-                f5 = 0,
-                f6 = 0,
-                f7 = 0,
-                f8 = 0,
+  static double f1  = 96.5,
+                f2  = 65.0,
+                f3  = 96.5,
+                f4  = 0,
+                f5  = 0,
+                f6  = 0,
+                f7  = 0,
+                f8  = 0,
                 f9,
                 f10,
                 f11,
@@ -477,7 +480,7 @@ int gameLoop(
     }
     if(M[5]) {
       M[5] = 0;
-      guiOn = 1 - guiOn;
+      guiOn ^= 1;
     }
     if(M[7]) {
       M[7] = 0;
@@ -636,8 +639,6 @@ int gameLoop(
         }
       }
       
-      // TODO: make two ints to basically cache BUFFER_W and
-      // BUFFER_H both divided by 2 every frame
       if(trapMouse && (
         (pixelX == BUFFER_HALF_W
           && abs(BUFFER_HALF_H - pixelY) < 4) ||
@@ -770,7 +771,6 @@ int gameLoop(
       SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
       SDL_RenderDrawRect(renderer, &hotbarSelectRect);
       
-      // TODO: make this more optimized
       for(i = 0; i < 9; i++)
         drawSlot(
           renderer,
