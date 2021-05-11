@@ -19,6 +19,7 @@
     gracie bell - daylight function
     segfault    - makefile
     https://gist.github.com/nowl/828013 - perlin noise
+    samantaz    - de-obfuscating controls code
   
   If you distribute a modified copy of this, just include this
   notice.
@@ -690,76 +691,72 @@ int gameLoop(
     switch(gamePopup) {
       // Pause menu
       case 1:
-        if (inputs->mouse_Left) {
-          if(button(renderer, "Resume",
-            BUFFER_HALF_W - 64, 20, 128,
-            inputs->mouse_X, inputs->mouse_Y)
-          ) {
-            gamePopup = 0;
-          }
+        if(button(renderer, "Resume",
+          BUFFER_HALF_W - 64, 20, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          gamePopup = 0;
+        }
 
-          if(button(renderer, "Options",
-            BUFFER_HALF_W - 64, 42, 128,
-            inputs->mouse_X, inputs->mouse_Y)
-          ) {
-            gamePopup = 2;
-          }
+        if(button(renderer, "Options",
+          BUFFER_HALF_W - 64, 42, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          gamePopup = 2;
+        }
 
-          if(button(renderer, "Exit",
-            BUFFER_HALF_W - 64, 64, 128,
-            inputs->mouse_X, inputs->mouse_Y)
-          ) {
-            return 0;
-          }
+        if(button(renderer, "Exit",
+          BUFFER_HALF_W - 64, 64, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          return 0;
         }
         break;
 
       // Options
       case 2:
-        if (inputs->mouse_Left) {
-          if(button(renderer, drawDistanceText,
-            BUFFER_HALF_W - 64, 20, 128,
-            inputs->mouse_X, inputs->mouse_Y)
-          ) {
-            switch(drawDistance) {
-              case 20:
-                drawDistance = 32;
-                break;
-              case 32:
-                drawDistance = 64;
-                break;
-              case 64:
-                drawDistance = 96;
-                break;
-              case 96:
-                drawDistance = 128;
-                break;
-              default:
-                drawDistance = 20;
-                break;
-            }
-            strnum(drawDistanceText, 15, drawDistance);
+        if(button(renderer, drawDistanceText,
+          BUFFER_HALF_W - 64, 20, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          switch(drawDistance) {
+            case 20:
+              drawDistance = 32;
+              break;
+            case 32:
+              drawDistance = 64;
+              break;
+            case 64:
+              drawDistance = 96;
+              break;
+            case 96:
+              drawDistance = 128;
+              break;
+            default:
+              drawDistance = 20;
+              break;
           }
-          
-          if(button(renderer, trapMouseText,
-            BUFFER_HALF_W - 64, 42, 128,
-            inputs->mouse_X, inputs->mouse_Y)
-          ) {
-            if(trapMouse) {
-              trapMouse = 0;
-              sprintf(trapMouseText + 15, "OFF");
-            } else {
-              trapMouse = 1;
-              sprintf(trapMouseText + 15, "ON");
-            }
+          strnum(drawDistanceText, 15, drawDistance);
+        }
+        
+        if(button(renderer, trapMouseText,
+          BUFFER_HALF_W - 64, 42, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          if(trapMouse) {
+            trapMouse = 0;
+            sprintf(trapMouseText + 15, "OFF");
+          } else {
+            trapMouse = 1;
+            sprintf(trapMouseText + 15, "ON");
           }
-          
-          if(button(renderer, "Back",
-            BUFFER_HALF_W - 64, 64, 128,
-            inputs->mouse_X, inputs->mouse_Y)
-          ) {
-            gamePopup = 1;
-          }
+        }
+        
+        if(button(renderer, "Back",
+          BUFFER_HALF_W - 64, 64, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          gamePopup = 1;
         }
         break;
     }
