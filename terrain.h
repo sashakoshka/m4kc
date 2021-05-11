@@ -25,7 +25,7 @@ void  genChunk(
 */
 int* chunkLookup(World* world, int x, int y, int z) {
   // Rather unlikely position
-  static Coords last = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF};
+  static Coords last = {100000000, 100000000, 100000000};
   static int *chunk;
   // Divide by 64
   x >>= 6;

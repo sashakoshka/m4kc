@@ -77,9 +77,9 @@ struct _Inventory {
   Stores xyz coordinates
 */
 struct _Coords {
-  int x;
-  int y;
-  int z;
+  float x;
+  float y;
+  float z;
 };
 
 /*

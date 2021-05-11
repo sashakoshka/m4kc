@@ -186,21 +186,14 @@ int gameLoop(
 ) {
   // We dont want to have to pass all of these by reference, so
   // have all of them as static variables
-  
-  static double f1  = 96.5,
-                f2  = 65.0,
-                f3  = 96.5,
-                f4  = 0,
-                f5  = 0,
-                f6  = 0,
-                f7  = 0,
-                f8  = 0,
+  static float  cameraAngle_H_abs = 0.0,
+                cameraAngle_V_abs = 0.0,
                 f9,
                 f10,
                 f11,
                 f12,
-                f13,
-                f14,
+                playerSpeedLR,
+                playerSpeedFB,
                 f15,
                 f16,
                 f17,
@@ -291,6 +284,9 @@ int gameLoop(
   static Coords blockSelectOffset = {0};
   static Coords coordPass         = {0};
   static Coords blockRayPosition  = {0};
+
+  static Coords playerPosition = { 96.5, 65.0, 96.5 };
+  static Coords playerMovement = {  0.0,  0.0,  0.0 };
   
   static int init = 1;
   if(init) {
@@ -338,10 +334,10 @@ int gameLoop(
     inventory.hotbar[8].amount  = 63;
   }
   
-  f9  = sin(f7),
-  f10 = cos(f7),
-  f11 = sin(f8),
-  f12 = cos(f8);
+  f9  = sin(cameraAngle_H_abs),
+  f10 = cos(cameraAngle_H_abs),
+  f11 = sin(cameraAngle_V_abs),
+  f12 = cos(cameraAngle_V_abs);
   
   // Skybox, basically
   timeCoef  = (float)(gameTime % 102944) / 16384;
@@ -398,57 +394,56 @@ int gameLoop(
       if (f15 < 0.0)
         f15 = 0.0;
       if (f15 > 0.0) {
-        f7 += f16 * f15 / 400.0;
-        f8 -= f17 * f15 / 400.0;
-        if (f8 < -1.57)
-          f8 = -1.57;
-        if (f8 > 1.57)
-          f8 = 1.57;
+        cameraAngle_H_abs += f16 * f15 / 400.0;
+        cameraAngle_V_abs -= f17 * f15 / 400.0;
+
+        // Restrict camera vertical position
+        if (cameraAngle_V_abs < -1.57) cameraAngle_V_abs = -1.57;
+        if (cameraAngle_V_abs >  1.57) cameraAngle_V_abs =  1.57;
       }
-      f14 = (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
-      f13 = (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
+
+      playerSpeedFB = (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
+      playerSpeedLR = (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
     }
     
     // Moving around
-    f4 *= 0.5;
-    f5 *= 0.99;
-    f6 *= 0.5;
-    f4 += f9 * f14 + f10 * f13;
-    f6 += f10 * f14 - f9 * f13;
-    f5 += 0.003;
+    playerMovement.x *= 0.5;
+    playerMovement.y *= 0.99;
+    playerMovement.z *= 0.5;
+
+    playerMovement.x += f9  * playerSpeedFB + f10 * playerSpeedLR;
+    playerMovement.z += f10 * playerSpeedFB - f9  * playerSpeedLR;
+    playerMovement.y += 0.003;
     
     
     // TODO: update this to check for collisions properly
     for (m = 0; m < 3; m++) {
-      f16 = f1 + f4 * ((m + 2) % 3 / 2);
-      f17 = f2 + f5 * ((m + 1) % 3 / 2);
-      f19 = f3 + f6 * ((m + 2) % 3 / 2);
+      f16 = playerPosition.x + playerMovement.x * ((m + 2) % 3 / 2);
+      f17 = playerPosition.y + playerMovement.y * ((m + 1) % 3 / 2);
+      f19 = playerPosition.z + playerMovement.z * ((m + 2) % 3 / 2);
+
       for (i12 = 0; i12 < 12; i12++) {
-        i13 =
-          (int)
-          (f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3) - 64;
-        i14 =
-          (int)
-          (f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
-        i15 =
-          (int)
-          (f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3) - 64;
+        i13 = (int) (f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
+        i14 = (int) (f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
+        i15 = (int) (f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
+
         if (getBlock(world, i13, i14, i15) > 0) {
           if (m != 1) {
             goto label208;
           }
-          if (inputs->keyboard_Space > 0 && (f5 > 0.0) &! gamePopup) {
+          if (inputs->keyboard_Space > 0 && (playerMovement.y > 0.0) &! gamePopup) {
             inputs->keyboard_Space = 0;
-            f5 = -0.1;
+            playerMovement.y = -0.1;
             goto label208;
           } 
-          f5 = 0.0;
+          playerMovement.y = 0.0;
           goto label208;
         }
       }
-      f1 = f16;
-      f2 = f17;
-      f3 = f19;
+
+      playerPosition.x = f16;
+      playerPosition.y = f17;
+      playerPosition.z = f19;
     }
     label208:;
   }
@@ -485,9 +480,9 @@ int gameLoop(
     }
   }
   for (k = 0; k < 12; k++) {
-    m = (int)(f1 + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
-    i10 = (int)(f2 + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
-    pixelY = (int)(f3 + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
+    m =      (int)(playerPosition.x + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
+    i10 =    (int)(playerPosition.y + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
+    pixelY = (int)(playerPosition.z + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
     if (
       m >= 0
       && i10 >= 0
@@ -529,17 +524,17 @@ int gameLoop(
         f29 = f24 * f28;
         f30 = f23 * f28;
         f31 = f25 * f28;
-        f32 = f1 - (int)f1;
+        f32 = playerPosition.x - (int)playerPosition.x;
         if (blockFace == 1)
-          f32 = f2 - (int)f2; 
+          f32 = playerPosition.y - (int)playerPosition.y;
         if (blockFace == 2)
-          f32 = f3 - (int)f3; 
+          f32 = playerPosition.z - (int)playerPosition.z;
         if (f27 > 0.0)
           f32 = 1.0 - f32; 
         f33 = f28 * f32;
-        f34 = f1 + f29 * f32;
-        f35 = f2 + f30 * f32;
-        f36 = f3 + f31 * f32;
+        f34 = playerPosition.x + f29 * f32;
+        f35 = playerPosition.y + f30 * f32;
+        f36 = playerPosition.z + f31 * f32;
         if (f27 < 0.0) {
           if (blockFace == 0)
             f34--; 
@@ -756,9 +751,9 @@ int gameLoop(
     if(guiOn) {
       // Debug screen
       if(debugOn) {
-        strnum(debugText[1], 3, (int)f1 - 64);
-        strnum(debugText[2], 3, (int)f2 - 64);
-        strnum(debugText[3], 3, (int)f3 - 64);
+        strnum(debugText[1], 3, (int)playerPosition.x - 64);
+        strnum(debugText[2], 3, (int)playerPosition.y - 64);
+        strnum(debugText[3], 3, (int)playerPosition.z - 64);
         strnum(debugText[4], 5, fps_now);
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
