@@ -693,7 +693,11 @@ static int gameLoop(
                 debugOn      = 0,
                 fogLog       = 0,
                 drawDistance = 20,
-                trapMouse    = 0;
+                trapMouse    = 0,
+                
+                fps_lastmil  = 0,
+                fps_count    = 0,
+                fps_now      = 0;
   
   static char drawDistanceText [] = "Draw distance: 20\0";
   static char trapMouseText    [] = "Capture mouse: OFF";
@@ -702,7 +706,8 @@ static int gameLoop(
     "M4KS 0.5",
     "X: ",
     "Y: ",
-    "Z: "
+    "Z: ",
+    "FPS: "
   };
   
   static double d;
@@ -795,8 +800,16 @@ static int gameLoop(
     M[27] = 0;
   }
   
+  fps_count++;
+  if(fps_lastmil < SDL_GetTicks() - 1000) {
+    fps_lastmil = SDL_GetTicks();
+    fps_now     = fps_count;
+    fps_count   = 0;
+  }
+  
   // Things that should run at a constant speed, regardless of
-  // CPU power
+  // CPU power. If the rendering takes a long time, this will
+  // fire more times to compensate.
   while(SDL_GetTicks() - l > 10L) {
     gameTime++;
     l += 10L;
@@ -831,7 +844,7 @@ static int gameLoop(
       f14 = (M[119] - M[115]) * 0.02;
       f13 = (M[100] - M[97]) * 0.02;
     }
-      
+    
     // Moving around
     f4 *= 0.5;
     f5 *= 0.99;
@@ -839,7 +852,9 @@ static int gameLoop(
     f4 += f9 * f14 + f10 * f13;
     f6 += f10 * f14 - f9 * f13;
     f5 += 0.003;
-      
+    
+    
+    // TODO: update this to check for collisions properly
     for (m = 0; m < 3; m++) {
       f16 = f1 + f4 * ((m + 2) % 3 / 2);
       f17 = f2 + f5 * ((m + 1) % 3 / 2);
@@ -1173,16 +1188,19 @@ static int gameLoop(
         strnum(debugText[1], 3, (int)f1 - 64);
         strnum(debugText[2], 3, (int)f2 - 64);
         strnum(debugText[3], 3, (int)f3 - 64);
+        strnum(debugText[4], 5, fps_now);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
         drawStr(renderer, debugText[0], 3, 3);
         drawStr(renderer, debugText[1], 3, 11);
         drawStr(renderer, debugText[2], 3, 19);
         drawStr(renderer, debugText[3], 3, 27);
+        drawStr(renderer, debugText[4], 3, 35);
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         drawStr(renderer, debugText[0], 2, 2);
         drawStr(renderer, debugText[1], 2, 10);
         drawStr(renderer, debugText[2], 2, 18);
         drawStr(renderer, debugText[3], 2, 26);
+        drawStr(renderer, debugText[4], 2, 34);
       }
       // Hotbar
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
