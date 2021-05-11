@@ -29,14 +29,14 @@ int gameLoop(
   int,
   int,
   unsigned int,
-  int*,
+  Inputs*,
   World*,
   SDL_Renderer*,
   SDL_Window*
 );
 
 int main(int argc, char *argv[]) {
-  int M[128] = {0};
+  Inputs inputs = {0};
   
   World world;
   
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     BUFFER_H,
     BUFFER_SCALE,
     seed,
-    M,
+    &inputs,
     &world,
     renderer,
     window
@@ -110,15 +110,15 @@ int main(int argc, char *argv[]) {
     SDL_GetMouseState(&mouseX, &mouseY);
     
     // Detect movement controls
-    M[32]  = keyboard[SDL_SCANCODE_SPACE];
-    M[119] = keyboard[SDL_SCANCODE_W];
-    M[115] = keyboard[SDL_SCANCODE_S];
-    M[97]  = keyboard[SDL_SCANCODE_A];
-    M[100] = keyboard[SDL_SCANCODE_D];
+    inputs.keyboard_Space  = keyboard[SDL_SCANCODE_SPACE];
+    inputs.keyboard_W      = keyboard[SDL_SCANCODE_W];
+    inputs.keyboard_S      = keyboard[SDL_SCANCODE_S];
+    inputs.keyboard_A      = keyboard[SDL_SCANCODE_A];
+    inputs.keyboard_D      = keyboard[SDL_SCANCODE_D];
     
     if(!SDL_GetRelativeMouseMode()) {
-      M[2] = mouseX;
-      M[3] = mouseY;
+      inputs.mouse_X = mouseX;
+      inputs.mouse_Y = mouseY;
     }
     
     while(SDL_PollEvent(&event)) {
@@ -129,10 +129,10 @@ int main(int argc, char *argv[]) {
         case SDL_MOUSEBUTTONDOWN:
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
-              M[1] = 1;
+              inputs.mouse_Left = 1;
               break;
             case SDL_BUTTON_RIGHT:
-              M[0] = 1;
+              inputs.mouse_Right = 1;
               break;
           }
           break;
@@ -140,21 +140,21 @@ int main(int argc, char *argv[]) {
         case SDL_KEYDOWN:
           if(event.key.repeat == 0) {
             // Detect UI hotkeys
-            M[27] = keyboard[SDL_SCANCODE_ESCAPE];
-            M[5]  = keyboard[SDL_SCANCODE_F1];
-            M[6]  = keyboard[SDL_SCANCODE_F2];
-            M[7]  = keyboard[SDL_SCANCODE_F3];
+            inputs.keyboard_Esc = keyboard[SDL_SCANCODE_ESCAPE];
+            inputs.keyboard_F1  = keyboard[SDL_SCANCODE_F1];
+            inputs.keyboard_F2  = keyboard[SDL_SCANCODE_F2];
+            inputs.keyboard_F3  = keyboard[SDL_SCANCODE_F3];
           }
           break;
         
         case SDL_MOUSEWHEEL:
-          M[4] = event.wheel.y;
+          inputs.mouse_Wheel = event.wheel.y;
           break;
         
         case SDL_MOUSEMOTION:
           if(SDL_GetRelativeMouseMode()) {
-            M[2] = event.motion.xrel;
-            M[3] = event.motion.yrel;
+            inputs.mouse_X = event.motion.xrel;
+            inputs.mouse_Y = event.motion.yrel;
           }
           break;
       }
@@ -179,7 +179,7 @@ int gameLoop(
   int BUFFER_H,
   int BUFFER_SCALE,
   unsigned int seed,
-  int *M,
+  Inputs *inputs,
   World *world,
   SDL_Renderer *renderer,
   SDL_Window   *window
@@ -359,9 +359,9 @@ int gameLoop(
   
   SDL_RenderClear(renderer);
   
-  if(M[27]) {
+  if(inputs->keyboard_Esc) {
     gamePopup = gamePopup ? 0 : 1;
-    M[27] = 0;
+    inputs->keyboard_Esc = 0;
   }
   
   fps_count++;
@@ -379,19 +379,19 @@ int gameLoop(
     l += 10L;
     if(!gamePopup) {
       // Scroll wheel
-      if(M[4] != 0) {
-        hotbarSelect -= M[4];
+      if(inputs->mouse_Wheel != 0) {
+        hotbarSelect -= inputs->mouse_Wheel;
         hotbarSelect = nmod(hotbarSelect, 9);
-        M[4] = 0;
+        inputs->mouse_Wheel = 0;
       }
       
       // Looking around
       if(trapMouse) {
-        f16 = (float)M[2] * 1.5;
-        f17 = (float)M[3] * 1.5;
+        f16 = (float)inputs->mouse_X * 1.5;
+        f17 = (float)inputs->mouse_Y * 1.5;
       } else {
-        f16 = (M[2] - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
-        f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
+        f16 = (inputs->mouse_X - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
+        f17 = (inputs->mouse_Y - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
       }
       
       f15 = sqrt(f16 * f16 + f17 * f17) - 1.2;
@@ -405,8 +405,8 @@ int gameLoop(
         if (f8 > 1.57)
           f8 = 1.57;
       }
-      f14 = (M[119] - M[115]) * 0.02;
-      f13 = (M[100] - M[97]) * 0.02;
+      f14 = (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
+      f13 = (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
     }
     
     // Moving around
@@ -437,8 +437,8 @@ int gameLoop(
           if (m != 1) {
             goto label208;
           }
-          if (M[32] > 0 && (f5 > 0.0) &! gamePopup) {
-            M[32] = 0;
+          if (inputs->keyboard_Space > 0 && (f5 > 0.0) &! gamePopup) {
+            inputs->keyboard_Space = 0;
             f5 = -0.1;
             goto label208;
           } 
@@ -456,16 +456,16 @@ int gameLoop(
   i6 = 0;
   i7 = 0;
   if(!gamePopup) {
-    if (M[1] > 0 && blockSelected) {
+    if (inputs->mouse_Left > 0 && blockSelected) {
       setBlock(
         world,
         blockSelect.x,
         blockSelect.y,
         blockSelect.z, 0, 1
       );
-      M[1] = 0;
+      inputs->mouse_Left = 0;
     } 
-    if (M[0] > 0 && blockSelected) {
+    if (inputs->mouse_Right > 0 && blockSelected) {
       setBlock(
         world,
         blockSelect.x + blockSelectOffset.x,
@@ -473,14 +473,14 @@ int gameLoop(
         blockSelect.z + blockSelectOffset.z,
         inventory.hotbar[hotbarSelect].blockid, 1
       );
-      M[0] = 0;
+      inputs->mouse_Right = 0;
     }
-    if(M[5]) {
-      M[5] = 0;
+    if(inputs->keyboard_F1) {
+      inputs->keyboard_F1 = 0;
       guiOn ^= 1;
     }
-    if(M[7]) {
-      M[7] = 0;
+    if(inputs->keyboard_F3) {
+      inputs->keyboard_F3 = 0;
       debugOn = 1 - debugOn;
     }
   }
@@ -594,8 +594,8 @@ int gameLoop(
               && (
                 (
                    ! trapMouse
-                  && pixelX == M[2] / BUFFER_SCALE
-                  && pixelY == M[3] / BUFFER_SCALE
+                  && pixelX == inputs->mouse_X / BUFFER_SCALE
+                  && pixelY == inputs->mouse_Y / BUFFER_SCALE
                 ) || (
                      trapMouse
                   && pixelX == BUFFER_HALF_W
@@ -664,8 +664,8 @@ int gameLoop(
   }
   init = 0;
   
-  M[2] /= BUFFER_SCALE;
-  M[3] /= BUFFER_SCALE;
+  inputs->mouse_X /= BUFFER_SCALE;
+  inputs->mouse_Y /= BUFFER_SCALE;
   
   // In-game menus
   if(gamePopup) {
@@ -676,66 +676,76 @@ int gameLoop(
     switch(gamePopup) {
       // Pause menu
       case 1:
-        if(button(renderer, "Resume",
-          BUFFER_HALF_W - 64, 20, 128, M[2], M[3]) && M[1]
-        ) {
-          gamePopup = 0;
-        }
-        
-        if(button(renderer, "Options",
-          BUFFER_HALF_W - 64, 42, 128, M[2], M[3]) && M[1]
-        ) {
-          gamePopup = 2;
-        }
-        
-        if(button(renderer, "Exit",
-          BUFFER_HALF_W - 64, 64, 128, M[2], M[3]) && M[1]
-        ) {
-          return 0;
+        if (inputs->mouse_Left) {
+          if(button(renderer, "Resume",
+            BUFFER_HALF_W - 64, 20, 128,
+            inputs->mouse_X, inputs->mouse_Y)
+          ) {
+            gamePopup = 0;
+          }
+
+          if(button(renderer, "Options",
+            BUFFER_HALF_W - 64, 42, 128,
+            inputs->mouse_X, inputs->mouse_Y)
+          ) {
+            gamePopup = 2;
+          }
+
+          if(button(renderer, "Exit",
+            BUFFER_HALF_W - 64, 64, 128,
+            inputs->mouse_X, inputs->mouse_Y)
+          ) {
+            return 0;
+          }
         }
         break;
-      
+
       // Options
       case 2:
-        if(button(renderer, drawDistanceText,
-          BUFFER_HALF_W - 64, 20, 128, M[2], M[3]) && M[1]
-        ) {
-          switch(drawDistance) {
-            case 20:
-              drawDistance = 32;
-              break;
-            case 32:
-              drawDistance = 64;
-              break;
-            case 64:
-              drawDistance = 96;
-              break;
-            case 96:
-              drawDistance = 128;
-              break;
-            default:
-              drawDistance = 20;
-              break;
+        if (inputs->mouse_Left) {
+          if(button(renderer, drawDistanceText,
+            BUFFER_HALF_W - 64, 20, 128,
+            inputs->mouse_X, inputs->mouse_Y)
+          ) {
+            switch(drawDistance) {
+              case 20:
+                drawDistance = 32;
+                break;
+              case 32:
+                drawDistance = 64;
+                break;
+              case 64:
+                drawDistance = 96;
+                break;
+              case 96:
+                drawDistance = 128;
+                break;
+              default:
+                drawDistance = 20;
+                break;
+            }
+            strnum(drawDistanceText, 15, drawDistance);
           }
-          strnum(drawDistanceText, 15, drawDistance);
-        }
-        
-        if(button(renderer, trapMouseText,
-          BUFFER_HALF_W - 64, 42, 128, M[2], M[3]) && M[1]
-        ) {
-          if(trapMouse) {
-            trapMouse = 0;
-            sprintf(trapMouseText + 15, "OFF");
-          } else {
-            trapMouse = 1;
-            sprintf(trapMouseText + 15, "ON");
+          
+          if(button(renderer, trapMouseText,
+            BUFFER_HALF_W - 64, 42, 128,
+            inputs->mouse_X, inputs->mouse_Y)
+          ) {
+            if(trapMouse) {
+              trapMouse = 0;
+              sprintf(trapMouseText + 15, "OFF");
+            } else {
+              trapMouse = 1;
+              sprintf(trapMouseText + 15, "ON");
+            }
           }
-        }
-        
-        if(button(renderer, "Back",
-          BUFFER_HALF_W - 64, 64, 128, M[2], M[3]) && M[1]
-        ) {
-          gamePopup = 1;
+          
+          if(button(renderer, "Back",
+            BUFFER_HALF_W - 64, 64, 128,
+            inputs->mouse_X, inputs->mouse_Y)
+          ) {
+            gamePopup = 1;
+          }
         }
         break;
     }
@@ -774,14 +784,14 @@ int gameLoop(
           &inventory.hotbar[i], 
           BUFFER_HALF_W - 76 + i * 17,
           BUFFER_H - 17,
-          M[2],
-          M[3]
+          inputs->mouse_X,
+          inputs->mouse_Y
         );
     }
   }
   
-  if(M[1]) M[1] = 0;
-  if(M[2]) M[2] = 0;
+  if(inputs->mouse_Left) inputs->mouse_Left = 0;
+  if(inputs->mouse_X)    inputs->mouse_X    = 0;
   
   return 1;
 }
