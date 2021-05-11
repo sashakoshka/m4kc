@@ -125,7 +125,7 @@ struct _Coords {
 // its own header file at some point.
 int textures[12288] = {0};
 
-int main() {
+int main(int argc, char *argv[]) {
   int M[128] = {0};
   
   World world = {{0}};
