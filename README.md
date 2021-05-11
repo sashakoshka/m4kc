@@ -35,6 +35,21 @@ This project is an attempt to translate the game into C in order to increase its
 * gcc (have not tried the flags with other compilers)
 * gzexe
 
+### On windows, you will need
+* Mingw-w64 installed
+
+## Build instructions
+
+### Linux, unix, etc
+* To just get a binary, run `make` or `make m4kc`
+* To run an uncompressed version, run `make run`
+* To install the program, run `make install`
+* To uninstall, run `make uninstall`
+* To clean, run `make clean`
+
+### Windows
+Run `win-build.bat`. Inside of the `win` directory, you will find `m4kc.exe` and `SDL2.dll`. In order for `m4kc.exe` to run, these two must be in the same folder.
+
 ## Places
 
 There is a forum thread for this project [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/3081789-minecraft-4k-c-rewrite)
