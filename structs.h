@@ -1,4 +1,4 @@
-typedef struct _ChunkMeta ChunkMeta;
+typedef struct _Chunk     Chunk;
 typedef struct _World     World;
 typedef struct _Player    Player;
 typedef struct _InvSlot   InvSlot;
@@ -6,22 +6,19 @@ typedef struct _Inventory Inventory;
 typedef struct _Coords    Coords;
 
 /*
-  _ChunkMeta
-  Accompanies a chunk array in a World. The World should have an
-  array of these, and an array of chunk arrays. This will point to
-  its proper chunk array. The purpose of this struct is to store
-  data about a chunk that makes it easier to look up, and be
-  movable in memory (eventual sorting for binary search)
+  _Chunk
+  Stores blocks in a chunk, a hash to make it easier to look up,
+  and a pointer to a block array.
   
   coordHash will contain a hash of the coords to help look up the
   chunk. When a new chunk is generated, its coords will be hashed
   and its loaded will be set to true. Then, the chunk meta array
   will be sorted by coordhash.
 */
-struct _ChunkMeta {
+struct _Chunk {
   int coordHash;
   int loaded;
-  int *chunk[];
+  int *blocks[];
 };
 
 /*
@@ -30,8 +27,8 @@ struct _ChunkMeta {
 */
 // 25: amount of chunks that can be loaded at one time
 struct _World {
-  int       chunk[1][262144];
-  ChunkMeta meta [1];
+  int   tempBlocks [262144];
+  Chunk chunk      [25];
 };
 
 /*

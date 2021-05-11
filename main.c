@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
   int M[128] = {0};
   
   World world;
+  initChunks(&world);
   
   //unsigned int seed = 18295169;
   unsigned int seed = 45390874;
