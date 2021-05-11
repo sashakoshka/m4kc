@@ -662,6 +662,13 @@ static int gameLoop(
   static char drawDistanceText [] = "Draw distance: 20\0";
   static char trapMouseText    [] = "Capture mouse: OFF";
   
+  static char debugText        [][16] = {
+    "M4KS 0.4",
+    "X: ",
+    "Y: ",
+    "Z: "
+  };
+  
   static double d;
   
   static SDL_Rect backgroundRect;
@@ -1142,8 +1149,23 @@ static int gameLoop(
         }
         break;
     }
-  } else if(trapMouse) {
-    SDL_SetRelativeMouseMode(1);
+  } else {
+    if(trapMouse) {
+      SDL_SetRelativeMouseMode(1);
+    }
+    strnum(debugText[1], 3, (int)f1 - 64);
+    strnum(debugText[2], 3, (int)f2 - 64);
+    strnum(debugText[3], 3, (int)f3 - 64);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+    drawStr(renderer, debugText[0], 3, 3);
+    drawStr(renderer, debugText[1], 3, 11);
+    drawStr(renderer, debugText[2], 3, 19);
+    drawStr(renderer, debugText[3], 3, 27);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    drawStr(renderer, debugText[0], 2, 2);
+    drawStr(renderer, debugText[1], 2, 10);
+    drawStr(renderer, debugText[2], 2, 18);
+    drawStr(renderer, debugText[3], 2, 26);
   }
   
   if(M[1]) M[1] = 0;
