@@ -28,6 +28,7 @@ typedef struct _Coords    Coords;
 static int   randm(int);
 static int   nmod(int, int);
 static float perlin2d(float, float, int);
+static int*  chunkLookup(World*, int, int, int); 
 static int   setBlock(World*, int, int, int, int, int);
 static int   getBlock(World*, int, int, int);
 static int   setCube(
@@ -359,6 +360,32 @@ static void genTextures(unsigned int seed) {
 }
 
 /*
+  chunkLookup
+  Takes in a world pointer, and returns a pointer to the chunk
+  at the specifiec x y and z coordinates. If the chunk is the
+  same as last time, it does not do another lookup, meaning this
+  function can be called very frequently.
+*/
+static int* chunkLookup(World* world, int x, int y, int z) {
+  // Rather unlikely position
+  static Coords last = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF};
+  static int *chunk;
+  // Divide by 64
+  x >>= 6;
+  y >>= 6;
+  z >>= 6;
+  if(
+    last.x != x &&
+    last.y != y &&
+    last.z != z
+  ) {
+    // TODO: look up chunk instead of this
+    chunk = world->chunk;
+  }
+  return chunk;
+}
+
+/*
   setBlock
   Takes in a world array, xyz coordinates, and a block id.
   Returns true if the block could be set, otherwise returns
@@ -380,7 +407,7 @@ static int setBlock(
     && z > -1 && z < 64
     && (force || b)
   ) {
-    world->chunk[x + y * 64 + z * 4096] = block;
+    chunkLookup(world, x, y, z)[x + y * 64 + z * 4096] = block;
     return b;
   } else {
     return 0;
@@ -403,7 +430,11 @@ static int getBlock(
     || y >= 64
     || z >= 64
   ) return 0;
-  return world->chunk[x + y * 64 + z * 4096];
+  return chunkLookup(world, x, y, z)[
+    x +
+    y * 64 +
+    z * 4096
+  ];
 }
 
 /*
@@ -688,15 +719,15 @@ static int gameLoop(
   
   static int init = 1;
   if(init) {
-    f1 = 96.5F;
-    f2 = 65.0F;
-    f3 = 96.5F;
-    f4 = 0.0F;
-    f5 = 0.0F;
-    f6 = 0.0F;
+    f1 = 96.5;
+    f2 = 65.0;
+    f3 = 96.5;
+    f4 = 0.0;
+    f5 = 0.0;
+    f6 = 0.0;
     blockSelected = 0;
-    f7 = 0.0F;
-    f8 = 0.0F;
+    f7 = 0.0;
+    f8 = 0.0;
     l = SDL_GetTicks();
     gameTime = 2048;
     
@@ -786,16 +817,16 @@ static int gameLoop(
         f17 = (M[3] - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
       }
       
-      f15 = sqrt(f16 * f16 + f17 * f17) - 1.2F;
-      if (f15 < 0.0F)
-        f15 = 0.0F;
-      if (f15 > 0.0F) {
-        f7 += f16 * f15 / 400.0F;
-        f8 -= f17 * f15 / 400.0F;
-        if (f8 < -1.57F)
-          f8 = -1.57F;
-        if (f8 > 1.57F)
-          f8 = 1.57F;
+      f15 = sqrt(f16 * f16 + f17 * f17) - 1.2;
+      if (f15 < 0.0)
+        f15 = 0.0;
+      if (f15 > 0.0) {
+        f7 += f16 * f15 / 400.0;
+        f8 -= f17 * f15 / 400.0;
+        if (f8 < -1.57)
+          f8 = -1.57;
+        if (f8 > 1.57)
+          f8 = 1.57;
       }
       
       // Moving around
@@ -817,23 +848,23 @@ static int gameLoop(
         for (i12 = 0; i12 < 12; i12++) {
           i13 =
             (int)
-            (f16 + (i12 >> 0 & 0x1) * 0.6F - 0.3F) - 64;
+            (f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3) - 64;
           i14 =
             (int)
-            (f17 + ((i12 >> 2) - 1) * 0.8F + 0.65F) - 64;
+            (f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
           i15 =
             (int)
-            (f19 + (i12 >> 1 & 0x1) * 0.6F - 0.3F) - 64;
+            (f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3) - 64;
           if (getBlock(world, i13, i14, i15) > 0) {
             if (m != 1) {
               goto label208;
             }
-            if (M[32] > 0 && f5 > 0.0F) {
+            if (M[32] > 0 && f5 > 0.0) {
               M[32] = 0;
-              f5 = -0.1F;
+              f5 = -0.1;
               goto label208;
             } 
-            f5 = 0.0F;
+            f5 = 0.0;
             goto label208;
           }
         }
@@ -877,9 +908,9 @@ static int gameLoop(
     }
   }
   for (k = 0; k < 12; k++) {
-    m = (int)(f1 + (k >> 0 & 0x1) * 0.6F - 0.3F) - 64;
-    i10 = (int)(f2 + ((k >> 2) - 1) * 0.8F + 0.65F) - 64;
-    pixelY = (int)(f3 + (k >> 1 & 0x1) * 0.6F - 0.3F) - 64;
+    m = (int)(f1 + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
+    i10 = (int)(f2 + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
+    pixelY = (int)(f3 + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
     if (
       m >= 0
       && i10 >= 0
@@ -899,10 +930,10 @@ static int gameLoop(
   // the blockSelected variable
   selectedPass = 0;
   for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
-    f18 = (pixelX - 107) / 90.0F;
+    f18 = (pixelX - 107) / 90.0;
     for (pixelY = 0; pixelY < BUFFER_H; pixelY++) {
-      f20 = (pixelY - 60) / 90.0F;
-      f21 = 1.0F;
+      f20 = (pixelY - 60) / 90.0;
+      f21 = 1.0;
       f22 = f21 * f12 + f20 * f11;
       f23 = f20 * f12 - f21 * f11;
       f24 = f18 * f10 + f22 * f9;
@@ -910,14 +941,14 @@ static int gameLoop(
       finalPixelColor = 0;
       pixelMist = 255;
       d = drawDistance;
-      f26 = 5.0F;
+      f26 = 5.0;
       for (blockFace = 0; blockFace < 3; blockFace++) {
         f27 = f24;
         if (blockFace == 1)
           f27 = f23; 
         if (blockFace == 2)
           f27 = f25; 
-        f28 = 1.0F / ((f27 < 0.0F) ? -f27 : f27);
+        f28 = 1.0 / ((f27 < 0.0) ? -f27 : f27);
         f29 = f24 * f28;
         f30 = f23 * f28;
         f31 = f25 * f28;
@@ -926,13 +957,13 @@ static int gameLoop(
           f32 = f2 - (int)f2; 
         if (blockFace == 2)
           f32 = f3 - (int)f3; 
-        if (f27 > 0.0F)
-          f32 = 1.0F - f32; 
+        if (f27 > 0.0)
+          f32 = 1.0 - f32; 
         f33 = f28 * f32;
         f34 = f1 + f29 * f32;
         f35 = f2 + f30 * f32;
         f36 = f3 + f31 * f32;
-        if (f27 < 0.0F) {
+        if (f27 < 0.0) {
           if (blockFace == 0)
             f34--; 
           if (blockFace == 1)
@@ -952,12 +983,12 @@ static int gameLoop(
             blockRayPosition.z
           );
           if (i25 > 0) {
-            i6 = (int)((f34 + f36) * 16.0F) & 0xF;
-            i7 = ((int)(f35 * 16.0F) & 0xF) + 16;
+            i6 = (int)((f34 + f36) * 16.0) & 0xF;
+            i7 = ((int)(f35 * 16.0) & 0xF) + 16;
             if (blockFace == 1) {
-              i6 = (int)(f34 * 16.0F) & 0xF;
-              i7 = (int)(f36 * 16.0F) & 0xF;
-              if (f30 < 0.0F)
+              i6 = (int)(f34 * 16.0) & 0xF;
+              i7 = (int)(f36 * 16.0) & 0xF;
+              if (f30 < 0.0)
                 i7 += 32; 
             }
             // Block outline color
