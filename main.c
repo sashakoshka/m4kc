@@ -231,6 +231,9 @@ int main(int argc, char *argv[]) {
           if(event.key.repeat == 0) {
             // Detect UI hotkeys
             M[27] = keyboard[SDL_SCANCODE_ESCAPE];
+            M[5] = keyboard[SDL_SCANCODE_F1];
+            M[6] = keyboard[SDL_SCANCODE_F2];
+            M[7] = keyboard[SDL_SCANCODE_F3];
           }
           break;
         
@@ -655,9 +658,11 @@ static int gameLoop(
                 gamePopup,
                 
                 hotbarSelect,
-                fogLog,
-                drawDistance,
-                trapMouse = 0;
+                guiOn        = 1,
+                debugOn      = 0,
+                fogLog       = 0,
+                drawDistance = 20,
+                trapMouse    = 0;
   
   static char drawDistanceText [] = "Draw distance: 20\0";
   static char trapMouseText    [] = "Capture mouse: OFF";
@@ -731,9 +736,6 @@ static int gameLoop(
     inventory.hotbar[6].amount  = 63;
     inventory.hotbar[7].amount  = 63;
     inventory.hotbar[8].amount  = 63;
-    
-    fogLog = 0;
-    drawDistance = 20;
   }
   
   f9  = sin(f7),
@@ -871,6 +873,14 @@ static int gameLoop(
         inventory.hotbar[hotbarSelect].blockid, 1
       );
       M[0] = 0;
+    }
+    if(M[5]) {
+      M[5] = 0;
+      guiOn = 1 - guiOn;
+    }
+    if(M[7]) {
+      M[7] = 0;
+      debugOn = 1 - debugOn;
     }
   }
   for (k = 0; k < 12; k++) {
@@ -1058,25 +1068,6 @@ static int gameLoop(
   M[2] /= BUFFER_SCALE;
   M[3] /= BUFFER_SCALE;
   
-  // Hotbar
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-  SDL_RenderFillRect(renderer, &hotbarRect);
-  
-  hotbarSelectRect.x = BUFFER_W / 2 - 77 + hotbarSelect * 17;
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  SDL_RenderDrawRect(renderer, &hotbarSelectRect);
-  
-  // TODO: make this more optimized
-  for(i = 0; i < 9; i++)
-    drawSlot(
-      renderer,
-      &inventory.hotbar[i], 
-      BUFFER_W / 2 - 76 + i * 17,
-      BUFFER_H - 17,
-      M[2],
-      M[3]
-    );
-  
   // In-game menus
   if(gamePopup) {
     SDL_SetRelativeMouseMode(0);
@@ -1153,19 +1144,44 @@ static int gameLoop(
     if(trapMouse) {
       SDL_SetRelativeMouseMode(1);
     }
-    strnum(debugText[1], 3, (int)f1 - 64);
-    strnum(debugText[2], 3, (int)f2 - 64);
-    strnum(debugText[3], 3, (int)f3 - 64);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-    drawStr(renderer, debugText[0], 3, 3);
-    drawStr(renderer, debugText[1], 3, 11);
-    drawStr(renderer, debugText[2], 3, 19);
-    drawStr(renderer, debugText[3], 3, 27);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    drawStr(renderer, debugText[0], 2, 2);
-    drawStr(renderer, debugText[1], 2, 10);
-    drawStr(renderer, debugText[2], 2, 18);
-    drawStr(renderer, debugText[3], 2, 26);
+    if(guiOn) {
+      // Debug screen
+      if(debugOn) {
+        // TODO: optimize
+        strnum(debugText[1], 3, (int)f1 - 64);
+        strnum(debugText[2], 3, (int)f2 - 64);
+        strnum(debugText[3], 3, (int)f3 - 64);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+        drawStr(renderer, debugText[0], 3, 3);
+        drawStr(renderer, debugText[1], 3, 11);
+        drawStr(renderer, debugText[2], 3, 19);
+        drawStr(renderer, debugText[3], 3, 27);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        drawStr(renderer, debugText[0], 2, 2);
+        drawStr(renderer, debugText[1], 2, 10);
+        drawStr(renderer, debugText[2], 2, 18);
+        drawStr(renderer, debugText[3], 2, 26);
+      }
+      // Hotbar
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+      SDL_RenderFillRect(renderer, &hotbarRect);
+      
+      hotbarSelectRect.x =
+        BUFFER_W / 2 - 77 + hotbarSelect * 17;
+      SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+      SDL_RenderDrawRect(renderer, &hotbarSelectRect);
+      
+      // TODO: make this more optimized
+      for(i = 0; i < 9; i++)
+        drawSlot(
+          renderer,
+          &inventory.hotbar[i], 
+          BUFFER_W / 2 - 76 + i * 17,
+          BUFFER_H - 17,
+          M[2],
+          M[3]
+        );
+    }
   }
   
   if(M[1]) M[1] = 0;
