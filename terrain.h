@@ -11,7 +11,7 @@ int   ch_setBlock(int*, int, int, int, int);
 void  genStructure(World*, int, int, int, int);
 void  genChunk(
   unsigned int,
-  World*, int*,
+  World*,
   int, int, int,
   int
 );
@@ -37,7 +37,7 @@ int* chunkLookup(World* world, int x, int y, int z) {
     last.z != z
   ) {
     // TODO: look up chunk instead of this
-    chunk = world->chunk;
+    chunk = world->chunk[0];
   }
   return chunk;
 }
@@ -191,7 +191,6 @@ void genStructure(
 void genChunk(
   unsigned int seed,
   World *world,
-  int *chunk,
   int xOffset,
   int yOffset,
   int zOffset,
@@ -201,6 +200,11 @@ void genChunk(
   // different, but predictable
   srand(seed * (xOffset * yOffset * zOffset + 1));
   static int heightmap[64][64], i, x, z;
+  
+  int *chunk = chunkLookup(world, xOffset, yOffset, zOffset);
+  
+  for(int i = 0; i < 262144; i++)
+    chunk[i] = 0;
   
   switch(type) {
     case 0:

@@ -14,11 +14,13 @@ typedef struct _Coords    Coords;
   movable in memory (eventual sorting for binary search)
   
   coordHash will contain a hash of the coords to help look up the
-  chunk.
+  chunk. When a new chunk is generated, its coords will be hashed
+  and its loaded will be set to true. Then, the chunk meta array
+  will be sorted by coordhash.
 */
 struct _ChunkMeta {
-  int loaded;
   int coordHash;
+  int loaded;
   int *chunk[];
 };
 
@@ -28,8 +30,8 @@ struct _ChunkMeta {
 */
 // 25: amount of chunks that can be loaded at one time
 struct _World {
-  int       chunk[262144];
-  ChunkMeta meta [25];
+  int       chunk[1][262144];
+  ChunkMeta meta [1];
 };
 
 /*

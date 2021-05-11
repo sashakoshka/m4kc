@@ -40,9 +40,6 @@ int main(int argc, char *argv[]) {
   
   World world;
   
-  for(int i = 0; i < 262144; i++)
-    world.chunk[i] = 0;
-  
   //unsigned int seed = 18295169;
   unsigned int seed = 45390874;
   
@@ -54,7 +51,7 @@ int main(int argc, char *argv[]) {
   
   //---- generating assets  ----//
   
-  genChunk(seed, &world, world.chunk, 0, 0, 0, 1);
+  genChunk(seed, &world, 0, 0, 0, 1);
   genTextures(seed);
   
   //----  initializing SDL  ----//
