@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "structs.h"
+#include "utility.h"
+#include "textures.h"
 #include "minecraftfont.h"
+#include "gui.h"
 
 /*
   Minecraft 4k, C edition. Version 0.5
@@ -19,34 +23,24 @@
   notice.
 */
 
-typedef struct _World     World;
-typedef struct _Player    Player;
-typedef struct _InvSlot   InvSlot;
-typedef struct _Inventory Inventory;
-typedef struct _Coords    Coords;
-
-static int   randm(int);
-static int   nmod(int, int);
-static float perlin2d(float, float, int);
-static int*  chunkLookup(World*, int, int, int); 
-static int   setBlock(World*, int, int, int, int, int);
-static int   getBlock(World*, int, int, int);
-static int   setCube(
+int*  chunkLookup(World*, int, int, int); 
+int   setBlock(World*, int, int, int, int, int);
+int   getBlock(World*, int, int, int);
+int   setCube(
   World*,
   int, int, int,
   int, int, int,
   int, int
 );
-static int   ch_setBlock(int*, int, int, int, int);
-static void  genStructure(World*, int, int, int, int);
-static void  genChunk(
+int   ch_setBlock(int*, int, int, int, int);
+void  genStructure(World*, int, int, int, int);
+void  genChunk(
   unsigned int,
   World*, int*,
   int, int, int,
   int
 );
-static void  genTextures(unsigned int);
-static int   gameLoop(
+int   gameLoop(
   int,
   int,
   int,
@@ -56,75 +50,6 @@ static int   gameLoop(
   SDL_Renderer*,
   SDL_Window*
 );
-
-static void strnum  (char*, int, int);
-static int drawChar (SDL_Renderer*,   int, int, int);
-static int drawStr  (SDL_Renderer*, char*, int, int);
-static int button   (SDL_Renderer*, char*,
-  int, int, int, int, int
-);
-static int drawSlot (SDL_Renderer*, InvSlot*,
-  int, int, int, int
-);
-
-/*
-  _World
-  Stores a chunk. This will eventually store multiple of them.
-*/
-struct _World {
-  int chunk[262144];
-};
-
-/*
-  _Player
-  Stores player data. This will be passed as reference to game
-  loop.
-*/
-struct _Player {
-  float xPos;
-  float yPos;
-  float zPos;
-  float xRot;
-  float yRot;
-  float zRot;
-  
-  unsigned int health;
-  unsigned int xp;
-};
-
-/*
-  _InvSlot
-  This will be used to store a single stack in the player's
-  inventory.
-*/
-struct _InvSlot {
-  unsigned int amount:6;
-  unsigned int blockid;
-} pack;
-
-/*
-  _Inventory
-  This will be used to store the player's inventory.
-*/
-struct _Inventory {
-  InvSlot slots[27];
-  InvSlot hotbar[9];
-  InvSlot armor[4];
-};
-
-/*
-  _Coords
-  Stores xyz coordinates
-*/
-struct _Coords {
-  int x;
-  int y;
-  int z;
-};
-
-// Global variable because so many things use it. Also may get
-// its own header file at some point.
-int textures[12288] = {0};
 
 int main(int argc, char *argv[]) {
   int M[128] = {0};
@@ -260,113 +185,13 @@ int main(int argc, char *argv[]) {
 }
 
 /*
-  randm
-  Takes in an integer, and uses it as a max for the random
-  number it outputs. Supposed to work like Random.nextInt() in
-  java.
-*/
-static int randm(int max) {
-  return rand() % max;
-}
-
-/*
-  nmod
-  Modulo operator that acts like java.
-*/
-static int nmod(int left, int right) {
-  left %= right;
-  if(left < 0)
-    left += right;
-  return left;
-}
-
-/*
-  genTextures
-  Takes in a seed and an array where the textures should go.
-  Generates game textures in that array.
-*/
-static void genTextures(unsigned int seed) {
-  srand(seed);
-  static int j  = 0,
-             k  = 0,
-             m  = 0,
-             n  = 0,
-             i1 = 0,
-             i2 = 0,
-             i3 = 0,
-             i6 = 0,
-             i7 = 0;
-  
-  for (j = 1; j < 16; j++) {
-    k = 255 - randm(96);
-    for (m = 0; m < 48; m++) {
-      for (n = 0; n < 16; n++) {
-        i1 = 9858122;
-        if (j == 4)
-          i1 = 8355711; 
-        if (j != 4 || randm(3) == 0)
-          k = 255 - randm(96); 
-        if (j == 1
-          && m < (n * n * (3 + n) * 81 >> 2 & 0x3) + 18)
-        {
-          i1 = 6990400;
-        } else if (j == 1
-          && m < (n * n * (3 + n) * 81 >> 2 & 0x3) + 19)
-        {
-          k = k * 2 / 3;
-        } 
-        if (j == 7) {
-          i1 = 6771249;
-          if (n > 0 && n < 15
-            && ((m > 0 && m < 15) || (m > 32 && m < 47)))
-          {
-            i1 = 12359778;
-            i6 = n - 7;
-            i7 = (m & 0xF) - 7;
-            if (i6 < 0)
-              i6 = 1 - i6; 
-            if (i7 < 0)
-              i7 = 1 - i7; 
-            if (i7 > i6)
-              i6 = i7; 
-            k = 196 - randm(32) + i6 % 3 * 32;
-          } else if (randm(2) == 0) {
-            k = k * (150 - (n & 0x1) * 100) / 100;
-          } 
-        } 
-        if (j == 5) {
-          i1 = 11876885;
-          if ((n + m / 4 * 4) % 8 == 0 || m % 4 == 0)
-            i1 = 12365733; 
-        } 
-        i2 = k;
-        if (m >= 32)
-          i2 /= 2; 
-        if (j == 8) {
-          i1 = 5298487;
-          if (randm(2) == 0) {
-            i1 = 0;
-            i2 = 255;
-          }
-        }
-        i3 = (i1 >> 16 & 0xFF)
-          * i2 / 255 << 16 | (i1 >> 8 & 0xFF)
-          * i2 / 255 << 8 | (i1 & 0xFF)
-          * i2 / 255;
-        textures[n + m * 16 + j * 256 * 3] = i3;
-      }
-    }
-  }
-}
-
-/*
   chunkLookup
   Takes in a world pointer, and returns a pointer to the chunk
   at the specifiec x y and z coordinates. If the chunk is the
   same as last time, it does not do another lookup, meaning this
   function can be called very frequently.
 */
-static int* chunkLookup(World* world, int x, int y, int z) {
+int* chunkLookup(World* world, int x, int y, int z) {
   // Rather unlikely position
   static Coords last = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF};
   static int *chunk;
@@ -393,7 +218,7 @@ static int* chunkLookup(World* world, int x, int y, int z) {
   the chunk is not loaded, and will set the block when the chunk
   loads. If force is true, blocks other than air will be set.
 */
-static int setBlock(
+int setBlock(
   World *world,
   int x, int y, int z,
   int block,
@@ -419,7 +244,7 @@ static int setBlock(
   Takes in a world array, xyz coordinates, and outputs the block
   id there. Eventually will return -1 if chunk is not loaded
 */
-static int getBlock(
+int getBlock(
   World *world,
   int x, int y, int z
 ) {
@@ -443,7 +268,7 @@ static int getBlock(
   Sets the block. For usage in terrain generation. Returns false
   if the block was previously air.
 */
-static int ch_setBlock(
+int ch_setBlock(
   int *chunk,
   int x, int y, int z,
   int block
@@ -461,7 +286,7 @@ static int ch_setBlock(
   other than air will be filled. If no blocks were previously
   air, returns false.
 */
-static int setCube(
+int setCube(
   World *world,
   int x, int y, int z,
   int w, int h, int l,
@@ -482,7 +307,7 @@ static int setCube(
   Takes in a world array, xyz coordinates, and generates the
   specified structure.
 */
-static void genStructure(
+void genStructure(
   World *world,
   int x, int y, int z,
   int type
@@ -531,7 +356,7 @@ static void genStructure(
   Takes in a seed and a chunk array. Chunk is 64x64x64 blocks.
   Fills the chunk array with generated terrain.
 */
-static void genChunk(
+void genChunk(
   unsigned int seed,
   World *world,
   int *chunk,
@@ -605,7 +430,7 @@ static void genChunk(
   If by chance the game ends, it returns false - which should
   terminate the main while loop and end the program.
 */
-static int gameLoop(
+int gameLoop(
   int BUFFER_W,
   int BUFFER_H,
   int BUFFER_SCALE,
@@ -618,15 +443,14 @@ static int gameLoop(
   // We dont want to have to pass all of these by reference, so
   // have all of them as static variables
   
-  // TODO: Migrate simple default const values to definitions
-  static float  f1,
-                f2,
-                f3,
-                f4,
-                f5,
-                f6,
-                f7,
-                f8,
+  static double f1 = 96.5,
+                f2 = 65.0,
+                f3 = 96.5,
+                f4 = 0,
+                f5 = 0,
+                f6 = 0,
+                f7 = 0,
+                f8 = 0,
                 f9,
                 f10,
                 f11,
@@ -659,10 +483,12 @@ static int gameLoop(
   
   static long   l, gameTime;
   
-  static int    k,
+  static int    BUFFER_HALF_W,
+                BUFFER_HALF_H,
+                k,
                 m,
                 i,
-                blockSelected,
+                blockSelected = 0,
                 selectedPass,
                 i6,
                 i7,
@@ -724,15 +550,9 @@ static int gameLoop(
   
   static int init = 1;
   if(init) {
-    f1 = 96.5;
-    f2 = 65.0;
-    f3 = 96.5;
-    f4 = 0.0;
-    f5 = 0.0;
-    f6 = 0.0;
-    blockSelected = 0;
-    f7 = 0.0;
-    f8 = 0.0;
+    BUFFER_HALF_W = BUFFER_W / 2;
+    BUFFER_HALF_H = BUFFER_H / 2;
+    
     l = SDL_GetTicks();
     gameTime = 2048;
     
@@ -744,7 +564,7 @@ static int gameLoop(
     backgroundRect.w = BUFFER_W;
     backgroundRect.h = BUFFER_H;
     
-    hotbarRect.x = BUFFER_W / 2 - 77;
+    hotbarRect.x = BUFFER_HALF_W - 77;
     hotbarRect.y = BUFFER_H - 18;
     hotbarRect.w = 154;
     hotbarRect.h = 18;
@@ -1034,8 +854,8 @@ static int gameLoop(
                   && pixelY == M[3] / BUFFER_SCALE
                 ) || (
                      trapMouse
-                  && pixelX == BUFFER_W / 2
-                  && pixelY == BUFFER_H / 2
+                  && pixelX == BUFFER_HALF_W
+                  && pixelY == BUFFER_HALF_H
                 )
               )
             ) {
@@ -1075,10 +895,10 @@ static int gameLoop(
       // TODO: make two ints to basically cache BUFFER_W and
       // BUFFER_H both divided by 2 every frame
       if(trapMouse && (
-        (pixelX == BUFFER_W / 2
-          && abs(BUFFER_H / 2 - pixelY) < 4) ||
-        (pixelY == BUFFER_H / 2
-          && abs(BUFFER_W / 2 - pixelX) < 4)
+        (pixelX == BUFFER_HALF_W
+          && abs(BUFFER_HALF_H - pixelY) < 4) ||
+        (pixelY == BUFFER_HALF_H
+          && abs(BUFFER_HALF_W - pixelX) < 4)
       )) {
         finalPixelColor = 16777216 - finalPixelColor;
       }
@@ -1115,19 +935,19 @@ static int gameLoop(
       // Pause menu
       case 1:
         if(button(renderer, "Resume",
-          BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
+          BUFFER_HALF_W - 64, 20, 128, M[2], M[3]) && M[1]
         ) {
           gamePopup = 0;
         }
         
         if(button(renderer, "Options",
-          BUFFER_W / 2 - 64, 42, 128, M[2], M[3]) && M[1]
+          BUFFER_HALF_W - 64, 42, 128, M[2], M[3]) && M[1]
         ) {
           gamePopup = 2;
         }
         
         if(button(renderer, "Exit",
-          BUFFER_W / 2 - 64, 64, 128, M[2], M[3]) && M[1]
+          BUFFER_HALF_W - 64, 64, 128, M[2], M[3]) && M[1]
         ) {
           return 0;
         }
@@ -1136,7 +956,7 @@ static int gameLoop(
       // Options
       case 2:
         if(button(renderer, drawDistanceText,
-          BUFFER_W / 2 - 64, 20, 128, M[2], M[3]) && M[1]
+          BUFFER_HALF_W - 64, 20, 128, M[2], M[3]) && M[1]
         ) {
           switch(drawDistance) {
             case 20:
@@ -1159,7 +979,7 @@ static int gameLoop(
         }
         
         if(button(renderer, trapMouseText,
-          BUFFER_W / 2 - 64, 42, 128, M[2], M[3]) && M[1]
+          BUFFER_HALF_W - 64, 42, 128, M[2], M[3]) && M[1]
         ) {
           if(trapMouse) {
             trapMouse = 0;
@@ -1171,7 +991,7 @@ static int gameLoop(
         }
         
         if(button(renderer, "Back",
-          BUFFER_W / 2 - 64, 64, 128, M[2], M[3]) && M[1]
+          BUFFER_HALF_W - 64, 64, 128, M[2], M[3]) && M[1]
         ) {
           gamePopup = 1;
         }
@@ -1184,30 +1004,25 @@ static int gameLoop(
     if(guiOn) {
       // Debug screen
       if(debugOn) {
-        // TODO: optimize
         strnum(debugText[1], 3, (int)f1 - 64);
         strnum(debugText[2], 3, (int)f2 - 64);
         strnum(debugText[3], 3, (int)f3 - 64);
         strnum(debugText[4], 5, fps_now);
+        
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-        drawStr(renderer, debugText[0], 3, 3);
-        drawStr(renderer, debugText[1], 3, 11);
-        drawStr(renderer, debugText[2], 3, 19);
-        drawStr(renderer, debugText[3], 3, 27);
-        drawStr(renderer, debugText[4], 3, 35);
+        for(i = 0; i < 5; i++)
+          drawStr(renderer, debugText[i], 3, i * 8 + 3);
+          
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        drawStr(renderer, debugText[0], 2, 2);
-        drawStr(renderer, debugText[1], 2, 10);
-        drawStr(renderer, debugText[2], 2, 18);
-        drawStr(renderer, debugText[3], 2, 26);
-        drawStr(renderer, debugText[4], 2, 34);
+        for(i = 0; i < 5; i++)
+          drawStr(renderer, debugText[i], 2, i * 8 + 2);
       }
       // Hotbar
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
       SDL_RenderFillRect(renderer, &hotbarRect);
       
       hotbarSelectRect.x =
-        BUFFER_W / 2 - 77 + hotbarSelect * 17;
+        BUFFER_HALF_W - 77 + hotbarSelect * 17;
       SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
       SDL_RenderDrawRect(renderer, &hotbarSelectRect);
       
@@ -1216,7 +1031,7 @@ static int gameLoop(
         drawSlot(
           renderer,
           &inventory.hotbar[i], 
-          BUFFER_W / 2 - 76 + i * 17,
+          BUFFER_HALF_W - 76 + i * 17,
           BUFFER_H - 17,
           M[2],
           M[3]
@@ -1228,211 +1043,4 @@ static int gameLoop(
   if(M[2]) M[2] = 0;
   
   return 1;
-}
-
-static int noise2(int x, int y, Uint8 *hash, int seed) {
-  static int tmp;
-  tmp = hash[(y + seed) % 256];
-  return hash[(tmp + x) % 256];
-}
-
-static float smooth_inter(float x, float y, float s) {
-  return x + s * s * (3 - 2 * s) * (y - x);
-}
-
-static float perlin2d(float x, float y, int seed) {
-  static Uint8 hash[] =
-  
-  {208,34,231,213,32,248,233,56,161,78,24,140,
-  71,48,140,254,245,255,247,247,40,185,248,251,245,28,124,204,
-  204,76,36,1,107,28,234,163,202,224,245,128,167,204,9,92,217,
-  54,239,174,173,102,193,189,190,121,100,108,167,44,43,77,180,
-  204,8,81,70,223,11,38,24,254,210,210,177,32,81,195,243,125,8,
-  169,112,32,97,53,195,13,203,9,47,104,125,117,114,124,165,203,
-  181,235,193,206,70,180,174,0,167,181,41,164,30,116,127,198,245,
-  146,87,224,149,206,57,4,192,210,65,210,129,240,178,105,228,108,
-  245,148,140,40,35,195,38,58,65,207,215,253,65,85,208,76,62,3,
-  237,55,89,232,50,217,64,244,157,199,121,252,90,17,212,203,149,
-  152,140,187,234,177,73,174,193,100,192,143,97,53,145,135,19,
-  103,13,90,135,151,199,91,239,247,33,39,145,101,120,99,3,186,86,
-  99,41,237,203,111,79,220,135,158,42,30,154,120,67,87,167,135,
-  176,183,191,253,115,184,21,233,58,129,233,142,39,128,211,118,
-  137,139,255,114,20,218,113,154,27,127,246,250,1,8,198,250,209,
-  92,222,173,21,88,102,219};
-  
-  float xa = x * 0.0625;
-  float ya = y * 0.0625;
-  float amp = 1.0;
-  float fin = 0;
-  float div = 0.0;
-
-  int i;
-  for(i = 0; i < 4; i++) {
-    div += 256 * amp;
-    
-    int x_int = xa;
-    int y_int = ya;
-    float x_frac = xa - x_int;
-    float y_frac = ya - y_int;
-    int s = noise2(x_int, y_int, hash, seed);
-    int t = noise2(x_int + 1, y_int,     hash, seed);
-    int u = noise2(x_int,     y_int + 1, hash, seed);
-    int v = noise2(x_int + 1, y_int + 1, hash, seed);
-    float low  = smooth_inter(s, t, x_frac);
-    float high = smooth_inter(u, v, x_frac);
-    
-    fin += smooth_inter(low, high, y_frac) * amp;
-    amp /= 2;
-    xa *= 2;
-    ya *= 2;
-  }
-
-  return fin/div;
-}
-
-/*
-  strnum
-  Takes in a char array and an offset and puts the specifiec
-  number into it. Make sure there is sufficient space in the
-  string.
-*/
-static void strnum(char *ptr, int offset, int num) {
-  sprintf(ptr + offset, "%d", num);
-}
-
-/*
-  drawChar
-  Takes in a pointer to a renderer, a charachter (as an int),
-  draws it at the specified x and y coordinates, and then returns
-  the charachter's width.
-*/
-static int drawChar(SDL_Renderer *renderer,
-  int c, int x, int y
-) {
-  for(int yy = 0; yy < 8; yy++) {
-    for(int xx = 0; xx < 8; xx++) {
-      if((font[c][yy] >> (7 - xx)) & 0x1)
-        SDL_RenderDrawPoint(renderer, x + xx, y + yy);
-    }
-  }
-  
-  return font[c][8];
-}
-
-/*
-  drawStr
-  Takes in a pointer to a renderer, a string, draws it at the
-  specified x and y coordinates, and then returns the x position
-  it left off on.
-*/
-static int drawStr(SDL_Renderer *renderer,
-  char *str, int x, int y
-) {
-  while(*str > 0) {
-    x += drawChar(renderer, *(str++), x, y);
-  }
-  
-  return x;
-}
-
-/*
-  button
-  Takes in a pointer to a renderer, a string, draws a button with
-  the specified x and y coordinates and width, and then returns
-  wether or not the specified mouse coordinates are within it.
-*/
-static int button(SDL_Renderer *renderer,
-  char *str, int x, int y, int w, int mouseX, int mouseY
-) {
-  int hover =
-    mouseX >= x      &&
-    mouseY >= y      &&
-    mouseX <  x + w  &&
-    mouseY <  y + 16 ;
-  
-  char *strsave = str;
-  int len = 0;
-  while(*str > 0) {
-    len += font[(int)*(str++)][8];
-  }
-  str = strsave;
-  
-  SDL_Rect rect;
-  rect.x = x;
-  rect.y = y;
-  rect.w = w;
-  rect.h = 16;
-  
-  if(hover)
-    SDL_SetRenderDrawColor(renderer, 116, 134, 230, 255);
-  else
-    SDL_SetRenderDrawColor(renderer, 139, 139, 139, 255);
-  SDL_RenderFillRect(renderer, &rect);
-  
-  x += (w - len) / 2 + 1;
-  y += 5;
-  
-  if(hover)
-    SDL_SetRenderDrawColor(renderer, 63,  63,  40,  255);
-  else
-    SDL_SetRenderDrawColor(renderer, 56,  56,  56,  255);
-  drawStr(renderer, str, x, y);
-  
-  x--;
-  y--;
-  
-  if(hover)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 160, 255);
-  else
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  drawStr(renderer, str, x, y);
-  
-  if(hover)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-  else
-    SDL_SetRenderDrawColor(renderer, 0,   0,   0,   255);
-  SDL_RenderDrawRect(renderer, &rect);
-  
-  return hover;
-}
-
-/*
-  drawSlot
-  Takes in a pointer to a renderer, an InvSlot, draws the item
-  with the specified x and y coordinates and width, and then 
-  returns wether or not the specified mouse coordinates are
-  within it.
-*/
-static int drawSlot(SDL_Renderer *renderer,
-  InvSlot *slot, int x, int y, int mouseX, int mouseY
-) {
-  static int hover,
-             i,
-             xx,
-             yy,
-             color;
-  
-  hover =
-    mouseX >= x      &&
-    mouseY >= y      &&
-    mouseX <  x + 16 &&
-    mouseY <  y + 16 ;
-  
-  i = slot->blockid * 256 * 3;
-  for(yy = 0; yy < 16; yy++)
-    for(xx = 0; xx < 16; xx++) {
-      color = textures[i];
-      SDL_SetRenderDrawColor(
-        renderer,
-        (color >> 16 & 0xFF),
-        (color >> 8 & 0xFF),
-        (color & 0xFF),
-        255
-      );
-      if(color > 0)
-        SDL_RenderDrawPoint(renderer, x + xx, y + yy);
-      i++;
-    }
-  
-  return hover;
 }
