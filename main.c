@@ -824,14 +824,7 @@ static int gameLoop(
           i15 =
             (int)
             (f19 + (i12 >> 1 & 0x1) * 0.6F - 0.3F) - 64;
-          if (i13 < 0
-            || i14 < 0
-            || i15 < 0
-            || i13 >= 64
-            || i14 >= 64
-            || i15 >= 64
-            || getBlock(world, i13, i14, i15) > 0
-          ) {
+          if (getBlock(world, i13, i14, i15) > 0) {
             if (m != 1) {
               goto label208;
             }
