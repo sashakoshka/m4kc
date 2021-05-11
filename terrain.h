@@ -1,4 +1,34 @@
 /*
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  IMPORTANT!!!!
+  Please do not touch this file. It is a bit unstable at the
+  moment. It's fine how it is, and I am working on infinite
+  terrain.
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   TODO:
   --Rename chunk meta to just chunk
   --have a pointer to a chunk array named "blocks"
