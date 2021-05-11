@@ -5,7 +5,7 @@
 #include "minecraftfont.h"
 
 /*
-  Minecraft 4k, C edition. Version 0.2
+  Minecraft 4k, C edition. Version 0.5
   
   Credits:
     notch       - creating the original game
@@ -668,7 +668,7 @@ static int gameLoop(
   static char trapMouseText    [] = "Capture mouse: OFF";
   
   static char debugText        [][16] = {
-    "M4KS 0.4",
+    "M4KS 0.5",
     "X: ",
     "Y: ",
     "Z: "
