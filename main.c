@@ -286,8 +286,8 @@ int gameLoop(
   static Coords coordPass         = {0};
   static Coords blockRayPosition  = {0};
 
-  static Coords playerPosition = { 96.5, 65.0, 96.5 };
-  static Coords playerMovement = {  0.0,  0.0,  0.0 };
+  static Coords playerPosition = {96.5, 65.0, 96.5};
+  static Coords playerMovement = { 0.0,  0.0,  0.0};
   
   static int init = 1;
   if(init) {
@@ -387,8 +387,12 @@ int gameLoop(
         f16 = (float)inputs->mouse_X * 1.5;
         f17 = (float)inputs->mouse_Y * 1.5;
       } else {
-        f16 = (inputs->mouse_X - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
-        f17 = (inputs->mouse_Y - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
+        f16 =
+          (inputs->mouse_X - BUFFER_W * 2) /
+          (float)BUFFER_W * 2.0;
+        f17 =
+          (inputs->mouse_Y - BUFFER_H * 2) /
+          (float)BUFFER_H * 2.0;
       }
       
       f15 = sqrt(f16 * f16 + f17 * f17) - 1.2;
@@ -403,8 +407,10 @@ int gameLoop(
         if (cameraAngle_V_abs >  1.57) cameraAngle_V_abs =  1.57;
       }
 
-      playerSpeedFB = (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
-      playerSpeedLR = (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
+      playerSpeedFB =
+        (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
+      playerSpeedLR =
+        (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
     }
     
     // Moving around
@@ -412,16 +418,21 @@ int gameLoop(
     playerMovement.y *= 0.99;
     playerMovement.z *= 0.5;
 
-    playerMovement.x += f9  * playerSpeedFB + f10 * playerSpeedLR;
-    playerMovement.z += f10 * playerSpeedFB - f9  * playerSpeedLR;
+    playerMovement.x +=
+      f9  * playerSpeedFB + f10 * playerSpeedLR;
+    playerMovement.z +=
+      f10 * playerSpeedFB - f9  * playerSpeedLR;
     playerMovement.y += 0.003;
     
     
     // TODO: update this to check for collisions properly
     for (m = 0; m < 3; m++) {
-      f16 = playerPosition.x + playerMovement.x * ((m + 2) % 3 / 2);
-      f17 = playerPosition.y + playerMovement.y * ((m + 1) % 3 / 2);
-      f19 = playerPosition.z + playerMovement.z * ((m + 2) % 3 / 2);
+      f16 =
+        playerPosition.x + playerMovement.x * ((m + 2) % 3 / 2);
+      f17 =
+        playerPosition.y + playerMovement.y * ((m + 1) % 3 / 2);
+      f19 =
+        playerPosition.z + playerMovement.z * ((m + 2) % 3 / 2);
 
       for (i12 = 0; i12 < 12; i12++) {
         i13 = (int) (f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
@@ -432,7 +443,11 @@ int gameLoop(
           if (m != 1) {
             goto label208;
           }
-          if (inputs->keyboard_Space > 0 && (playerMovement.y > 0.0) &! gamePopup) {
+          if (
+            inputs->keyboard_Space > 0 &&
+            (playerMovement.y > 0.0)   &!
+            gamePopup
+          ) {
             inputs->keyboard_Space = 0;
             playerMovement.y = -0.1;
             goto label208;
@@ -481,9 +496,12 @@ int gameLoop(
     }
   }
   for (k = 0; k < 12; k++) {
-    m =      (int)(playerPosition.x + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
-    i10 =    (int)(playerPosition.y + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
-    pixelY = (int)(playerPosition.z + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
+    m =
+      (int)(playerPosition.x + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
+    i10 =
+      (int)(playerPosition.y + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
+    pixelY =
+      (int)(playerPosition.z + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
     if (
       m >= 0
       && i10 >= 0
