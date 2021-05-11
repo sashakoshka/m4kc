@@ -4,6 +4,7 @@ typedef struct _Player    Player;
 typedef struct _InvSlot   InvSlot;
 typedef struct _Inventory Inventory;
 typedef struct _Coords    Coords;
+typedef struct _Inputs    Inputs;
 
 /*
   _Chunk
@@ -73,7 +74,31 @@ struct _Inventory {
   Stores xyz coordinates
 */
 struct _Coords {
-  int x;
-  int y;
-  int z;
+  float x;
+  float y;
+  float z;
+};
+
+/*
+  _Inputs
+  Stores the state of the different inputs (keyboard/mouse)
+  for the current tick. Updated on each game loop.
+*/
+struct _Inputs {
+    int mouse_Right;     // M[0]
+    int mouse_Left;      // M[1]
+    int mouse_X;         // M[2]
+    int mouse_Y;         // M[3]
+    int mouse_Wheel;     // M[4]
+
+    int keyboard_Space;  // M[32]
+    int keyboard_W;      // M[119]
+    int keyboard_S;      // M[115]
+    int keyboard_A;      // M[97]
+    int keyboard_D;      // M[100]
+
+    int keyboard_Esc;    // M[27]
+    int keyboard_F1;     // M[5]
+    int keyboard_F2;     // M[6]
+    int keyboard_F3;     // M[7]
 };

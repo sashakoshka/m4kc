@@ -51,8 +51,8 @@ void initChunks(World *world) {
 */
 Chunk* chunkLookup(World *world, int x, int y, int z) {
   // Rather unlikely position
-  static Coords last = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF};
   static Chunk *chunk;
+  static Coords last = {100000000, 100000000, 100000000};
   // Divide by 64
   x >>= 6;
   y >>= 6;
