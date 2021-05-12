@@ -13,17 +13,21 @@ This project is an attempt to translate the game into C in order to increase its
 ## Bug list
 
 * "Sticky" block collision - this behavior is present in the original version and I have been trying to work out ways to fix it for a while.
-* Block outline cuts off at mouse x position.
+* Raycaster breaks at -64 along any axis
 
-## Goals for this project
+## Some goals for this project
 
-* Maintaining the original look and feel as closely as possible.
-* Keeping the final executable under 10 KB (on Linux, with the system I have set up in the makefile)
-* More blocks
-* Perlin noise terrain generation (water, caves, etc)
-* Infinite worlds, possibly vertically too
-* Mobs and multiplayer (this would require changing the rendering engine to some degree)
-* Day/night??? I don't know whether or not this would change the look or feel too much.
+* Maintaining the original look and feel as closely as possible. ✅️
+* Keeping the final executable under 20 KB (on Linux, with the system I have set up in the makefile) ✅️
+* More blocks 🏗️
+* Perlin noise terrain generation ✅️ (water, caves, etc) 🏗️
+* Infinite worlds, possibly vertically too 🏗️
+* Mobs and multiplayer (this would require changing the rendering engine to some degree) 🏗️
+* Day/night ✅️
+
+*✅️ - got that!*
+
+*🏗️ - not yet...*
 
 ## Dependencies
 
@@ -55,3 +59,15 @@ Run `win-build.bat`. Inside of the `win` directory, you will find `m4kc.exe` and
 There is a forum thread for this project [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/3081789-minecraft-4k-c-rewrite)
 
 I will be uploading binaries [here](https://holanet.xyz/soft/m4kc/)
+
+## FAQ
+
+I've either been asked these, or I expect to be at some point.
+
+> What's with the cryptic variable names like `f22` and `i6`?
+
+A lot of this code is decompiled from the original java version, and those are names the compiler assigned to the variables.
+
+> Why is it so slow?
+
+The game uses a 3D voxel raycaster to render things, which is a lot slower than more traditional methods of rendering. Luckily, C provides more powerful ways to optimize something like this than Java - and optimizations will keep coming.
