@@ -1,6 +1,7 @@
 CC=gcc
-CFLAGS=-Os -Wall
-CFLAGS_COMPACT=-g0 -s -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables
+CFLAGS=-Wall
+CFLAGS_COMPACT=-Os -g0 -s -fno-stack-protector -fno-unwind-tables -fno-asynchronous-unwind-tables
+CFLAGS_LARGE=-g
 LIBS=-L/usr/local/lib -lSDL2 -lm
 PREFIX=/usr
 
@@ -13,7 +14,7 @@ m4kc:
 	ls -l m4kc
 
 m4kc-large:
-	$(CC) main.c -o m4kc-large $(CFLAGS) $(LIBS)
+	$(CC) main.c -o m4kc-large $(CFLAGS) $(CFLAGS_LARGE) $(LIBS)
 
 install: m4kc copy-files
 	install -m 755 m4kc $(DESTDIR)$(PREFIX)/bin/m4kc

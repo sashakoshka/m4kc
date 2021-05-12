@@ -66,9 +66,10 @@ void   genChunk(
 */
 void initChunks(World *world) {
   static int i;
-  for(i = 0; i < 25; i++) {
+  for(i = 0; i < 2; i++) {
     world->chunk[i].coordHash = 0;
     world->chunk[i].loaded    = 0;
+    world->chunk[i].blocks    = NULL;
   }
 }
 
@@ -80,8 +81,8 @@ void initChunks(World *world) {
   function can be called very frequently.
 */
 Chunk* chunkLookup(World *world, int x, int y, int z) {
-  // Rather unlikely position
   static Chunk *chunk;
+  // Rather unlikely position
   static Coords last = {100000000, 100000000, 100000000};
   // Divide by 64
   x >>= 6;
@@ -101,7 +102,6 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
     last.x = x;
     last.y = y;
     last.z = z;
-    //printf("look %i\n", chunk->loaded);
   }
   return chunk;
 }
@@ -123,15 +123,14 @@ int setBlock(
   static int   b;
   static Chunk *chunk;
   b = getBlock(world, x, y, z) < 1;
-  //printf("set %i, %i, %i\n", x, y, z);
   
-  if  (x > -1 && x < 64
-    && y > -1 && y < 64
-    && z > -1 && z < 64
-    && (force || b)
-  ) {
+  if(force || b) { // If the block was air or we don't care
     chunk = chunkLookup(world, x, y, z);
-    (*chunk->blocks)[x + y * 64 + z * 4096] = block;
+    
+    // If chunk does not have an allocated block array, exit
+    if(!chunk->loaded) return 0;
+    
+    chunk->blocks[ + x + y * 64 + z * 4096] = block;
     return b;
   } else {
     return 0;
@@ -149,15 +148,11 @@ int getBlock(
 ) {
   static Chunk *chunk;
   chunk = chunkLookup(world, x, y, z);
-  //printf("get %i, %i, %i, %i\n", x, y, z, chunk->loaded);
   
-  // THIS WILL FAIL more often than not. Need to find out why
-  // certain chunk slots are not initialized.
-  if(chunk->loaded != 1) return 0;
+  // If chunk does not have an allocated block array, exit
+  if(!chunk->loaded) return 0;
   
-  //printf("get was loaded\n");
-  //printf("get at 0 = %i\n", *(chunk->blocks[0]));
-  return chunk->blocks[0][
+  return chunk->blocks[
     x +
     y * 64 +
     z * 4096
@@ -215,6 +210,7 @@ void genStructure(
   int type
 ) {
   static int i, b;
+  
   /*
     Structure ideas
     
@@ -266,26 +262,31 @@ void genChunk(
   int zOffset,
   int type
 ) {
+  
   // To make sure structure generation accross chunks is
   // different, but predictable
   srand(seed * (xOffset * yOffset * zOffset + 1));
-  static int heightmap[64][64], i, x, z;
+  int heightmap[64][64], i, x, z;
   
   Chunk *chunk = chunkLookup(world, xOffset, yOffset, zOffset);
   
-  // If there is no array, allocate one
+  // If there is no array, allocate one.
   if(!chunk->loaded)
-    *(chunk->blocks) = (int*)malloc(262144 * sizeof(int));
+    chunk->blocks = (int*)calloc(262144, sizeof(int));
   
-  int *blocks = *(chunk->blocks);
+  if(chunk->blocks == NULL) {
+    printf("genChunk: memory allocation fail");
+    return;
+  }
+  
+  int *blocks = chunk->blocks;
   
   for(int i = 0; i < 262144; i++)
     blocks[i] = 19;
-  chunk->loaded = 1;
   
-  //printf("GENCHUNK %i\n", chunk->loaded);
-  //printf("GENCHUNK me %i\n", blocks[i]);
-  //printf("GENCHUNK gb %i\n", getBlock(world, 3, 34, 8));
+  // What we have here won't cause a segfault, so it is safe to
+  // mark the chunk as loaded.
+  chunk->loaded = 1;
   
   switch(type) {
     case 0:

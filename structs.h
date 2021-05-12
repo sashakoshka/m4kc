@@ -19,7 +19,7 @@ typedef struct _Inputs    Inputs;
 struct _Chunk {
   int coordHash;
   int loaded;
-  int *blocks[];
+  int *blocks;
 };
 
 /*
@@ -28,7 +28,7 @@ struct _Chunk {
 */
 // 25: amount of chunks that can be loaded at one time
 struct _World {
-  Chunk chunk[25];
+  Chunk chunk[2];
 };
 
 /*

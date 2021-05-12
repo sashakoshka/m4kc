@@ -40,7 +40,6 @@ int main(int argc, char *argv[]) {
   Inputs inputs = {0};
   
   World world;
-  initChunks(&world);
   
   //unsigned int seed = 18295169;
   unsigned int seed = 45390874;
@@ -52,6 +51,8 @@ int main(int argc, char *argv[]) {
   int mouseX = 0, mouseY = 0;
   
   //---- generating assets  ----//
+  
+  initChunks(&world);
   
   genChunk(seed, &world, 0, 0, 0, 1);
   genTextures(seed);
@@ -404,8 +405,10 @@ int gameLoop(
         cameraAngle_V_abs -= f17 * f15 / 400.0;
 
         // Restrict camera vertical position
-        if (cameraAngle_V_abs < -1.57) cameraAngle_V_abs = -1.57;
-        if (cameraAngle_V_abs >  1.57) cameraAngle_V_abs =  1.57;
+        if (cameraAngle_V_abs < -1.57)
+          cameraAngle_V_abs = -1.57;
+        if (cameraAngle_V_abs >  1.57)
+          cameraAngle_V_abs =  1.57;
       }
 
       playerSpeedFB =
@@ -498,17 +501,20 @@ int gameLoop(
   }
   for (k = 0; k < 12; k++) {
     m =
-      (int)(playerPosition.x + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
+      (int)
+        (playerPosition.x + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
     i10 =
-      (int)(playerPosition.y + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
+      (int)
+        (playerPosition.y + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
     pixelY =
-      (int)(playerPosition.z + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
+      (int)
+        (playerPosition.z + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
     if (
-      m >= 0
-      && i10 >= 0
+         m      >= 0
+      && i10    >= 0
       && pixelY >= 0
-      && m   < 64
-      && i10 < 64
+      && m      < 64
+      && i10    < 64
       && pixelY < 64
     ) {
       // TODO: Check if block is inside player before placing,
