@@ -274,7 +274,10 @@ int gameLoop(
     "X: ",
     "Y: ",
     "Z: ",
-    "FPS: "
+    "FPS: ",
+    "ChunkX: ",
+    "ChunkY: ",
+    "ChunkZ: ",
   };
   
   static double d;
@@ -776,17 +779,36 @@ int gameLoop(
     if(guiOn) {
       // Debug screen
       if(debugOn) {
+        // Coordinates
         strnum(debugText[1], 3, (int)playerPosition.x - 64);
         strnum(debugText[2], 3, (int)playerPosition.y - 64);
         strnum(debugText[3], 3, (int)playerPosition.z - 64);
+        
+        // FPS
         strnum(debugText[4], 5, fps_now);
         
+        // Chunk coordinates
+        strnum(
+          debugText[5], 8, 
+          ((int)playerPosition.x - 64) >> 6
+        );
+        strnum(
+          debugText[6], 8, 
+          ((int)playerPosition.y - 64) >> 6
+        );
+        strnum(
+          debugText[7], 8, 
+          ((int)playerPosition.z - 64) >> 6
+        );
+        
+        // Shadow
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-        for(i = 0; i < 5; i++)
+        for(i = 0; i < 8; i++)
           drawStr(renderer, debugText[i], 3, i * 8 + 3);
-          
+        
+        // Text
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        for(i = 0; i < 5; i++)
+        for(i = 0; i < 8; i++)
           drawStr(renderer, debugText[i], 2, i * 8 + 2);
       }
       // Hotbar
