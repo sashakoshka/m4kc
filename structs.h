@@ -28,7 +28,7 @@ struct _Chunk {
 */
 // 25: amount of chunks that can be loaded at one time
 struct _World {
-  Chunk chunk[2];
+  Chunk chunk[27];
 };
 
 /*

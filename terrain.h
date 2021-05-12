@@ -1,18 +1,19 @@
-void initChunks    (World*);
-Chunk* chunkLookup (World*, int, int, int); 
+void   initChunks  (World*);
+void   genAll      (World*, unsigned int, int);
+Chunk* chunkLookup (World*, int, int, int);
 int    setBlock    (World*, int, int, int, int, int);
 int    getBlock    (World*, int, int, int);
-int    setCube(
+int setCube(
   World*,
   int, int, int,
   int, int, int,
   int, int
 );
-int    ch_setBlock(int*, int, int, int, int);
-void   genStructure(World*, int, int, int, int);
-void   genChunk(
-  unsigned int,
+int  ch_setBlock   (int*, int, int, int, int);
+void genStructure  (World*, int, int, int, int);
+void genChunk(
   World*,
+  unsigned int,
   int, int, int,
   int
 );
@@ -23,13 +24,27 @@ void   genChunk(
 */
 void initChunks(World *world) {
   static int i;
-  for(i = 0; i < 2; i++) {
+  for(i = 0; i < 27; i++) {
     world->chunk[i].coordHash = 0;
     world->chunk[i].loaded    = 0;
     world->chunk[i].blocks    = NULL;
   }
 }
 
+/*
+  genAll
+  generates all chunks surrounding the player. TODO: once chunk
+  indexing system fully working, call this when the player
+  crosses chunk boundaries
+*/
+void genAll(World *world, unsigned int seed, int type) {
+  // For all chunk slots we have, go around the player. This
+  // will eventually take in player position.
+  for(int x = 0; x < 64 * 3; x += 64)
+  for(int y = 0; y < 64 * 3; y += 64)
+  for(int z = 0; z < 64 * 3; z += 64)
+    genChunk(world, seed, x, y, z, type);
+}
 /*
   chunkLookup
   Takes in a world pointer, and returns a pointer to the chunk
@@ -39,26 +54,47 @@ void initChunks(World *world) {
 */
 Chunk* chunkLookup(World *world, int x, int y, int z) {
   static Chunk *chunk;
-  // Rather unlikely position
-  static Coords last = {100000000, 100000000, 100000000};
+  // Rather unlikely position. Not a coord because integers are
+  // faster
+  static int lastX = 100000000;
+  static int lastY = 100000000;
+  static int lastZ = 100000000;
   // Divide by 64
   x >>= 6;
   y >>= 6;
   z >>= 6;
   if(
-    last.x != x ||
-    last.y != y ||
-    last.z != z
+    lastX != x ||
+    lastY != y ||
+    lastZ != z
   ) {
-    // TODO: look up chunk instead of this
+    // Quickly hash the chunk coordinates
+    
+    // Since we already divided them by 64 (with bit shifting),
+    // we can pick up from here.
+    // Modulo-like operation by bitmasking
+    x &= 0b1111111111;
+    y &= 0b1111111111;
+    z &= 0b1111111111;
+    
+    // Move these into their correct "slots"
+    y <<= 10;
+    z <<= 20;
+    
+    // Flatten them using binary or. Hash is stored in X.
+    x |= y | z;
+    
+    // TODO: look up chunk instead of this. If chunk is not
+    // found, return null.
+    
     if(x == 0 && y == 0 && z == 0)
       chunk = &world->chunk[0];
     else
-      chunk = &world->chunk[1];
+      return NULL;
     
-    last.x = x;
-    last.y = y;
-    last.z = z;
+    lastX = x;
+    lastY = y;
+    lastZ = z;
   }
   return chunk;
 }
@@ -85,7 +121,7 @@ int setBlock(
     chunk = chunkLookup(world, x, y, z);
     
     // If chunk does not have an allocated block array, exit
-    if(!chunk->loaded) return 0;
+    if(chunk == NULL || !chunk->loaded) return -1;
     
     chunk->blocks[ + x + y * 64 + z * 4096] = block;
     return b;
@@ -97,7 +133,7 @@ int setBlock(
 /*
   getBlock
   Takes in a world array, xyz coordinates, and outputs the block
-  id there. Eventually will return -1 if chunk is not loaded
+  id there. Returns -1 if chunk is not loaded
 */
 int getBlock(
   World *world,
@@ -107,7 +143,7 @@ int getBlock(
   chunk = chunkLookup(world, x, y, z);
   
   // If chunk does not have an allocated block array, exit
-  if(!chunk->loaded) return 0;
+  if(chunk == NULL || !chunk->loaded) return -1;
   
   return chunk->blocks[
     x +
@@ -212,8 +248,8 @@ void genStructure(
   Fills the chunk array with generated terrain.
 */
 void genChunk(
-  unsigned int seed,
   World *world,
+  unsigned int seed,
   int xOffset,
   int yOffset,
   int zOffset,
@@ -227,9 +263,14 @@ void genChunk(
   
   Chunk *chunk = chunkLookup(world, xOffset, yOffset, zOffset);
   
+  if(chunk == NULL) return;
+  
   // If there is no array, allocate one.
   if(!chunk->loaded)
     chunk->blocks = (int*)calloc(262144, sizeof(int));
+  else {
+    // TODO: Save chunk to disk
+  }
   
   if(chunk->blocks == NULL) {
     printf("genChunk: memory allocation fail");
@@ -240,6 +281,20 @@ void genChunk(
   
   for(int i = 0; i < 262144; i++)
     blocks[i] = 19;
+  
+  // Generate a hash
+  xOffset >>= 6;
+  yOffset >>= 6;
+  zOffset >>= 6;
+  
+  xOffset &= 0b1111111111;
+  yOffset &= 0b1111111111;
+  zOffset &= 0b1111111111;
+  
+  yOffset <<= 10;
+  zOffset <<= 20;
+  
+  chunk->coordHash = xOffset | yOffset | zOffset;
   
   // What we have here won't cause a segfault, so it is safe to
   // mark the chunk as loaded.

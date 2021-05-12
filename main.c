@@ -54,7 +54,8 @@ int main(int argc, char *argv[]) {
   
   initChunks(&world);
   
-  genChunk(seed, &world, 0, 0, 0, 1);
+  //genChunk(&world, seed, 0, 0, 0, 1);
+  genAll(&world, seed, 1);
   genTextures(seed);
   
   //----  initializing SDL  ----//
@@ -657,6 +658,7 @@ int gameLoop(
         }
       }
       
+      // Draw inverted color crosshair
       if(trapMouse && (
         (pixelX == BUFFER_HALF_W
           && abs(BUFFER_HALF_H - pixelY) < 4) ||
@@ -678,12 +680,13 @@ int gameLoop(
         SDL_RenderDrawPoint(renderer, pixelX, pixelY);
       }
       
-      // Pass info about selected block on
-      blockSelected = selectedPass;
-      memcpy(&blockSelect, &coordPass, sizeof(Coords));
     }
   }
   init = 0;
+  
+  // Pass info about selected block on
+  blockSelected = selectedPass;
+  memcpy(&blockSelect, &coordPass, sizeof(Coords));
   
   inputs->mouse_X /= BUFFER_SCALE;
   inputs->mouse_Y /= BUFFER_SCALE;
