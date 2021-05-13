@@ -1,4 +1,5 @@
 void   initChunks  (World*);
+void   sortChunks  (World*);
 void   genAll      (World*, unsigned int, int);
 Chunk* chunkLookup (World*, int, int, int);
 int    setBlock    (World*, int, int, int, int, int);
@@ -32,6 +33,24 @@ void initChunks(World *world) {
 }
 
 /*
+  sortChunks
+  Sorts all chunks in a world by hash
+*/
+void sortChunks (World* world) {
+  int i, j;
+  Chunk temp;
+  for(i = 0; i < 27; i++)
+  for(j = 0; j < (27 - 1 - i); j++)
+  if (
+    world->chunk[j].coordHash < world->chunk[j + 1].coordHash
+  ) {
+    temp = world->chunk[j];
+    world->chunk[j] = world->chunk[j + 1];
+    world->chunk[j + 1] = temp;
+  }
+}
+
+/*
   genAll
   generates all chunks surrounding the player. TODO: once chunk
   indexing system fully working, call this when the player
@@ -48,8 +67,8 @@ void genAll(World *world, unsigned int seed, int type) {
 /*
   chunkLookup
   Takes in a world pointer, and returns a pointer to the chunk
-  at the specific x y and z coordinates. If the chunk is the same
-  as last time, it does not do another lookup, meaning this
+  at the specific x y and z coordinates. If the chunk is the
+  same as last time, it does not do another lookup, meaning this
   function can be called very frequently.
 */
 Chunk* chunkLookup(World *world, int x, int y, int z) {
@@ -414,4 +433,7 @@ void genChunk(
             ch_setBlock(blocks, x, y, z, 5);
         }
   }
+  
+  // Sort all chunks
+  sortChunks(world);
 }
