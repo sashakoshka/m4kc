@@ -10,7 +10,7 @@
 #include "gui.h"
 
 /*
-  Minecraft 4k, C edition. Version 0.5
+  Minecraft 4k, C edition. Version 0.6
   
   Credits:
     notch       - creating the original game
@@ -265,7 +265,7 @@ int gameLoop(
   static char trapMouseText    [] = "Capture mouse: OFF";
   
   static char debugText        [][16] = {
-    "M4KC 0.5",
+    "M4KC 0.6",
     "X: ",
     "Y: ",
     "Z: ",
