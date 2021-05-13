@@ -1,6 +1,6 @@
 int   randm(int);
 int   nmod(int, int);
-float perlin2d(float, float, int);
+float perlin2d(int, double, double, double);
 
 /*
   randm
@@ -34,7 +34,11 @@ float smooth_inter(float x, float y, float s) {
   return x + s * s * (3 - 2 * s) * (y - x);
 }
 
-float perlin2d(float x, float y, int seed) {
+float perlin2d(
+  int seed,
+  double x, double y,
+  double freq
+) {
   static Uint8 hash[] =
   
   {208,34,231,213,32,248,233,56,161,78,24,140,
@@ -54,11 +58,11 @@ float perlin2d(float x, float y, int seed) {
   137,139,255,114,20,218,113,154,27,127,246,250,1,8,198,250,209,
   92,222,173,21,88,102,219};
   
-  float xa = x * 0.0625;
-  float ya = y * 0.0625;
-  float amp = 1.0;
-  float fin = 0;
-  float div = 0.0;
+  double xa = x * freq; //0.0625 TODO: update chunkGen
+  double ya = y * freq; //0.0625
+  double amp = 1.0;
+  double fin = 0;
+  double div = 0.0;
 
   int i;
   for(i = 0; i < 4; i++) {
@@ -66,14 +70,14 @@ float perlin2d(float x, float y, int seed) {
     
     int x_int = xa;
     int y_int = ya;
-    float x_frac = xa - x_int;
-    float y_frac = ya - y_int;
+    double x_frac = xa - x_int;
+    double y_frac = ya - y_int;
     int s = noise2(x_int, y_int, hash, seed);
     int t = noise2(x_int + 1, y_int,     hash, seed);
     int u = noise2(x_int,     y_int + 1, hash, seed);
     int v = noise2(x_int + 1, y_int + 1, hash, seed);
-    float low  = smooth_inter(s, t, x_frac);
-    float high = smooth_inter(u, v, x_frac);
+    double low  = smooth_inter(s, t, x_frac);
+    double high = smooth_inter(u, v, x_frac);
     
     fin += smooth_inter(low, high, y_frac) * amp;
     amp /= 2;

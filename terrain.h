@@ -378,12 +378,20 @@ void genChunk(
       for(int x = 0; x < 64; x++)
         for(int z = 0; z < 64; z++) {
           heightmap[x][z] =
-            perlin2d(
-              x + xOffset + 65535,
-              z + zOffset + 65535,
-              seed
+            perlin2d( // Detail noise
+              seed,
+              x + xOffset + 16777215,
+              z + zOffset + 16777215,
+              0.0625
             )
-            * 16 + 24 - yOffset;
+            * 16 +
+            perlin2d( // Detail noise
+              seed,
+              x + xOffset + 16777215,
+              z + zOffset + 16777215,
+              0.0078125
+            )
+            * 64 - yOffset;
         }
       
       // Make terrain from heightmap
