@@ -1,10 +1,11 @@
-void strnum  (char*, int, int);
-int drawChar (SDL_Renderer*,   int, int, int);
-int drawStr  (SDL_Renderer*, char*, int, int);
-int button   (SDL_Renderer*, char*,
+void strnum   (char*, int, int);
+int drawChar  (SDL_Renderer*,   int, int, int);
+int drawStr   (SDL_Renderer*, char*, int, int);
+int drawBGStr (SDL_Renderer*, char*, int, int);
+int button    (SDL_Renderer*, char*,
   int, int, int, int, int
 );
-int drawSlot (SDL_Renderer*, InvSlot*,
+int drawSlot  (SDL_Renderer*, InvSlot*,
   int, int, int, int
 );
 
@@ -51,6 +52,34 @@ int drawStr(SDL_Renderer *renderer,
   }
   
   return x;
+}
+
+/*
+  drawBGStr
+  Like drawStr, but also draws a semitransparent background
+  behind the text.
+*/
+int drawBGStr(SDL_Renderer *renderer,
+  char *str, int x, int y
+) {
+  static int len;
+  static SDL_Rect bg = {0, 0, 0, 9};
+  static char *strBak;
+  
+  strBak = str;
+  len = 0;
+  while(*str > 0)
+    len += font[(int)*(str++)][8];
+  
+  bg.x = x;
+  bg.y = y;
+  bg.w = len + 1;
+  
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+  SDL_RenderFillRect(renderer, &bg);
+  
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  return drawStr(renderer, strBak, ++x, ++y);
 }
 
 /*

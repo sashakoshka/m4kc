@@ -801,15 +801,9 @@ int gameLoop(
           ((int)playerPosition.z - 64) >> 6
         );
         
-        // Shadow
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-        for(i = 0; i < 8; i++)
-          drawStr(renderer, debugText[i], 3, i * 8 + 3);
-        
         // Text
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         for(i = 0; i < 8; i++)
-          drawStr(renderer, debugText[i], 2, i * 8 + 2);
+          drawBGStr(renderer, debugText[i], 0, i * 9);
       }
       // Hotbar
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);

@@ -91,7 +91,8 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
     
     // Look up chunk instead of this. If chunk is not found, 
     // return null.
-    
+    // TODO: sort chunk array when new one is loaded, and do a
+    // binary search here
     for(i = 0; i < 27; i++)
       if(world->chunk[i].coordHash == x) {
         chunk = &world->chunk[i];
