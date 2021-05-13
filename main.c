@@ -59,10 +59,6 @@ int main(int argc, char *argv[]) {
   
   //----  initializing SDL  ----//
   
-  // There are a couple things here that are commented out to
-  // cut down executable size. If you are trying to solve a
-  // problem, just comment them back in.
-  
   SDL_Window   *window   = NULL;
   SDL_Renderer *renderer = NULL;
   const Uint8  *keyboard = SDL_GetKeyboardState(NULL);

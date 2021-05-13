@@ -27,7 +27,6 @@ void initChunks(World *world) {
   for(i = 0; i < 27; i++) {
     world->chunk[i].coordHash = 0;
     world->chunk[i].loaded    = 0;
-    world->chunk[i].stamp     = 0;
     world->chunk[i].blocks    = NULL;
   }
 }
@@ -271,7 +270,7 @@ void genChunk(
   // To make sure structure generation accross chunks is
   // different, but predictable
   srand(seed * (xOffset * yOffset * zOffset + 1));
-  int heightmap[64][64], i, x, z, stampMin;
+  int heightmap[64][64], i, x, z, loadedMin;
   static int count = 0;
   
   Chunk *chunk = chunkLookup(world, xOffset, yOffset, zOffset);
@@ -282,12 +281,14 @@ void genChunk(
   if(chunk == NULL) {
     for(; i < 27 && world->chunk[i].loaded; i++);
   
-    // Pick out the oldest chunk (stamp) and overrwrite it.
+    // Pick out the oldest chunk (loaded) and overrwrite it.
     if(i == 27) {
-      stampMin = 0;
+      loadedMin = 0;
       for(i = 0; i < 27; i++)
-        if(world->chunk[i].stamp <= world->chunk[stampMin].stamp)
-          stampMin = i;
+        if(
+          world->chunk[i].loaded <=
+          world->chunk[loadedMin].loaded
+        ) loadedMin = i;
     }
     chunk = &world->chunk[i];
   }
@@ -328,8 +329,7 @@ void genChunk(
   
   // What we have here won't cause a segfault, so it is safe to
   // mark the chunk as loaded and set its stamp.
-  chunk->loaded = 1;
-  chunk->stamp  = ++count;
+  chunk->loaded = ++count;
   
   /*
   printf(
@@ -387,7 +387,7 @@ void genChunk(
         }
       }
       
-      for(i = randm(4); i > 0; i--) {
+      for(i = randm(2); i > 0; i--) {
         x = randm(64);
         z = randm(64);
         if(
