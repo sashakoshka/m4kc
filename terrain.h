@@ -73,7 +73,6 @@ void genAll(World *world, unsigned int seed, int type) {
 */
 Chunk* chunkLookup(World *world, int x, int y, int z) {
   static Chunk *chunk;
-  static int i;
   // Rather unlikely position. Not a coord because integers are
   // faster
   static int lastX = 100000000;
@@ -109,14 +108,22 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
     x |= y | z;
     x++;
     
-    // Look up chunk instead of this. If chunk is not found, 
-    // return null.
-    // TODO: do a binary search here
-    for(i = 0; i < 27; i++)
-      if(world->chunk[i].coordHash == x) {
-        chunk = &world->chunk[i];
+    // Look up chunk using a binary search
+    static int first, middle, last;
+    
+    first  = 0;
+    last   = 26;
+    middle = 13;
+    
+    while(first <= last) {
+      if(world->chunk[middle].coordHash > x)
+        first = middle + 1;
+      else if(world->chunk[middle].coordHash == x) {
+        chunk = &world->chunk[middle];
         return chunk;
-      }
+      } else last = middle - 1;
+      middle = (first + last) / 2;
+    }
     chunk = NULL;
   }
   return chunk;
