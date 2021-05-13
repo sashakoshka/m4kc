@@ -19,6 +19,7 @@ typedef struct _Inputs    Inputs;
 struct _Chunk {
   int coordHash;
   int loaded;
+  int stamp;
   int *blocks;
 };
 

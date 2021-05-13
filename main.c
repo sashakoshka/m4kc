@@ -54,8 +54,34 @@ int main(int argc, char *argv[]) {
   
   initChunks(&world);
   
-  //genChunk(&world, seed, 0, 0, 0, 1);
   genAll(&world, seed, 1);
+  
+  // this is test code
+  
+  // issues: chunk pointer in genChunk does not set properly when
+  // overrwriting and old chunk's memory(???), and setBlock in
+  // genChunk cases segfault when negative chunk
+  //genChunk(&world, seed, 564, 466, 234, 2);
+  
+  printf("\n---- LOOKUP TEST ---\n\n");
+  Chunk *testChunk;
+  for(int x = -64; x < 64 * 2; x += 64)
+  for(int y = -64; y < 64 * 2; y += 64)
+  for(int z = -64; z < 64 * 2; z += 64) {
+    testChunk = chunkLookup(&world, x, y, z);
+    if(testChunk == NULL)
+      printf("NULL chunk!\n");
+    else
+      printf(
+        "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
+        testChunk->coordHash,
+        x, y, z,
+        testChunk->stamp, testChunk
+      );
+  }
+  // get rid of this once above code is confirmed to work
+  //return 0;
+  
   genTextures(seed);
   
   //----  initializing SDL  ----//
@@ -252,6 +278,8 @@ int gameLoop(
                   1: Pause menu
                   2: In-game options menu
                   3: Inventory
+                  4: Advanced debug menu
+                  5: Chunk peek
                 */
                 gamePopup,
                 
@@ -609,7 +637,7 @@ int gameLoop(
               )
             ) {
               pixelColor = textures[
-                i6 + i7 * 16 + i25 * 256 * 3
+                i6 + (i7 << 4) + i25 * 256 * 3
               ]; 
             }
             // See if the block is selected
@@ -674,9 +702,9 @@ int gameLoop(
       if(finalPixelColor > 0) {
         SDL_SetRenderDrawColor(
           renderer,
-          (finalPixelColor >> 16 & 0xFF) * pixelShade / 255,
-          (finalPixelColor >> 8  & 0xFF) * pixelShade / 255,
-          (finalPixelColor       & 0xFF) * pixelShade / 255,
+          ((finalPixelColor >> 16 & 0xFF) * pixelShade) >> 8,
+          ((finalPixelColor >> 8  & 0xFF) * pixelShade) >> 8,
+          ((finalPixelColor       & 0xFF) * pixelShade) >> 8,
           fogLog ? sqrt(pixelMist) * 16 : pixelMist
         );
         
@@ -710,7 +738,7 @@ int gameLoop(
           gamePopup = 0;
         }
 
-        if(button(renderer, "Options",
+        if(button(renderer, "Options...",
           BUFFER_HALF_W - 64, 42, 128,
           inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
         ) {
@@ -764,11 +792,72 @@ int gameLoop(
           }
         }
         
-        if(button(renderer, "Back",
+        if(button(renderer, "Debug...",
           BUFFER_HALF_W - 64, 64, 128,
           inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
         ) {
+          gamePopup = 4;
+        }
+        
+        if(button(renderer, "Back",
+          BUFFER_HALF_W - 64, 86, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
           gamePopup = 1;
+        }
+        break;
+      
+      // Inventory
+      case 3:
+        // TODO: draw inventory
+        break;
+      
+      // Advanced debug menu
+      case 4:
+        if(button(renderer, "Chunk Peek",
+          BUFFER_HALF_W - 64, 20, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          gamePopup = 5;
+        }
+        
+        if(button(renderer, "Back",
+          BUFFER_HALF_W - 64, 42, 128,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          gamePopup = 2;
+        }
+        break;
+      
+      // Chunk peek
+      case 5:
+        ;
+        static Chunk *debugChunk;
+        static char chunkPeekText[][32] = {
+          "coordHash: ",
+          "loaded: "
+        };
+        debugChunk = chunkLookup(
+          world,
+          (int)playerPosition.x - 64,
+          (int)playerPosition.y - 64,
+          (int)playerPosition.z - 64
+        );
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        if(debugChunk != NULL) {
+          strnum(
+            chunkPeekText[0], 11,
+            debugChunk -> coordHash
+          );
+          strnum(
+            chunkPeekText[1], 8,
+            debugChunk -> loaded
+          );
+          for(i = 0; i < 2; i++) {
+            drawStr(renderer, chunkPeekText[i], 0, i << 3); 
+          }
+        } else {
+          drawStr(renderer, "NULL chunk!", 0, 0); 
         }
         break;
     }
