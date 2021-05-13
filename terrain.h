@@ -331,12 +331,14 @@ void genChunk(
   chunk->loaded = 1;
   chunk->stamp  = ++count;
   
+  /*
   printf(
     "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
     chunk->coordHash,
     xOffset, yOffset, zOffset,
     chunk->stamp, chunk
   );
+  */
   
   switch(type) {
     case 0:
@@ -352,7 +354,7 @@ void genChunk(
         for(int z = 0; z < 64; z++) {
           heightmap[x][z] =
             perlin2d(x + xOffset, z + zOffset, seed)
-            * 16 + 24 + yOffset;
+            * 16 + 24 - yOffset;
         }
       
       // Make terrain from heightmap

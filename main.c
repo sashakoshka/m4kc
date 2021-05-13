@@ -53,34 +53,7 @@ int main(int argc, char *argv[]) {
   //---- generating assets  ----//
   
   initChunks(&world);
-  
   genAll(&world, seed, 1);
-  
-  // this is test code
-  
-  // issues: chunk pointer in genChunk does not set properly when
-  // overrwriting and old chunk's memory(???), and setBlock in
-  // genChunk cases segfault when negative chunk
-  //genChunk(&world, seed, 564, 466, 234, 2);
-  
-  printf("\n---- LOOKUP TEST ---\n\n");
-  Chunk *testChunk;
-  for(int x = -64; x < 64 * 2; x += 64)
-  for(int y = -64; y < 64 * 2; y += 64)
-  for(int z = -64; z < 64 * 2; z += 64) {
-    testChunk = chunkLookup(&world, x, y, z);
-    if(testChunk == NULL)
-      printf("NULL chunk!\n");
-    else
-      printf(
-        "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
-        testChunk->coordHash,
-        x, y, z,
-        testChunk->stamp, testChunk
-      );
-  }
-  // get rid of this once above code is confirmed to work
-  //return 0;
   
   genTextures(seed);
   
@@ -96,7 +69,7 @@ int main(int argc, char *argv[]) {
   SDL_Event event;
   
   if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-    //printf("cant make window\n");
+    printf("cant make window\n");
     goto exit;
   }
   
@@ -106,7 +79,7 @@ int main(int argc, char *argv[]) {
     SDL_WINDOW_SHOWN
   );
   if(window == NULL) {
-    //printf("%s\n", SDL_GetError());
+    printf("%s\n", SDL_GetError());
     goto exit;
   }
   
@@ -114,12 +87,10 @@ int main(int argc, char *argv[]) {
     window,
     -1, 0
   );
-  /*
   if(renderer == NULL) {
     printf("%s\n", SDL_GetError());
     goto exit;
   }
-  */
   SDL_RenderSetScale(renderer, BUFFER_SCALE, BUFFER_SCALE);
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   
@@ -298,7 +269,7 @@ int gameLoop(
   static char trapMouseText    [] = "Capture mouse: OFF";
   
   static char debugText        [][16] = {
-    "M4KS 0.5",
+    "M4KC 0.5",
     "X: ",
     "Y: ",
     "Z: ",
@@ -832,6 +803,11 @@ int gameLoop(
       // Chunk peek
       case 5:
         ;
+        static int chunkPeekRX,
+                   chunkPeekRY,
+                   chunkPeekRYMax = 0,
+                   chunkPeekRZ,
+                   chunkPeekColor;
         static Chunk *debugChunk;
         static char chunkPeekText[][32] = {
           "coordHash: ",
@@ -845,6 +821,8 @@ int gameLoop(
         );
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         if(debugChunk != NULL) {
+          // There is a chunk to display info about. Process
+          // strings.
           strnum(
             chunkPeekText[0], 11,
             debugChunk -> coordHash
@@ -853,11 +831,96 @@ int gameLoop(
             chunkPeekText[1], 8,
             debugChunk -> loaded
           );
+          // Draw the strings
           for(i = 0; i < 2; i++) {
             drawStr(renderer, chunkPeekText[i], 0, i << 3); 
           }
+          
+          // Scroll wheel for changing chunk map xray
+          if(inputs->mouse_Wheel != 0) {
+            chunkPeekRYMax -= inputs->mouse_Wheel;
+            chunkPeekRYMax = nmod(chunkPeekRYMax, 64);
+            inputs->mouse_Wheel = 0;
+          }
+          
+          // Mouse for changing chunk map xray
+          if(
+            inputs->mouse_X > 128 &&
+            inputs->mouse_Y < 64  &&
+            inputs->mouse_Left
+          ) chunkPeekRYMax = inputs->mouse_Y;
+          
+          // Up/Down buttons for changing chunk map xray
+          if(button(renderer, "UP",
+            4, 56, 64,
+            inputs->mouse_X, inputs->mouse_Y)
+            && inputs->mouse_Left
+          ) {
+            chunkPeekRYMax = nmod(chunkPeekRYMax - 1, 64);
+          }
+          
+          if(button(renderer, "DOWN",
+            4, 78, 64,
+            inputs->mouse_X, inputs->mouse_Y)
+            && inputs->mouse_Left
+          ) {
+            chunkPeekRYMax = nmod(chunkPeekRYMax + 1, 64);
+          }
+          
+          // Draw chunk map
+          SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+          SDL_RenderDrawLine(
+            renderer,
+            128, chunkPeekRYMax,
+            191, chunkPeekRYMax
+          );
+          for(
+            chunkPeekRY = 64; chunkPeekRY >= chunkPeekRYMax;
+            chunkPeekRY--)
+          for(
+            chunkPeekRX = 0; chunkPeekRX < 64; chunkPeekRX++)
+          for(
+            chunkPeekRZ = 0; chunkPeekRZ < 64; chunkPeekRZ++
+          ) {
+            chunkPeekColor = textures[
+              debugChunk->blocks[
+                chunkPeekRX +
+                (chunkPeekRY << 6) +
+                (chunkPeekRZ << 12)
+              ] * 256 * 3 + 6 * 16
+            ];
+            if(chunkPeekColor) {
+              SDL_SetRenderDrawColor(
+                renderer,
+                (chunkPeekColor >> 16 & 0xFF),
+                (chunkPeekColor >> 8 & 0xFF),
+                (chunkPeekColor & 0xFF),
+                255
+              );
+              SDL_RenderDrawPoint(
+                renderer,
+                chunkPeekRX + 128, chunkPeekRY + chunkPeekRZ
+              );
+              // A little shadow for depth
+              SDL_SetRenderDrawColor(
+                renderer,
+                0, 0, 0, 64
+              );
+              SDL_RenderDrawPoint(
+                renderer,
+                chunkPeekRX + 128, chunkPeekRY + chunkPeekRZ + 1
+              );
+            }
+          }
         } else {
           drawStr(renderer, "NULL chunk!", 0, 0); 
+        }
+        
+        if(button(renderer, "Back",
+          4, 100, 64,
+          inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
+        ) {
+          gamePopup = 4;
         }
         break;
     }
