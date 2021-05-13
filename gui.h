@@ -87,7 +87,7 @@ int button(SDL_Renderer *renderer,
     SDL_SetRenderDrawColor(renderer, 139, 139, 139, 255);
   SDL_RenderFillRect(renderer, &rect);
   
-  x += (w - len) / 2 + 1;
+  x += ((w - len) >> 1) + 1;
   y += 5;
   
   if(hover)

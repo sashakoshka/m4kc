@@ -54,6 +54,7 @@ void genAll(World *world, unsigned int seed, int type) {
 */
 Chunk* chunkLookup(World *world, int x, int y, int z) {
   static Chunk *chunk;
+  static int i;
   // Rather unlikely position. Not a coord because integers are
   // faster
   static int lastX = 100000000;
@@ -68,6 +69,10 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
     lastY != y ||
     lastZ != z
   ) {
+    lastX = x;
+    lastY = y;
+    lastZ = z;
+    
     // Quickly hash the chunk coordinates
     
     // Since we already divided them by 64 (with bit shifting),
@@ -84,17 +89,15 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
     // Flatten them using binary or. Hash is stored in X.
     x |= y | z;
     
-    // TODO: look up chunk instead of this. If chunk is not
-    // found, return null.
+    // Look up chunk instead of this. If chunk is not found, 
+    // return null.
     
-    if(x == 0 && y == 0 && z == 0)
-      chunk = &world->chunk[0];
-    else
-      return NULL;
-    
-    lastX = x;
-    lastY = y;
-    lastZ = z;
+    for(i = 0; i < 27; i++)
+      if(world->chunk[i].coordHash == x) {
+        chunk = &world->chunk[i];
+        return chunk;
+      }
+    chunk = NULL;
   }
   return chunk;
 }
@@ -123,7 +126,7 @@ int setBlock(
     // If chunk does not have an allocated block array, exit
     if(chunk == NULL || !chunk->loaded) return -1;
     
-    chunk->blocks[ + x + y * 64 + z * 4096] = block;
+    chunk->blocks[x + (y << 6) + (z << 12)] = block;
     return b;
   } else {
     return 0;
@@ -145,11 +148,7 @@ int getBlock(
   // If chunk does not have an allocated block array, exit
   if(chunk == NULL || !chunk->loaded) return -1;
   
-  return chunk->blocks[
-    x +
-    y * 64 +
-    z * 4096
-  ];
+  return chunk->blocks[x + (y << 6) + (z << 12)];
 }
 
 /*
@@ -164,8 +163,8 @@ int ch_setBlock(
   int block
 ) {
   static int b;
-  b = blocks[x + y * 64 + z * 4096] > 0;
-  blocks[x + y * 64 + z * 4096] = block;
+  b = blocks[x + (y << 6) + (z << 12)] > 0;
+  blocks[x + (y << 6) + (z << 12)] = block;
   return b;
 }
 
