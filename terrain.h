@@ -75,21 +75,19 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
   static Chunk *chunk;
   // Rather unlikely position. Not a coord because integers are
   // faster
-  static int agoX = 100000000;
-  static int agoY = 100000000;
-  static int agoZ = 100000000;
+  static IntCoords ago = {100000000, 100000000, 100000000};
   // Divide by 64
   x >>= 6;
   y >>= 6;
   z >>= 6;
   if(
-    agoX != x ||
-    agoY != y ||
-    agoZ != z
+    ago.x != x ||
+    ago.y != y ||
+    ago.z != z
   ) {
-    agoX = x;
-    agoY = y;
-    agoZ = z;
+    ago.x = x;
+    ago.y = y;
+    ago.z = z;
     
     // Quickly hash the chunk coordinates
     
