@@ -290,6 +290,8 @@ int gameLoop(
   static Coords playerPosition = {96.5, 65.0, 96.5};
   static Coords playerMovement = { 0.0,  0.0,  0.0};
   
+  static Chunk *chunk;
+  
   static int init = 1;
   if(init) {
     BUFFER_HALF_W = BUFFER_W / 2;
@@ -573,13 +575,25 @@ int gameLoop(
           blockRayPosition.y = (int)f35 - 64;
           blockRayPosition.z = (int)f36 - 64;
           
-          i25 = getBlock(
+          // Imitate getBlock so we don't have to launch into
+          // a function then another function a zillion times
+          // per second
+          i25 = 0;
+          chunk = chunkLookup(
             world,
             blockRayPosition.x,
             blockRayPosition.y,
             blockRayPosition.z
           );
-          if (i25 > 0) {
+          if(chunk) {
+            i25 = chunk->blocks[
+               nmod(blockRayPosition.x, 64)        +
+              (nmod(blockRayPosition.y, 64) << 6 ) +
+              (nmod(blockRayPosition.z, 64) << 12)
+            ];
+            goto chunkNotNull; // Less branches the better
+          }
+          chunkNotNull: if(i25 > 0) {
             i6 = (int)((f34 + f36) * 16.0) & 0xF;
             i7 = ((int)(f35 * 16.0) & 0xF) + 16;
             if (blockFace == 1) {
