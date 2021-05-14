@@ -25,7 +25,7 @@ void genChunk(
 */
 void initChunks(World *world) {
   static int i;
-  for(i = 0; i < 27; i++) {
+  for(i = 0; i < CHUNKARR_SIZE; i++) {
     world->chunk[i].coordHash = 0;
     world->chunk[i].loaded    = 0;
     world->chunk[i].blocks    = NULL;
@@ -39,8 +39,8 @@ void initChunks(World *world) {
 void sortChunks (World* world) {
   int i, j;
   Chunk temp;
-  for(i = 0; i < 27; i++)
-  for(j = 0; j < (27 - 1 - i); j++)
+  for(i = 0; i < CHUNKARR_SIZE; i++)
+  for(j = 0; j < (CHUNKARR_SIZE - 1 - i); j++)
   if (
     world->chunk[j].coordHash < world->chunk[j + 1].coordHash
   ) {
@@ -59,10 +59,19 @@ void sortChunks (World* world) {
 void genAll(World *world, unsigned int seed, int type) {
   // For all chunk slots we have, go around the player. This
   // will eventually take in player position.
-  for(int x = -64; x < 64 * 2; x += 64)
-  for(int y = -64; y < 64 * 2; y += 64)
-  for(int z = -64; z < 64 * 2; z += 64)
-    genChunk(world, seed, x, y, z, type);
+  for(
+    int x = -64;
+    x < 32 * (CHUNKARR_DIAM + 1);
+    x += 64
+  ) for(
+    int y = -32 * (CHUNKARR_DIAM - 1);
+    y < 32 * (CHUNKARR_DIAM + 1);
+    y += 64
+  ) for(
+    int z = -32 * (CHUNKARR_DIAM - 1);
+    z < 32 * (CHUNKARR_DIAM + 1);
+    z += 64
+  ) genChunk(world, seed, x, y, z, type);
 }
 /*
   chunkLookup
@@ -109,9 +118,9 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
     // Look up chunk using a binary search
     int first, middle, last;
     
-    first  = 0;
-    last   = 26;
-    middle = 13;
+    first  = 0,
+    last   = CHUNKARR_SIZE - 1,
+    middle = (CHUNKARR_SIZE - 1) / 2;
     
     while(first <= last) {
       if(world->chunk[middle].coordHash > x)
@@ -302,12 +311,12 @@ void genChunk(
   // for it
   i = 0;
   if(chunk == NULL) {
-    for(; i < 27 && world->chunk[i].loaded; i++);
+    for(; i < CHUNKARR_SIZE && world->chunk[i].loaded; i++);
   
     // Pick out the oldest chunk (loaded) and overrwrite it.
-    if(i == 27) {
+    if(i == CHUNKARR_SIZE) {
       loadedMin = 0;
-      for(i = 0; i < 27; i++)
+      for(i = 0; i < CHUNKARR_SIZE; i++)
         if(
           world->chunk[i].loaded <=
           world->chunk[loadedMin].loaded
@@ -406,6 +415,8 @@ void genChunk(
               ch_setBlock(blocks, x, y, z, 0);
       
       // Generate structures
+      // TODO: fix structures not properly generating in some
+      // chunks
       for(i = randm(16) + 64; i > 0; i--) {
         x = randm(64);
         z = randm(64);

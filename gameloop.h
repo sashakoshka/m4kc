@@ -446,8 +446,8 @@ int gameLoop(
             lookup_hash++;
             
             int lookup_first  = 0,
-                lookup_last   = 26,
-                lookup_middle = 13;
+                lookup_last   = CHUNKARR_SIZE - 1,
+                lookup_middle = (CHUNKARR_SIZE - 1) / 2;
             
             while(lookup_first <= lookup_last) {
               if(

@@ -1,3 +1,6 @@
+#define CHUNKARR_DIAM 5
+#define CHUNKARR_SIZE CHUNKARR_DIAM*CHUNKARR_DIAM*CHUNKARR_DIAM
+
 typedef struct _Chunk     Chunk;
 typedef struct _World     World;
 typedef struct _Player    Player;
@@ -27,9 +30,8 @@ struct _Chunk {
   _World
   Stores a chunk. This will eventually store multiple of them.
 */
-// 25: amount of chunks that can be loaded at one time
 struct _World {
-  Chunk chunk[27];
+  Chunk chunk[CHUNKARR_SIZE];
 };
 
 /*
