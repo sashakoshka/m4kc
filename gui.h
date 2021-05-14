@@ -1,13 +1,17 @@
-void strnum   (char*, int, int);
-int drawChar  (SDL_Renderer*,   int, int, int);
-int drawStr   (SDL_Renderer*, char*, int, int);
-int drawBGStr (SDL_Renderer*, char*, int, int);
-int button    (SDL_Renderer*, char*,
+void strnum     (char*, int, int);
+int  drawChar   (SDL_Renderer*,   int, int, int);
+int  drawStr    (SDL_Renderer*, char*, int, int);
+int  drawBGStr  (SDL_Renderer*, char*, int, int);
+int  button(
+  SDL_Renderer*, char*,
   int, int, int, int, int
 );
-int drawSlot  (SDL_Renderer*, InvSlot*,
+int  drawSlot(
+  SDL_Renderer*, InvSlot*,
   int, int, int, int
 );
+void dirtBg     (SDL_Renderer*, int, int);
+void loadScreen (SDL_Renderer*, char*, int, int);
 
 /*
   strnum
@@ -182,4 +186,68 @@ int drawSlot(SDL_Renderer *renderer,
     }
   
   return hover;
+}
+/*
+  dirtBg
+  Draws a dirt textured background
+*/
+void dirtBg (
+  SDL_Renderer *renderer,
+  int BUFFER_W,
+  int BUFFER_H
+) {
+  Uint8 i = 0;
+  int color;
+  for(int y = 0; y < BUFFER_H; y++) {
+    for(int x = 0; x < BUFFER_W; x++) {
+      color = textures[i + 2 * 256 * 3];
+      SDL_SetRenderDrawColor(
+        renderer,
+        (color >> 16 & 0xFF),
+        (color >> 8 & 0xFF),
+        (color & 0xFF),
+        255
+      );
+      SDL_RenderDrawPoint(renderer, x, y);
+      i++;
+    }
+    i &= 0b11110000;
+  }
+}
+
+/*
+  loadScreen
+  Draws a loading screen
+*/
+void loadScreen(
+  SDL_Renderer *renderer,
+  char *str,
+  int BUFFER_W,
+  int BUFFER_H
+) {
+  char *strsave = str;
+  int len = 0;
+  while(*str > 0) {
+    len += font[(int)*(str++)][8];
+  }
+  str = strsave;
+  len /= 2;
+  
+  dirtBg(renderer, BUFFER_W, BUFFER_H);
+  
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+  drawStr(
+    renderer,
+    str,
+    BUFFER_W / 2 - len + 1,
+    BUFFER_H / 2 - 7
+  );
+  
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  drawStr(
+    renderer,
+    str,
+    BUFFER_W / 2 - len,
+    BUFFER_H / 2 - 8
+  );
 }

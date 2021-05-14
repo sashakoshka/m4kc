@@ -40,19 +40,12 @@ int main(int argc, char *argv[]) {
   
   int mouseX = 0, mouseY = 0;
   
-  //---- generating assets  ----//
-  
-  initChunks(&world);
-  genAll(&world, seed, 1);
-  
-  genTextures(seed);
-  
   //----  initializing SDL  ----//
   
   SDL_Window   *window   = NULL;
   SDL_Renderer *renderer = NULL;
   const Uint8  *keyboard = SDL_GetKeyboardState(NULL);
-  SDL_Event event;
+  SDL_Event     event;
   
   if(SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("cant make window\n");
@@ -80,6 +73,24 @@ int main(int argc, char *argv[]) {
   SDL_RenderSetScale(renderer, BUFFER_SCALE, BUFFER_SCALE);
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
   
+  //---- generating assets  ----//
+  
+  // Needs to come first (for the loading screen)
+  genTextures(seed);
+  
+  loadScreen(
+    renderer,
+    "Generating world...",
+    BUFFER_W,
+    BUFFER_H
+  );
+  if(!heartbeat(window, &event, renderer))
+    goto exit;
+  
+  initChunks(&world);
+  genAll(&world, seed, 1);
+  
+  
    //----   main game loop   ----//
   
   while(gameLoop(
@@ -88,6 +99,7 @@ int main(int argc, char *argv[]) {
     BUFFER_SCALE,
     seed,
     &inputs,
+    keyboard,
     &world,
     renderer,
     window

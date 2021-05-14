@@ -10,6 +10,7 @@ int gameLoop(
   int BUFFER_SCALE,
   unsigned int seed,
   Inputs *inputs,
+  const Uint8 *keyboard,
   World *world,
   SDL_Renderer *renderer,
   SDL_Window   *window
