@@ -282,10 +282,10 @@ int gameLoop(
   static SDL_Rect hotbarSelectRect;
   
   static Inventory inventory;
-  static Coords blockSelect       = {0};
-  static Coords blockSelectOffset = {0};
-  static Coords coordPass         = {0};
-  static Coords blockRayPosition  = {0};
+  static IntCoords blockSelect       = {0};
+  static IntCoords blockSelectOffset = {0};
+  static IntCoords coordPass         = {0};
+  static IntCoords blockRayPosition  = {0};
 
   static Coords playerPosition = {96.5, 65.0, 96.5};
   static Coords playerMovement = { 0.0,  0.0,  0.0};

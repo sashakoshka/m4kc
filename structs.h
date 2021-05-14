@@ -4,6 +4,7 @@ typedef struct _Player    Player;
 typedef struct _InvSlot   InvSlot;
 typedef struct _Inventory Inventory;
 typedef struct _Coords    Coords;
+typedef struct _IntCoords IntCoords;
 typedef struct _Inputs    Inputs;
 
 /*
@@ -76,6 +77,16 @@ struct _Coords {
   float x;
   float y;
   float z;
+};
+
+/*
+  _IntCoords
+  Stores xyz integer coordinates
+*/
+struct _IntCoords {
+  int x;
+  int y;
+  int z;
 };
 
 /*
