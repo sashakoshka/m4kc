@@ -569,7 +569,9 @@ int gameLoop(
             f35--; 
           if (blockFace == 2)
             f36--; 
-        } 
+        }
+        
+        // Whatever's in this loop needs to run *extremely* fast
         while (f33 < d) {
           blockRayPosition.x = (int)f34 - 64;
           blockRayPosition.y = (int)f35 - 64;
@@ -577,23 +579,79 @@ int gameLoop(
           
           // Imitate getBlock so we don't have to launch into
           // a function then another function a zillion times
-          // per second
-          i25 = 0;
+          // per second.
+          static IntCoords lookup_ago = {
+            100000000,
+            100000000,
+            100000000
+          }, lookup_now;
+          
+          lookup_now.x = blockRayPosition.x >> 6;
+          lookup_now.y = blockRayPosition.y >> 6;
+          lookup_now.z = blockRayPosition.z >> 6;
+          
+          if(
+            lookup_now.x != lookup_ago.x ||
+            lookup_now.y != lookup_ago.y ||
+            lookup_now.z != lookup_ago.z
+          ) {
+            memcpy(
+              &lookup_ago,
+              &lookup_now,
+              sizeof(IntCoords)
+            );
+            
+            lookup_now.x &= 0b1111111111;
+            lookup_now.y &= 0b1111111111;
+            lookup_now.z &= 0b1111111111;
+            
+            lookup_now.y <<= 10;
+            lookup_now.z <<= 20;
+            
+            int lookup_hash =
+              lookup_now.x | lookup_now.y | lookup_now.z;
+            lookup_hash++;
+            
+            int lookup_first  = 0,
+                lookup_last   = 26,
+                lookup_middle = 13;
+            
+            while(lookup_first <= lookup_last) {
+              if(
+                world->chunk[lookup_middle].coordHash
+                > lookup_hash
+              ) lookup_first = lookup_middle + 1;
+              else if(
+                world->chunk[lookup_middle].coordHash
+                == lookup_hash
+              ) {
+                chunk = &world->chunk[lookup_middle];
+                goto foundChunk;
+              } else lookup_last = lookup_middle - 1;
+              lookup_middle = (lookup_first + lookup_last) / 2;
+            }
+            chunk = NULL;
+          }
+          /*
           chunk = chunkLookup(
             world,
             blockRayPosition.x,
             blockRayPosition.y,
             blockRayPosition.z
           );
-          if(chunk) {
+          */
+          foundChunk: if(chunk) {
             i25 = chunk->blocks[
                nmod(blockRayPosition.x, 64)        +
               (nmod(blockRayPosition.y, 64) << 6 ) +
               (nmod(blockRayPosition.z, 64) << 12)
             ];
-            goto chunkNotNull; // Less branches the better
+          } else {
+            i25 = 0;
+            goto chunkNull;
           }
-          chunkNotNull: if(i25 > 0) {
+          
+          if(i25 > 0) {
             i6 = (int)((f34 + f36) * 16.0) & 0xF;
             i7 = ((int)(f35 * 16.0) & 0xF) + 16;
             if (blockFace == 1) {
@@ -641,7 +699,7 @@ int gameLoop(
               memcpy(
                 &coordPass,
                 &blockRayPosition,
-                sizeof(Coords)
+                sizeof(IntCoords)
               );
               
               // Treating a coords set as an array and blockFace
@@ -662,12 +720,13 @@ int gameLoop(
                 255 - (blockFace + 2) % 3 * 50;
               d = f33;
             } 
-          } 
+          }
+          chunkNull:
           f34 += f29;
           f35 += f30;
           f36 += f31;
           f33 += f28;
-        }
+        } // This concludes our warpspeed rampage
       }
       
       // Draw inverted color crosshair
@@ -698,7 +757,7 @@ int gameLoop(
   
   // Pass info about selected block on
   blockSelected = selectedPass;
-  memcpy(&blockSelect, &coordPass, sizeof(Coords));
+  memcpy(&blockSelect, &coordPass, sizeof(IntCoords));
   
   inputs->mouse_X /= BUFFER_SCALE;
   inputs->mouse_Y /= BUFFER_SCALE;

@@ -75,21 +75,21 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
   static Chunk *chunk;
   // Rather unlikely position. Not a coord because integers are
   // faster
-  static int lastX = 100000000;
-  static int lastY = 100000000;
-  static int lastZ = 100000000;
+  static int agoX = 100000000;
+  static int agoY = 100000000;
+  static int agoZ = 100000000;
   // Divide by 64
   x >>= 6;
   y >>= 6;
   z >>= 6;
   if(
-    lastX != x ||
-    lastY != y ||
-    lastZ != z
+    agoX != x ||
+    agoY != y ||
+    agoZ != z
   ) {
-    lastX = x;
-    lastY = y;
-    lastZ = z;
+    agoX = x;
+    agoY = y;
+    agoZ = z;
     
     // Quickly hash the chunk coordinates
     
@@ -109,7 +109,7 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
     x++;
     
     // Look up chunk using a binary search
-    static int first, middle, last;
+    int first, middle, last;
     
     first  = 0;
     last   = 26;
@@ -391,24 +391,23 @@ void genChunk(
               z + zOffset + 16777215,
               0.0078125
             )
-            * 64 - yOffset;
+            * 64;
         }
       
       // Make terrain from heightmap
       for(int x = 0; x < 64; x++)
         for(int y = 0; y < 64; y++)
           for(int z = 0; z < 64; z++)
-            if(y > heightmap[x][z] + 4)
+            if(y + yOffset > heightmap[x][z] + 4)
               ch_setBlock(blocks, x, y, z, 4);
-            else if(y > heightmap[x][z])
+            else if(y + yOffset > heightmap[x][z])
               ch_setBlock(blocks, x, y, z, 2);
-            else if(y == heightmap[x][z])
+            else if(y + yOffset == heightmap[x][z])
               ch_setBlock(blocks, x, y, z, 1);
             else
               ch_setBlock(blocks, x, y, z, 0);
       
       // Generate structures
-      // TODO: check if the heightmap value is in the chunk
       for(i = randm(16) + 64; i > 0; i--) {
         x = randm(64);
         z = randm(64);
