@@ -85,6 +85,8 @@ int gameLoop(
                 drawDistance = 20,
                 trapMouse    = 0,
                 
+                chatDrawIndex,
+                
                 fps_lastmil  = 0,
                 fps_count    = 0,
                 fps_now      = 0;
@@ -103,15 +105,18 @@ int gameLoop(
     "ChunkZ: ",
   };
   
-  static char  chatHistory      [16][64] = {0};
-  static int   chatHistoryFade  [16]     = {0};
+  static char  chatHistory      [11][64] = {0};
+  static int   chatHistoryFade  [11]     = {0};
   static int   chatHistoryIndex          = 0;
+  static char  chatBox          [64]     = {0};
+  static int   chatBoxCursor             = 0;
   
   static double d;
   
   static SDL_Rect backgroundRect;
   static SDL_Rect hotbarRect;
   static SDL_Rect hotbarSelectRect;
+  static SDL_Rect chatBoxRect = {0, 0, 0, 9};
   
   static Inventory inventory;
   static IntCoords blockSelect       = {0};
@@ -165,6 +170,9 @@ int gameLoop(
     inventory.hotbar[6].amount  = 63;
     inventory.hotbar[7].amount  = 63;
     inventory.hotbar[8].amount  = 63;
+    
+    chatBoxRect.y = BUFFER_H - 9;
+    chatBoxRect.w = BUFFER_W;
     
     chatAdd(
       chatHistory, chatHistoryFade, &chatHistoryIndex,
@@ -275,12 +283,12 @@ int gameLoop(
         playerPosition.y + playerMovement.y * ((m + 1) % 3 / 2);
       f19 =
         playerPosition.z + playerMovement.z * ((m + 2) % 3 / 2);
-
+      
       for (i12 = 0; i12 < 12; i12++) {
         i13 = (int) (f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
         i14 = (int) (f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
         i15 = (int) (f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
-
+        
         if (getBlock(world, i13, i14, i15) > 0) {
           if (m != 1) {
             goto label208;
@@ -359,10 +367,14 @@ int gameLoop(
     }
     if(inputs->keyboard_F3) {
       inputs->keyboard_F3 = 0;
-      debugOn = 1 - debugOn;
+      debugOn = !debugOn;
+    }
+    if(inputs->keyboard_T) {
+      inputs->keyboard_T = 0;
+      inputs->keyTyped   = 0;
+      gamePopup = 6;
     }
     
-
   }
   
   // Cast rays
@@ -618,14 +630,14 @@ int gameLoop(
         ) {
           gamePopup = 0;
         }
-
+        
         if(button(renderer, "Options...",
           BUFFER_HALF_W - 64, 42, 128,
           inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
         ) {
           gamePopup = 2;
         }
-
+        
         if(button(renderer, "Exit",
           BUFFER_HALF_W - 64, 64, 128,
           inputs->mouse_X, inputs->mouse_Y) && inputs->mouse_Left
@@ -633,7 +645,7 @@ int gameLoop(
           return 0;
         }
         break;
-
+      
       // Options
       case 2:
         if(button(renderer, drawDistanceText,
@@ -833,6 +845,61 @@ int gameLoop(
           gamePopup = 4;
         }
         break;
+      
+      // Chat
+      case 6:
+        // Chat history
+        chatDrawIndex = chatHistoryIndex;
+        for(i = 0; i < 11; i++) {
+          chatDrawIndex = nmod(chatDrawIndex - 1, 11);
+          drawBGStr(
+            renderer, chatHistory[chatDrawIndex],
+            0, BUFFER_H - 32 - i * 9
+          );
+        }
+        
+        // Get keyboard input
+        if(inputs->keyTyped) {
+          if(keyboard[SDL_SCANCODE_BACKSPACE]) {
+            // Delete last char and decrement cursor position
+            if(chatBoxCursor > 0) {
+              chatBox[--chatBoxCursor] = 0;
+            }
+          } else if(
+            keyboard[SDL_SCANCODE_RETURN] && chatBoxCursor > 0
+          ) {
+            // Add input to chat
+            chatAdd(
+              chatHistory, chatHistoryFade, &chatHistoryIndex,
+              chatBox
+            );
+            // Clear input box
+            chatBoxCursor = 0;
+            for(i = 0; i < 64; i++)
+              chatBox[i] = 0;
+          } else if(
+            inputs->keyTyped > 31 && inputs->keyTyped < 127 &&
+            chatBoxCursor < 64
+          ) {
+            // We have a printable keycode, so we can type it.
+            chatBox[chatBoxCursor++] = inputs->keyTyped;
+          }
+        }
+        
+        // Chat input box
+        // If char limit is reached, give some visual feedback.
+        if(chatBoxCursor == 64)
+          SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
+        else
+          SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+        SDL_RenderFillRect(renderer, &chatBoxRect);
+        
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        drawStr(
+          renderer, chatBox,
+          0, BUFFER_H - 8
+        );
+        break;
     }
   } else {
     if(trapMouse) {
@@ -887,11 +954,11 @@ int gameLoop(
         );
       
       // Chat
-      int chatDrawIndex = chatHistoryIndex;
-      for(i = 0; i < 16; i++) {
-        chatDrawIndex = nmod(chatDrawIndex - 1, 16);
-        if(chatHistoryFade[i] > 0) {
-          chatHistoryFade[i]--;
+      chatDrawIndex = chatHistoryIndex;
+      for(i = 0; i < 11; i++) {
+        chatDrawIndex = nmod(chatDrawIndex - 1, 11);
+        if(chatHistoryFade[chatDrawIndex] > 0) {
+          chatHistoryFade[chatDrawIndex]--;
           drawBGStr(
             renderer, chatHistory[chatDrawIndex],
             0, BUFFER_H - 32 - i * 9
@@ -903,6 +970,9 @@ int gameLoop(
   
   if(inputs->mouse_Left) inputs->mouse_Left = 0;
   if(inputs->mouse_X)    inputs->mouse_X    = 0;
+  
+  // Clean up input struct
+  inputs->keyTyped = 0;
   
   return 1;
 }

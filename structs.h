@@ -43,9 +43,8 @@ struct _Player {
   float xPos;
   float yPos;
   float zPos;
-  float xRot;
-  float yRot;
-  float zRot;
+  float hRot;
+  float vRot;
   
   unsigned int health;
   unsigned int xp;
@@ -108,9 +107,13 @@ struct _Inputs {
   int keyboard_S;      // M[115]
   int keyboard_A;      // M[97]
   int keyboard_D;      // M[100]
+  int keyboard_E;
+  int keyboard_T;
 
   int keyboard_Esc;    // M[27]
   int keyboard_F1;     // M[5]
   int keyboard_F2;     // M[6]
   int keyboard_F3;     // M[7]
+  
+  char keyTyped;
 };

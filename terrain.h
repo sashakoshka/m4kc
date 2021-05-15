@@ -374,6 +374,7 @@ void genChunk(
   */
   
   switch(type) {
+    // Classic terrain
     case 0:
       for(int x = 0; x < 64; x++)
         for(int y = 32; y < 64; y++)
@@ -381,6 +382,8 @@ void genChunk(
             ch_setBlock(blocks, x, y, z,
               randm(2) == 0 ? randm(8) : 0);
       break;
+    
+    // New terrain
     case 1:
       // Generate heightmap
       for(int x = 0; x < 64; x++)

@@ -279,14 +279,15 @@ void loadScreen(
   Adds a message to chat
 */
 void chatAdd (
-  char  chatHistory[16][64],
+  char  chatHistory[11][64],
   int  *chatHistoryFade,
   int  *chatHistoryIndex,
   char *str
 ) {
-  chatHistoryFade[*chatHistoryIndex] = 255;
+  chatHistoryFade[*chatHistoryIndex] = 480;
   memcpy(
     chatHistory[(*chatHistoryIndex)++],
     str, sizeof(char) * 64
   );
+  *chatHistoryIndex = nmod(*chatHistoryIndex, 11);
 }
