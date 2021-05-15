@@ -74,6 +74,7 @@ int gameLoop(
                   3: Inventory
                   4: Advanced debug menu
                   5: Chunk peek
+                  6: Chat
                 */
                 gamePopup,
                 
@@ -101,6 +102,10 @@ int gameLoop(
     "ChunkY: ",
     "ChunkZ: ",
   };
+  
+  static char  chatHistory      [16][64] = {0};
+  static int   chatHistoryFade  [16]     = {0};
+  static int   chatHistoryIndex          = 0;
   
   static double d;
   
@@ -160,6 +165,11 @@ int gameLoop(
     inventory.hotbar[6].amount  = 63;
     inventory.hotbar[7].amount  = 63;
     inventory.hotbar[8].amount  = 63;
+    
+    chatAdd(
+      chatHistory, chatHistoryFade, &chatHistoryIndex,
+      "Game started"
+    );
   }
   
   f9  = sin(cameraAngle_H_abs),
@@ -875,6 +885,19 @@ int gameLoop(
           inputs->mouse_X,
           inputs->mouse_Y
         );
+      
+      // Chat
+      int chatDrawIndex = chatHistoryIndex;
+      for(i = 0; i < 16; i++) {
+        chatDrawIndex = nmod(chatDrawIndex - 1, 16);
+        if(chatHistoryFade[i] > 0) {
+          chatHistoryFade[i]--;
+          drawBGStr(
+            renderer, chatHistory[chatDrawIndex],
+            0, BUFFER_H - 32 - i * 9
+          );
+        }
+      }
     }
   }
   

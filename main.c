@@ -115,11 +115,11 @@ int main(int argc, char *argv[]) {
     SDL_GetMouseState(&mouseX, &mouseY);
     
     // Detect movement controls
-    inputs.keyboard_Space  = keyboard[SDL_SCANCODE_SPACE];
-    inputs.keyboard_W      = keyboard[SDL_SCANCODE_W];
-    inputs.keyboard_S      = keyboard[SDL_SCANCODE_S];
-    inputs.keyboard_A      = keyboard[SDL_SCANCODE_A];
-    inputs.keyboard_D      = keyboard[SDL_SCANCODE_D];
+    inputs.keyboard_Space = keyboard[SDL_SCANCODE_SPACE];
+    inputs.keyboard_W     = keyboard[SDL_SCANCODE_W];
+    inputs.keyboard_S     = keyboard[SDL_SCANCODE_S];
+    inputs.keyboard_A     = keyboard[SDL_SCANCODE_A];
+    inputs.keyboard_D     = keyboard[SDL_SCANCODE_D];
     
     if(!SDL_GetRelativeMouseMode()) {
       inputs.mouse_X = mouseX;

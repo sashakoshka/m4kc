@@ -12,6 +12,7 @@ int  drawSlot(
 );
 void dirtBg     (SDL_Renderer*);
 void loadScreen (SDL_Renderer*, char*, float, float);
+void chatAdd    (char[16][64], int*, int*, char*);
 
 const int BUFFER_W     = 214;
 const int BUFFER_H     = 120;
@@ -270,5 +271,22 @@ void loadScreen(
     BUFFER_HALF_H + 6,
     BUFFER_HALF_W - 32 + (prog / max) * 64,
     BUFFER_HALF_H + 6
+  );
+}
+
+/*
+  chatAdd
+  Adds a message to chat
+*/
+void chatAdd (
+  char  chatHistory[16][64],
+  int  *chatHistoryFade,
+  int  *chatHistoryIndex,
+  char *str
+) {
+  chatHistoryFade[*chatHistoryIndex] = 255;
+  memcpy(
+    chatHistory[(*chatHistoryIndex)++],
+    str, sizeof(char) * 64
   );
 }
