@@ -895,9 +895,14 @@ int gameLoop(
         SDL_RenderFillRect(renderer, &chatBoxRect);
         
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        drawStr(
-          renderer, chatBox,
-          0, BUFFER_H - 8
+        drawChar(
+          renderer,
+          95 + 32 * ((gameTime >> 6) % 2),
+          drawStr(
+            renderer, chatBox,
+            0, BUFFER_H - 8
+          ),
+          BUFFER_H - 8
         );
         break;
     }
