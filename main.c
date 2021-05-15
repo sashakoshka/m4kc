@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
   int i = 0;
   initChunks(&world);
   for(
-    int x = -64;
+    int x = -32 * (CHUNKARR_DIAM - 1);
     x < 32 * (CHUNKARR_DIAM + 1);
     x += 64
   ) for(
@@ -97,6 +97,8 @@ int main(int argc, char *argv[]) {
       ++i, CHUNKARR_SIZE
     );
   }
+  
+  //genChunk(&world, seed, 199, 30, 199, 1);
   
    //----   main game loop   ----//
   

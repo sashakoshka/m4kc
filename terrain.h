@@ -60,16 +60,16 @@ void genAll(World *world, unsigned int seed, int type) {
   // For all chunk slots we have, go around the player. This
   // will eventually take in player position.
   for(
-    int x = -64;
-    x < 32 * (CHUNKARR_DIAM + 1);
+    int x = -32 * (CHUNKARR_DIAM - 1);
+    x < 32 * (CHUNKARR_DIAM);
     x += 64
   ) for(
     int y = -32 * (CHUNKARR_DIAM - 1);
-    y < 32 * (CHUNKARR_DIAM + 1);
+    y < 32 * (CHUNKARR_DIAM);
     y += 64
   ) for(
     int z = -32 * (CHUNKARR_DIAM - 1);
-    z < 32 * (CHUNKARR_DIAM + 1);
+    z < 32 * (CHUNKARR_DIAM);
     z += 64
   ) genChunk(world, seed, x, y, z, type);
 }
@@ -321,6 +321,7 @@ void genChunk(
           world->chunk[i].loaded <=
           world->chunk[loadedMin].loaded
         ) loadedMin = i;
+      i = loadedMin;
     }
     chunk = &world->chunk[i];
   }

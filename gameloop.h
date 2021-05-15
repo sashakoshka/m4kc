@@ -48,15 +48,13 @@ int gameLoop(
   
   static long   l, gameTime;
   
-  static int    k,
-                m,
+  static int    m,
                 i,
                 blockSelected = 0,
                 selectedPass,
                 i6,
                 i7,
                 pixelX,
-                i10,
                 pixelY,
                 i12,
                 i13,
