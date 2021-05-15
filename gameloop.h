@@ -5,9 +5,6 @@
   terminate the main while loop and end the program.
 */
 int gameLoop(
-  int BUFFER_W,
-  int BUFFER_H,
-  int BUFFER_SCALE,
   unsigned int seed,
   Inputs *inputs,
   const Uint8 *keyboard,
@@ -51,9 +48,7 @@ int gameLoop(
   
   static long   l, gameTime;
   
-  static int    BUFFER_HALF_W,
-                BUFFER_HALF_H,
-                k,
+  static int    k,
                 m,
                 i,
                 blockSelected = 0,
@@ -128,9 +123,6 @@ int gameLoop(
   
   static int init = 1;
   if(init) {
-    BUFFER_HALF_W = BUFFER_W / 2;
-    BUFFER_HALF_H = BUFFER_H / 2;
-    
     l = SDL_GetTicks();
     gameTime = 2048;
     

@@ -10,8 +10,14 @@ int  drawSlot(
   SDL_Renderer*, InvSlot*,
   int, int, int, int
 );
-void dirtBg     (SDL_Renderer*, int, int);
-void loadScreen (SDL_Renderer*, char*, int, int);
+void dirtBg     (SDL_Renderer*);
+void loadScreen (SDL_Renderer*, char*, float, float);
+
+const int BUFFER_W     = 214;
+const int BUFFER_H     = 120;
+const int BUFFER_SCALE = 4;
+const int BUFFER_HALF_W = BUFFER_W / 2;
+const int BUFFER_HALF_H = BUFFER_H / 2;
 
 /*
   strnum
@@ -192,9 +198,7 @@ int drawSlot(SDL_Renderer *renderer,
   Draws a dirt textured background
 */
 void dirtBg (
-  SDL_Renderer *renderer,
-  int BUFFER_W,
-  int BUFFER_H
+  SDL_Renderer *renderer
 ) {
   Uint8 i = 0;
   int color;
@@ -203,9 +207,9 @@ void dirtBg (
       color = textures[i + 2 * 256 * 3];
       SDL_SetRenderDrawColor(
         renderer,
-        (color >> 16 & 0xFF),
-        (color >> 8 & 0xFF),
-        (color & 0xFF),
+        (color >> 16 & 0xFF) >> 1,
+        (color >> 8 & 0xFF)  >> 1,
+        (color & 0xFF)       >> 1,
         255
       );
       SDL_RenderDrawPoint(renderer, x, y);
@@ -222,8 +226,7 @@ void dirtBg (
 void loadScreen(
   SDL_Renderer *renderer,
   char *str,
-  int BUFFER_W,
-  int BUFFER_H
+  float prog, float max
 ) {
   char *strsave = str;
   int len = 0;
@@ -233,21 +236,39 @@ void loadScreen(
   str = strsave;
   len /= 2;
   
-  dirtBg(renderer, BUFFER_W, BUFFER_H);
+  dirtBg(renderer);
   
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+  SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
   drawStr(
     renderer,
     str,
-    BUFFER_W / 2 - len + 1,
-    BUFFER_H / 2 - 7
+    BUFFER_HALF_W - len + 1,
+    BUFFER_HALF_H - 7
   );
   
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
   drawStr(
     renderer,
     str,
-    BUFFER_W / 2 - len,
-    BUFFER_H / 2 - 8
+    BUFFER_HALF_W - len,
+    BUFFER_HALF_H - 8
+  );
+  
+  SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
+  SDL_RenderDrawLine(
+    renderer,
+    BUFFER_HALF_W - 32,
+    BUFFER_HALF_H + 6,
+    BUFFER_HALF_W + 32,
+    BUFFER_HALF_H + 6
+  );
+  
+  SDL_SetRenderDrawColor(renderer, 132, 255, 132, 255);
+  SDL_RenderDrawLine(
+    renderer,
+    BUFFER_HALF_W - 32,
+    BUFFER_HALF_H + 6,
+    BUFFER_HALF_W - 32 + (prog / max) * 64,
+    BUFFER_HALF_H + 6
   );
 }

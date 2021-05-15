@@ -34,10 +34,6 @@ int main(int argc, char *argv[]) {
   //unsigned int seed = 18295169;
   unsigned int seed = 45390874;
   
-  const int BUFFER_W     = 214;
-  const int BUFFER_H     = 120;
-  const int BUFFER_SCALE = 4;
-  
   int mouseX = 0, mouseY = 0;
   
   //----  initializing SDL  ----//
@@ -78,25 +74,33 @@ int main(int argc, char *argv[]) {
   // Needs to come first (for the loading screen)
   genTextures(seed);
   
-  loadScreen(
-    renderer,
-    "Generating world...",
-    BUFFER_W,
-    BUFFER_H
-  );
-  if(!heartbeat(window, &event, renderer))
-    goto exit;
-  
+  int i = 0;
   initChunks(&world);
-  genAll(&world, seed, 1);
-  
+  for(
+    int x = -64;
+    x < 32 * (CHUNKARR_DIAM + 1);
+    x += 64
+  ) for(
+    int y = -32 * (CHUNKARR_DIAM - 1);
+    y < 32 * (CHUNKARR_DIAM + 1);
+    y += 64
+  ) for(
+    int z = -32 * (CHUNKARR_DIAM - 1);
+    z < 32 * (CHUNKARR_DIAM + 1);
+    z += 64
+  ) {
+    genChunk(&world, seed, x, y, z, 1);
+    if(!heartbeat(window, &event, renderer)) goto exit;
+    loadScreen(
+      renderer,
+      "Generating world...",
+      ++i, CHUNKARR_SIZE
+    );
+  }
   
    //----   main game loop   ----//
   
   while(gameLoop(
-    BUFFER_W,
-    BUFFER_H,
-    BUFFER_SCALE,
     seed,
     &inputs,
     keyboard,
