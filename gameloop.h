@@ -242,6 +242,9 @@ int gameLoop(
         (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
       playerSpeedLR =
         (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
+    } else {
+      playerSpeedFB = 0;
+      playerSpeedLR = 0;
     }
     
     // Moving around
@@ -321,10 +324,24 @@ int gameLoop(
       inputs->keyboard_F1 = 0;
       guiOn ^= 1;
     }
+    if(inputs->keyboard_F2) {
+      inputs->keyboard_F2 = 0;
+      // TODO: This segfaults. Fix
+      /*
+      SDL_Surface *grab = SDL_GetWindowSurface(window);
+      if(SDL_SaveBMP(grab, "screenshot.bmp")) {
+        printf("saved screenshot\n");
+      } else {
+        printf("couldn't save screenshot\n");
+      }
+      */
+    }
     if(inputs->keyboard_F3) {
       inputs->keyboard_F3 = 0;
       debugOn = 1 - debugOn;
     }
+    
+
   }
   for (k = 0; k < 12; k++) {
     m =
