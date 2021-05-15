@@ -301,7 +301,7 @@ int gameLoop(
   i6 = 0;
   i7 = 0;
   if(!gamePopup) {
-    if (inputs->mouse_Left > 0 && blockSelected) {
+    if(inputs->mouse_Left > 0 && blockSelected) {
       setBlock(
         world,
         blockSelect.x,
@@ -309,15 +309,28 @@ int gameLoop(
         blockSelect.z, 0, 1
       );
       inputs->mouse_Left = 0;
-    } 
-    if (inputs->mouse_Right > 0 && blockSelected) {
-      setBlock(
-        world,
-        blockSelect.x + blockSelectOffset.x,
-        blockSelect.y + blockSelectOffset.y,
-        blockSelect.z + blockSelectOffset.z,
-        inventory.hotbar[hotbarSelect].blockid, 1
-      );
+    }
+    
+    blockSelectOffset.x += blockSelect.x;
+    blockSelectOffset.y += blockSelect.y;
+    blockSelectOffset.z += blockSelect.z;
+    if(inputs->mouse_Right > 0) {
+      if(!(
+        blockSelectOffset.x == (int) playerPosition.x - 64 &&
+        blockSelectOffset.z == (int) playerPosition.z - 64 &&
+        (
+          blockSelectOffset.y == (int) playerPosition.y - 64 ||
+          blockSelectOffset.y == (int) playerPosition.y - 63
+        )
+      )) {
+        setBlock(
+          world,
+          blockSelectOffset.x,
+          blockSelectOffset.y,
+          blockSelectOffset.z,
+          inventory.hotbar[hotbarSelect].blockid, 1
+        );
+      }
       inputs->mouse_Right = 0;
     }
     if(inputs->keyboard_F1) {
@@ -342,29 +355,6 @@ int gameLoop(
     }
     
 
-  }
-  for (k = 0; k < 12; k++) {
-    m =
-      (int)
-        (playerPosition.x + (k >> 0 & 0x1) * 0.6 - 0.3) - 64;
-    i10 =
-      (int)
-        (playerPosition.y + ((k >> 2) - 1) * 0.8 + 0.65) - 64;
-    pixelY =
-      (int)
-        (playerPosition.z + (k >> 1 & 0x1) * 0.6 - 0.3) - 64;
-    if (
-         m      >= 0
-      && i10    >= 0
-      && pixelY >= 0
-      && m      < 64
-      && i10    < 64
-      && pixelY < 64
-    ) {
-      // TODO: Check if block is inside player before placing,
-      // NOT THIS LOL
-      setBlock(world, m, i10, pixelY, 0, 1);
-    }
   }
   
   // Cast rays
