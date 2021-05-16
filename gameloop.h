@@ -13,15 +13,14 @@ int gameLoop(
 ) {
   // We dont want to have to pass all of these by reference, so
   // have all of them as static variables
-  static float  cameraAngle_H_abs = 0.0,
-                cameraAngle_V_abs = 0.0,
+  static float  cameraAngle_H = 0.0,
+                cameraAngle_V = 0.0,
                 f9,
                 f10,
                 f11,
                 f12,
                 playerSpeedLR,
                 playerSpeedFB,
-                f15,
                 f16,
                 f17,
                 f18,
@@ -226,10 +225,10 @@ int gameLoop(
       break;
     
     case 5:
-      f9  = sin(cameraAngle_H_abs),
-      f10 = cos(cameraAngle_H_abs),
-      f11 = sin(cameraAngle_V_abs),
-      f12 = cos(cameraAngle_V_abs);
+      f9  = sin(cameraAngle_H),
+      f10 = cos(cameraAngle_H),
+      f11 = sin(cameraAngle_V),
+      f12 = cos(cameraAngle_V);
       
       // Skybox, basically
       timeCoef  = (float)(gameTime % 102944) / 16384;
@@ -259,9 +258,9 @@ int gameLoop(
         fps_count   = 0;
       }
       
-      // Things that should run at a constant speed, regardless of
-      // CPU power. If the rendering takes a long time, this will
-      // fire more times to compensate.
+      /* Things that should run at a constant speed, regardless
+      of CPU power. If the rendering takes a long time, this
+      will fire more times to compensate. */
       while(SDL_GetTicks() - l > 10L) {
         gameTime++;
         l += 10L;
@@ -275,30 +274,35 @@ int gameLoop(
           
           // Looking around
           if(trapMouse) {
-            f16 = (float)inputs->mouse_X * 1.5;
-            f17 = (float)inputs->mouse_Y * 1.5;
+            cameraAngle_H += (float)inputs->mouse_X / 64;
+            cameraAngle_V = (float)inputs->mouse_Y / 64;
           } else {
             f16 =
               (inputs->mouse_X - BUFFER_W * 2) /
               (float)BUFFER_W * 2.0;
+
             f17 =
               (inputs->mouse_Y - BUFFER_H * 2) /
               (float)BUFFER_H * 2.0;
-          }
           
-          f15 = sqrt(f16 * f16 + f17 * f17) - 1.2;
-          if (f15 < 0.0)
-            f15 = 0.0;
-          if (f15 > 0.0) {
-            cameraAngle_H_abs += f16 * f15 / 400.0;
-            cameraAngle_V_abs -= f17 * f15 / 400.0;
+            float cameraMoveDistance =
+              sqrt(f16 * f16 + f17 * f17) - 1.2;
 
-            // Restrict camera vertical position
-            if (cameraAngle_V_abs < -1.57)
-              cameraAngle_V_abs = -1.57;
-            if (cameraAngle_V_abs >  1.57)
-              cameraAngle_V_abs =  1.57;
+            if (cameraMoveDistance < 0.0)
+              cameraMoveDistance = 0.0;
+            if (cameraMoveDistance > 0.0) {
+              cameraAngle_H +=
+                f16 * cameraMoveDistance / 400.0;
+              cameraAngle_V -=
+                f17 * cameraMoveDistance / 400.0;
+            }
           }
+
+          // Restrict camera vertical position
+          if (cameraAngle_V < -1.57)
+            cameraAngle_V = -1.57;
+          if (cameraAngle_V >  1.57)
+            cameraAngle_V =  1.57;
 
           playerSpeedFB =
             (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
