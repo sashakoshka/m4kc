@@ -1,6 +1,7 @@
 void strnum     (char*, int, int);
 int  drawChar   (SDL_Renderer*,   int, int, int);
 int  drawStr    (SDL_Renderer*, char*, int, int);
+int  centerStr  (SDL_Renderer*, char*, int, int);
 int  drawBGStr  (SDL_Renderer*, char*, int, int);
 int  button(
   SDL_Renderer*, char*,
@@ -68,6 +69,28 @@ int drawStr(SDL_Renderer *renderer,
 }
 
 /*
+  centerStr
+  Identical to drawStr, but centers the text
+*/
+int centerStr(SDL_Renderer *renderer,
+  char *str, int x, int y
+) {
+  x *= 2;
+  char *strsave = str;
+  while(*str > 0) {
+    x -= font[(int)*(str++)][8];
+  }
+  str = strsave;
+  x /= 2;
+  
+  while(*str > 0) {
+    x += drawChar(renderer, *(str++), x, y);
+  }
+  
+  return x;
+}
+
+/*
   drawBGStr
   Like drawStr, but also draws a semitransparent background
   behind the text.
@@ -110,13 +133,6 @@ int button(SDL_Renderer *renderer,
     mouseX <  x + w  &&
     mouseY <  y + 16 ;
   
-  char *strsave = str;
-  int len = 0;
-  while(*str > 0) {
-    len += font[(int)*(str++)][8];
-  }
-  str = strsave;
-  
   SDL_Rect rect;
   rect.x = x;
   rect.y = y;
@@ -129,14 +145,14 @@ int button(SDL_Renderer *renderer,
     SDL_SetRenderDrawColor(renderer, 139, 139, 139, 255);
   SDL_RenderFillRect(renderer, &rect);
   
-  x += ((w - len) >> 1) + 1;
+  x += w / 2;
   y += 5;
   
   if(hover)
     SDL_SetRenderDrawColor(renderer, 63,  63,  40,  255);
   else
     SDL_SetRenderDrawColor(renderer, 56,  56,  56,  255);
-  drawStr(renderer, str, x, y);
+  centerStr(renderer, str, x, y);
   
   x--;
   y--;
@@ -145,7 +161,7 @@ int button(SDL_Renderer *renderer,
     SDL_SetRenderDrawColor(renderer, 255, 255, 160, 255);
   else
     white(renderer);
-  drawStr(renderer, str, x, y);
+  centerStr(renderer, str, x, y);
   
   if(hover)
     white(renderer);
@@ -231,29 +247,21 @@ void loadScreen(
   char *str,
   float prog, float max
 ) {
-  char *strsave = str;
-  int len = 0;
-  while(*str > 0) {
-    len += font[(int)*(str++)][8];
-  }
-  str = strsave;
-  len /= 2;
-  
   dirtBg(renderer);
   
   SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
-  drawStr(
+  centerStr(
     renderer,
     str,
-    BUFFER_HALF_W - len + 1,
+    BUFFER_HALF_W + 1,
     BUFFER_HALF_H - 7
   );
   
   white(renderer);
-  drawStr(
+  centerStr(
     renderer,
     str,
-    BUFFER_HALF_W - len,
+    BUFFER_HALF_W,
     BUFFER_HALF_H - 8
   );
   

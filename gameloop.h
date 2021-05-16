@@ -200,10 +200,10 @@ int gameLoop(
       
       dirtBg(renderer);
       white(renderer);
-      drawStr(
+      centerStr(
         renderer,
         "M4KC",
-        BUFFER_HALF_W - 12,
+        BUFFER_HALF_W,
         20
       );
       
@@ -1082,10 +1082,10 @@ int gameLoop(
       
       dirtBg(renderer);
       white(renderer);
-      drawStr(
+      centerStr(
         renderer,
         "Go away, this is my house.",
-        BUFFER_HALF_W - 62,
+        BUFFER_HALF_W,
         BUFFER_HALF_H - 16
       );
       if(button(renderer, "Ok",
