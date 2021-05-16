@@ -200,11 +200,11 @@ int gameLoop(
       
       dirtBg(renderer);
       white(renderer);
-      centerStr(
+      drawBig(
         renderer,
         "M4KC",
         BUFFER_HALF_W,
-        20
+        16
       );
       
       if(button(renderer, "Singleplayer",
@@ -303,7 +303,7 @@ int gameLoop(
           // Looking around
           if(trapMouse) {
             cameraAngle_H += (float)inputs->mouse_X / 64;
-            cameraAngle_V = (float)inputs->mouse_Y / 64;
+            cameraAngle_V -= (float)inputs->mouse_Y / 64;
           } else {
             f16 =
               (inputs->mouse_X - BUFFER_W * 2) /

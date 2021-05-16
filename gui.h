@@ -2,6 +2,7 @@ void strnum     (char*, int, int);
 int  drawChar   (SDL_Renderer*,   int, int, int);
 int  drawStr    (SDL_Renderer*, char*, int, int);
 int  centerStr  (SDL_Renderer*, char*, int, int);
+int  drawBig    (SDL_Renderer*, char*, int, int);
 int  drawBGStr  (SDL_Renderer*, char*, int, int);
 int  button(
   SDL_Renderer*, char*,
@@ -85,6 +86,35 @@ int centerStr(SDL_Renderer *renderer,
   
   while(*str > 0) {
     x += drawChar(renderer, *(str++), x, y);
+  }
+  
+  return x;
+}
+
+
+/*
+  drawBig
+  Draws centered text at a large scale
+*/
+int drawBig(SDL_Renderer *renderer,
+  char *str, int x, int y
+) {
+  char *strsave = str;
+  while(*str > 0) {
+    x -= font[(int)*(str++)][8];
+  }
+  str = strsave;
+  
+  while(*str > 0) {
+    int c = *(str++);
+    for(int yy = 0; yy < 16; yy++) {
+      for(int xx = 0; xx < 16; xx++) {
+        if((font[c][yy / 2] >> (7 - xx / 2)) & 0x1)
+          SDL_RenderDrawPoint(renderer, x + xx, y + yy);
+      }
+    }
+    
+    x += font[c][8] * 2;
   }
   
   return x;
