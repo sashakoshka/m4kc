@@ -71,36 +71,10 @@ int main(int argc, char *argv[]) {
   
   //---- generating assets  ----//
   
-  // Needs to come first (for the loading screen)
   genTextures(seed);
-  
-  int i = 0;
   initChunks(&world);
-  for(
-    int x = -32 * (CHUNKARR_DIAM - 1);
-    x < 32 * (CHUNKARR_DIAM + 1);
-    x += 64
-  ) for(
-    int y = -32 * (CHUNKARR_DIAM - 1);
-    y < 32 * (CHUNKARR_DIAM + 1);
-    y += 64
-  ) for(
-    int z = -32 * (CHUNKARR_DIAM - 1);
-    z < 32 * (CHUNKARR_DIAM + 1);
-    z += 64
-  ) {
-    genChunk(&world, seed, x, y, z, 1);
-    if(!heartbeat(window, &event, renderer)) goto exit;
-    loadScreen(
-      renderer,
-      "Generating world...",
-      ++i, CHUNKARR_SIZE
-    );
-  }
   
-  //genChunk(&world, seed, 199, 30, 199, 1);
-  
-   //----   main game loop   ----//
+  //----   main game loop   ----//
   
   while(gameLoop(
     seed,

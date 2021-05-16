@@ -193,6 +193,7 @@ int gameLoop(
   }
   
   switch(gameState) {
+    // A main menu
     case 0:
       inputs->mouse_X /= BUFFER_SCALE;
       inputs->mouse_Y /= BUFFER_SCALE;
@@ -211,7 +212,7 @@ int gameLoop(
         inputs->mouse_X, inputs->mouse_Y) &&
         inputs->mouse_Left
       ) {
-        gameState = 5;
+        gameState = 4;
         init = 1;
       }
       
@@ -224,6 +225,33 @@ int gameLoop(
       }
       break;
     
+    // Generate a world and present a loading screen
+    case 4:
+      ;
+      static int chunkLoadNum = 0;
+      if(chunkLoadNum < CHUNKARR_SIZE) {
+        genChunk(world, seed,
+          ( chunkLoadNum                  % CHUNKARR_DIAM)
+            * 64 - 128,
+          ((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM)
+            * 64 - 128,
+          ( chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM))
+            * 64 - 128,
+          1
+        );
+        loadScreen(
+          renderer,
+          "Generating world...",
+          chunkLoadNum, CHUNKARR_SIZE
+        );
+        chunkLoadNum++;
+      } else {
+        chunkLoadNum = 0;
+        gameState = 5;
+      }
+      break;
+    
+    // The actual gameplay
     case 5:
       f9  = sin(cameraAngle_H),
       f10 = cos(cameraAngle_H),
@@ -1074,6 +1102,7 @@ int gameLoop(
       inputs->keySym   = 0;
       break;
     
+    // IDK lol
     default:
       inputs->mouse_X /= BUFFER_SCALE;
       inputs->mouse_Y /= BUFFER_SCALE;

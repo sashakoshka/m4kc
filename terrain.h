@@ -73,6 +73,7 @@ void genAll(World *world, unsigned int seed, int type) {
     z += 64
   ) genChunk(world, seed, x, y, z, type);
 }
+
 /*
   chunkLookup
   Takes in a world pointer, and returns a pointer to the chunk
@@ -369,7 +370,7 @@ void genChunk(
     "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
     chunk->coordHash,
     xOffset, yOffset, zOffset,
-    chunk->stamp, chunk
+    chunk->loaded, chunk
   );
   */
   
