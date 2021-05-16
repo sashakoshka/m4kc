@@ -859,14 +859,14 @@ int gameLoop(
         }
         
         // Get keyboard input
-        if(inputs->keyTyped) {
-          if(keyboard[SDL_SCANCODE_BACKSPACE]) {
+        if(inputs->keyTyped || inputs->keySym) {
+          if(inputs->keySym == SDLK_BACKSPACE) {
             // Delete last char and decrement cursor position
             if(chatBoxCursor > 0) {
               chatBox[--chatBoxCursor] = 0;
             }
           } else if(
-            keyboard[SDL_SCANCODE_RETURN] && chatBoxCursor > 0
+            inputs->keySym == SDLK_RETURN && chatBoxCursor > 0
           ) {
             // Add input to chat
             chatAdd(
@@ -875,14 +875,14 @@ int gameLoop(
             );
             // Clear input box
             chatBoxCursor = 0;
-            for(i = 0; i < 64; i++)
-              chatBox[i] = 0;
+            chatBox[0] = 0;
           } else if(
             inputs->keyTyped > 31 && inputs->keyTyped < 127 &&
             chatBoxCursor < 64
           ) {
             // We have a printable keycode, so we can type it.
             chatBox[chatBoxCursor++] = inputs->keyTyped;
+            chatBox[chatBoxCursor]   = 0;
           }
         }
         
@@ -978,6 +978,7 @@ int gameLoop(
   
   // Clean up input struct
   inputs->keyTyped = 0;
+  inputs->keySym   = 0;
   
   return 1;
 }

@@ -152,8 +152,7 @@ int main(int argc, char *argv[]) {
             inputs.keyboard_E   = keyboard[SDL_SCANCODE_E];
             inputs.keyboard_T   = keyboard[SDL_SCANCODE_T];
             
-            inputs.keyTyped     = event.key.keysym.sym;
-            
+            inputs.keySym       = event.key.keysym.sym;
           }
           break;
         
@@ -166,6 +165,10 @@ int main(int argc, char *argv[]) {
             inputs.mouse_X = event.motion.xrel;
             inputs.mouse_Y = event.motion.yrel;
           }
+          break;
+        
+        case SDL_TEXTINPUT:
+          inputs.keyTyped = event.text.text[0];
           break;
       }
     }

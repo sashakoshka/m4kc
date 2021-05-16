@@ -115,5 +115,6 @@ struct _Inputs {
   int keyboard_F2;     // M[6]
   int keyboard_F3;     // M[7]
   
-  char keyTyped;
+  int keyTyped;
+  int keySym;
 };
