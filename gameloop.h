@@ -134,8 +134,8 @@ int gameLoop(
   static IntCoords coordPass         = {0};
   static IntCoords blockRayPosition  = {0};
 
-  static Coords playerPosition = {96.5, 65.0, 96.5};
-  static Coords playerMovement = { 0.0,  0.0,  0.0};
+  static Coords playerPosition = {0.0};
+  static Coords playerMovement = {0.0};
   
   static Chunk *chunk;
   
@@ -144,7 +144,14 @@ int gameLoop(
     l = SDL_GetTicks();
     gameTime = 2048;
     
-    gamePopup = 0;
+    playerPosition.x = 96.5;
+    playerPosition.y = 65.0;
+    playerPosition.z = 96.5;
+    
+    cameraAngle_H    = 0.0;
+    cameraAngle_V    = 0.0;
+    
+    gamePopup    = 0;
     hotbarSelect = 0;
     
     backgroundRect.x = 0;
@@ -465,9 +472,8 @@ int gameLoop(
         
       }
       
-      // Cast rays
-      // selectedPass passes wether or not a block is selected
-      // to  the blockSelected variable
+      /* Cast rays selectedPass passes wether or not a block is
+      selected to  the blockSelected variable */
       selectedPass = 0;
       for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
         f18 = (pixelX - 107) / 90.0;
@@ -512,16 +518,16 @@ int gameLoop(
                 f36--; 
             }
             
-            // Whatever's in this loop needs to run *extremely*
-            // fast
+            /* Whatever's in this loop needs to run *extremely*
+            fast */
             while (f33 < d) {
               blockRayPosition.x = (int)f34 - 64;
               blockRayPosition.y = (int)f35 - 64;
               blockRayPosition.z = (int)f36 - 64;
               
-              // Imitate getBlock so we don't have to launch
-              // into a function then another function a
-              // zillion times per second.
+              /* Imitate getBlock so we don't have to launch
+              into a function then another function a zillion
+              times per second. */
               static IntCoords lookup_ago = {
                 100000000,
                 100000000,
@@ -622,9 +628,8 @@ int gameLoop(
                     i6 + (i7 << 4) + i25 * 256 * 3
                   ]; 
                 }
-                // See if the block is selected
-                // There must be a better way to do this
-                // check...
+                /* See if the block is selected There must be a
+                better way to do this  check... */
                 if (
                   f33 < f26
                   && (
@@ -648,8 +653,8 @@ int gameLoop(
                     sizeof(IntCoords)
                   );
                   
-                  // Treating a coords set as an array and
-                  //blockFace as an index.
+                  /* Treating a coords set as an array and
+                  blockFace as an index. */
                   blockSelectOffset.x = 0;
                   blockSelectOffset.y = 0;
                   blockSelectOffset.z = 0;
