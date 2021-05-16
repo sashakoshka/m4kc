@@ -682,8 +682,11 @@ int gameLoop(
       // In-game menus
       if(gamePopup) {
         SDL_SetRelativeMouseMode(0);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
-        SDL_RenderFillRect(renderer, &backgroundRect);
+        
+        if(gamePopup != 6) {
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
+        }
         
         switch(gamePopup) {
           // Pause menu
@@ -814,10 +817,7 @@ int gameLoop(
               (int)playerPosition.y - 64,
               (int)playerPosition.z - 64
             );
-            SDL_SetRenderDrawColor(
-              renderer,
-              255, 255, 255, 255
-            );
+            white(renderer);
             if(debugChunk != NULL) {
               // There is a chunk to display info about. Process
               // strings.
@@ -866,10 +866,7 @@ int gameLoop(
               }
               
               // Draw chunk map
-              SDL_SetRenderDrawColor(
-                renderer,
-                255, 255, 255, 255
-              );
+              white(renderer);
               SDL_RenderDrawLine(
                 renderer,
                 128, chunkPeekRYMax,
@@ -983,13 +980,10 @@ int gameLoop(
             if(chatBoxCursor == 64)
               SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
             else
-              SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+              tblack(renderer);
             SDL_RenderFillRect(renderer, &chatBoxRect);
             
-            SDL_SetRenderDrawColor(
-              renderer,
-              255, 255, 255, 255
-            );
+            white(renderer);
             drawChar(
               renderer,
               95 + 32 * ((gameTime >> 6) % 2),
@@ -1035,12 +1029,12 @@ int gameLoop(
               drawBGStr(renderer, debugText[i], 0, i * 9);
           }
           // Hotbar
-          SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+          tblack(renderer);
           SDL_RenderFillRect(renderer, &hotbarRect);
           
           hotbarSelectRect.x =
             BUFFER_HALF_W - 77 + hotbarSelect * 17;
-          SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+          white(renderer);
           SDL_RenderDrawRect(renderer, &hotbarSelectRect);
           
           for(i = 0; i < 9; i++)
