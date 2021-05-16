@@ -26,7 +26,7 @@ const int BUFFER_HALF_H = BUFFER_H / 2;
 
 /*
   strnum
-  Takes in a char array and an offset and puts the specifiec
+  Takes in a char array and an offset and puts the specified
   number into it. Make sure there is sufficient space in the
   string.
 */
@@ -36,9 +36,9 @@ void strnum(char *ptr, int offset, int num) {
 
 /*
   drawChar
-  Takes in a pointer to a renderer, a charachter (as an int),
+  Takes in a pointer to a renderer, a character (as an int),
   draws it at the specified x and y coordinates, and then returns
-  the charachter's width.
+  the character's width.
 */
 int drawChar(SDL_Renderer *renderer,
   int c, int x, int y

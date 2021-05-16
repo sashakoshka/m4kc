@@ -99,7 +99,9 @@ int gameLoop(
                 
                 fps_lastmil  = 0,
                 fps_count    = 0,
-                fps_now      = 0;
+                fps_now      = 0,
+                
+                chunkLoadNum;
   
   static char drawDistanceText [] = "Draw distance: 20\0";
   static char trapMouseText    [] = "Capture mouse: OFF";
@@ -138,6 +140,8 @@ int gameLoop(
   static Coords playerMovement = {0.0};
   
   static Chunk *chunk;
+  
+  static IntCoords chunkLoadCoords;
   
   static int init = 0;
   if(init) {
@@ -196,6 +200,8 @@ int gameLoop(
       "Game started"
     );
     
+    chunkLoadNum = 0;
+    
     init = 0;
   }
   
@@ -235,16 +241,20 @@ int gameLoop(
     // Generate a world and present a loading screen
     case 4:
       ;
-      static int chunkLoadNum = 0;
       if(chunkLoadNum < CHUNKARR_SIZE) {
-        genChunk(world, seed,
-          ( chunkLoadNum                  % CHUNKARR_DIAM)
-            * 64 - 128,
-          ((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM)
-            * 64 - 128,
-          ( chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM))
-            * 64 - 128,
-          1
+        chunkLoadCoords.x =
+          (chunkLoadNum % CHUNKARR_DIAM) * 64 - 128;
+        chunkLoadCoords.y =
+          ((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) *
+          64 - 128;
+        chunkLoadCoords.z =
+          (chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) *
+          64 - 128;
+        genChunk(
+          world, seed,
+          chunkLoadCoords.x,
+          chunkLoadCoords.y,
+          chunkLoadCoords.z, 1
         );
         loadScreen(
           renderer,
@@ -253,13 +263,51 @@ int gameLoop(
         );
         chunkLoadNum++;
       } else {
-        chunkLoadNum = 0;
         gameState = 5;
+        chunkLoadNum = 0;
       }
       break;
     
     // The actual gameplay
     case 5:
+      /* Look to see if there are chunks that need to be
+      loaded in*/
+      if(chunkLoadNum < CHUNKARR_SIZE) {
+        chunkLoadCoords.x =
+          (chunkLoadNum % CHUNKARR_DIAM) *
+          64 - 128 + playerPosition.x - 64;
+        chunkLoadCoords.y =
+          ((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) *
+          64 - 128 + playerPosition.y - 64;
+        chunkLoadCoords.z =
+          (chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) *
+          64 - 128 + playerPosition.z - 64;
+        if(
+          !chunkLookup(
+            world,
+            chunkLoadCoords.x,
+            chunkLoadCoords.y,
+            chunkLoadCoords.z
+          )
+        ) {
+          genChunk(
+            world, seed,
+            chunkLoadCoords.x,
+            chunkLoadCoords.y,
+            chunkLoadCoords.z, 1
+          );
+          printf(
+            "%i, %i, %i\n",
+            chunkLoadCoords.x,
+            chunkLoadCoords.y,
+            chunkLoadCoords.z
+          );
+        }
+        chunkLoadNum++;
+      } else {
+        chunkLoadNum = 0;
+      }
+      
       f9  = sin(cameraAngle_H),
       f10 = cos(cameraAngle_H),
       f11 = sin(cameraAngle_V),

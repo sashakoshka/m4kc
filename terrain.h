@@ -1,6 +1,5 @@
 void   initChunks  (World*);
 void   sortChunks  (World*);
-void   genAll      (World*, unsigned int, int);
 Chunk* chunkLookup (World*, int, int, int);
 int    setBlock    (World*, int, int, int, int, int);
 int    getBlock    (World*, int, int, int);
@@ -48,30 +47,6 @@ void sortChunks (World* world) {
     world->chunk[j] = world->chunk[j + 1];
     world->chunk[j + 1] = temp;
   }
-}
-
-/*
-  genAll
-  generates all chunks surrounding the player. TODO: once chunk
-  indexing system fully working, call this when the player
-  crosses chunk boundaries
-*/
-void genAll(World *world, unsigned int seed, int type) {
-  // For all chunk slots we have, go around the player. This
-  // will eventually take in player position.
-  for(
-    int x = -32 * (CHUNKARR_DIAM - 1);
-    x < 32 * (CHUNKARR_DIAM);
-    x += 64
-  ) for(
-    int y = -32 * (CHUNKARR_DIAM - 1);
-    y < 32 * (CHUNKARR_DIAM);
-    y += 64
-  ) for(
-    int z = -32 * (CHUNKARR_DIAM - 1);
-    z < 32 * (CHUNKARR_DIAM);
-    z += 64
-  ) genChunk(world, seed, x, y, z, type);
 }
 
 /*
