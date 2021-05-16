@@ -282,27 +282,12 @@ int gameLoop(
         chunkLoadCoords.z =
           (chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) *
           64 - 128 + playerPosition.z - 64;
-        if(
-          !chunkLookup(
-            world,
-            chunkLoadCoords.x,
-            chunkLoadCoords.y,
-            chunkLoadCoords.z
-          )
-        ) {
           genChunk(
             world, seed,
             chunkLoadCoords.x,
             chunkLoadCoords.y,
             chunkLoadCoords.z, 1
           );
-          printf(
-            "%i, %i, %i\n",
-            chunkLoadCoords.x,
-            chunkLoadCoords.y,
-            chunkLoadCoords.z
-          );
-        }
         chunkLoadNum++;
       } else {
         chunkLoadNum = 0;

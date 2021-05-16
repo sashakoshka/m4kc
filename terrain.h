@@ -283,8 +283,7 @@ void genChunk(
   
   Chunk *chunk = chunkLookup(world, xOffset, yOffset, zOffset);
   
-  // If there is no chunk at that coordinate, find a good place
-  // for it
+  // Only generate if that chunk hasn't been generated yet.
   i = 0;
   if(chunk == NULL) {
     for(; i < CHUNKARR_SIZE && world->chunk[i].loaded; i++);
@@ -300,146 +299,146 @@ void genChunk(
       i = loadedMin;
     }
     chunk = &world->chunk[i];
-  }
   
-  // If there is no array, allocate one.
-  if(chunk->loaded) {
-    // TODO: Save chunk to disk
-  } else {
-    chunk->blocks = (int*)calloc(262144, sizeof(int));
-  }
-  
-  if(chunk->blocks == NULL) {
-    printf("genChunk: memory allocation fail");
-    return;
-  }
-  
-  int *blocks = chunk->blocks;
-  
-  for(int i = 0; i < 262144; i++)
-    blocks[i] = 0;
-  
-  // Generate a hash
-  static int hashX, hashY, hashZ;
-  
-  hashX = xOffset >> 6;
-  hashY = yOffset >> 6;
-  hashZ = zOffset >> 6;
-  
-  hashX &= 0b1111111111;
-  hashY &= 0b1111111111;
-  hashZ &= 0b1111111111;
-  
-  hashY <<= 10;
-  hashZ <<= 20;
-  
-  chunk->coordHash = hashX | hashY | hashZ;
-  chunk->coordHash++;
-  
-  // What we have here won't cause a segfault, so it is safe to
-  // mark the chunk as loaded and set its stamp.
-  chunk->loaded = ++count;
-  
-  /*
-  printf(
-    "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
-    chunk->coordHash,
-    xOffset, yOffset, zOffset,
-    chunk->loaded, chunk
-  );
-  */
-  
-  switch(type) {
-    // Classic terrain
-    case 0:
-      for(int x = 0; x < 64; x++)
-        for(int y = 32; y < 64; y++)
-          for(int z = 0; z < 64; z++)
-            ch_setBlock(blocks, x, y, z,
-              randm(2) == 0 ? randm(8) : 0);
-      break;
+    // If there is no array, allocate one.
+    if(chunk->loaded) {
+      // TODO: Save chunk to disk
+    } else {
+      chunk->blocks = (int*)calloc(262144, sizeof(int));
+    }
     
-    // New terrain
-    case 1:
-      // Generate heightmap
-      for(int x = 0; x < 64; x++)
-        for(int z = 0; z < 64; z++) {
-          heightmap[x][z] =
-            perlin2d( // Detail noise
-              seed,
-              x + xOffset + 16777215,
-              z + zOffset + 16777215,
-              0.0625
-            )
-            * 16 +
-            perlin2d( // Detail noise
-              seed,
-              x + xOffset + 16777215,
-              z + zOffset + 16777215,
-              0.0078125
-            )
-            * 64;
-        }
-      
-      // Make terrain from heightmap
-      for(int x = 0; x < 64; x++)
-        for(int y = 0; y < 64; y++)
-          for(int z = 0; z < 64; z++)
-            if(y + yOffset > heightmap[x][z] + 4)
-              ch_setBlock(blocks, x, y, z, 4);
-            else if(y + yOffset > heightmap[x][z])
-              ch_setBlock(blocks, x, y, z, 2);
-            else if(y + yOffset == heightmap[x][z])
-              ch_setBlock(blocks, x, y, z, 1);
-            else
-              ch_setBlock(blocks, x, y, z, 0);
-      
-      // Generate structures
-      // TODO: fix structures not properly generating in some
-      // chunks
-      for(i = randm(16) + 64; i > 0; i--) {
-        x = randm(64);
-        z = randm(64);
-        if(
-          heightmap[x][z] >= yOffset &&
-          heightmap[x][z] <  yOffset + 64
-        ) {
-          genStructure(
-            world,
-            x + xOffset, heightmap[x][z] - 1, z + zOffset,
-            0
-          );
-        }
-      }
-      
-      for(i = randm(2); i > 0; i--) {
-        x = randm(64);
-        z = randm(64);
-        if(
-          heightmap[x][z] >= yOffset &&
-          heightmap[x][z] <  yOffset + 64
-        ) {
-          genStructure(
-            world,
-            x + xOffset, heightmap[x][z] + 1, z + zOffset,
-            1
-          );
-        }
-      }
-      
-      break;
+    if(chunk->blocks == NULL) {
+      printf("genChunk: memory allocation fail");
+      return;
+    }
     
-    // Debug stone
-    case 2:
-      for(int x = 0; x < 64; x++)
-        for(int z = 0; z < 64; z++) {
-          for(int y = 0; y < 32; y++)
-            ch_setBlock(blocks, x, y, z, 4);
+    int *blocks = chunk->blocks;
+    
+    for(int i = 0; i < 262144; i++)
+      blocks[i] = 0;
+    
+    // Generate a hash
+    static int hashX, hashY, hashZ;
+    
+    hashX = xOffset >> 6;
+    hashY = yOffset >> 6;
+    hashZ = zOffset >> 6;
+    
+    hashX &= 0b1111111111;
+    hashY &= 0b1111111111;
+    hashZ &= 0b1111111111;
+    
+    hashY <<= 10;
+    hashZ <<= 20;
+    
+    chunk->coordHash = hashX | hashY | hashZ;
+    chunk->coordHash++;
+    
+    // What we have here won't cause a segfault, so it is safe to
+    // mark the chunk as loaded and set its stamp.
+    chunk->loaded = ++count;
+    
+    /*
+    printf(
+      "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
+      chunk->coordHash,
+      xOffset, yOffset, zOffset,
+      chunk->loaded, chunk
+    );
+    */
+    
+    switch(type) {
+      // Classic terrain
+      case 0:
+        for(int x = 0; x < 64; x++)
           for(int y = 32; y < 64; y++)
-            ch_setBlock(blocks, x, y, z, 5);
+            for(int z = 0; z < 64; z++)
+              ch_setBlock(blocks, x, y, z,
+                randm(2) == 0 ? randm(8) : 0);
+        break;
+      
+      // New terrain
+      case 1:
+        // Generate heightmap
+        for(int x = 0; x < 64; x++)
+          for(int z = 0; z < 64; z++) {
+            heightmap[x][z] =
+              perlin2d( // Detail noise
+                seed,
+                x + xOffset + 16777215,
+                z + zOffset + 16777215,
+                0.0625
+              )
+              * 16 +
+              perlin2d( // Detail noise
+                seed,
+                x + xOffset + 16777215,
+                z + zOffset + 16777215,
+                0.0078125
+              )
+              * 64;
+          }
+        
+        // Make terrain from heightmap
+        for(int x = 0; x < 64; x++)
+          for(int y = 0; y < 64; y++)
+            for(int z = 0; z < 64; z++)
+              if(y + yOffset > heightmap[x][z] + 4)
+                ch_setBlock(blocks, x, y, z, 4);
+              else if(y + yOffset > heightmap[x][z])
+                ch_setBlock(blocks, x, y, z, 2);
+              else if(y + yOffset == heightmap[x][z])
+                ch_setBlock(blocks, x, y, z, 1);
+              else
+                ch_setBlock(blocks, x, y, z, 0);
+        
+        // Generate structures
+        // TODO: fix structures not properly generating in some
+        // chunks
+        for(i = randm(16) + 64; i > 0; i--) {
+          x = randm(64);
+          z = randm(64);
+          if(
+            heightmap[x][z] >= yOffset &&
+            heightmap[x][z] <  yOffset + 64
+          ) {
+            genStructure(
+              world,
+              x + xOffset, heightmap[x][z] - 1, z + zOffset,
+              0
+            );
+          }
         }
+        
+        for(i = randm(2); i > 0; i--) {
+          x = randm(64);
+          z = randm(64);
+          if(
+            heightmap[x][z] >= yOffset &&
+            heightmap[x][z] <  yOffset + 64
+          ) {
+            genStructure(
+              world,
+              x + xOffset, heightmap[x][z] + 1, z + zOffset,
+              1
+            );
+          }
+        }
+        
+        break;
+      
+      // Debug stone
+      case 2:
+        for(int x = 0; x < 64; x++)
+          for(int z = 0; z < 64; z++) {
+            for(int y = 0; y < 32; y++)
+              ch_setBlock(blocks, x, y, z, 4);
+            for(int y = 32; y < 64; y++)
+              ch_setBlock(blocks, x, y, z, 5);
+          }
+    }
+    
+    // Sort all chunks
+    sortChunks(world);
   }
-  
-  // Sort all chunks
-  sortChunks(world);
 }
