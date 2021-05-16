@@ -13,6 +13,8 @@ int  drawSlot(
 void dirtBg     (SDL_Renderer*);
 void loadScreen (SDL_Renderer*, char*, float, float);
 void chatAdd    (char[16][64], int*, int*, char*);
+void white      (SDL_Renderer*);
+void tblack     (SDL_Renderer*);
 
 const int BUFFER_W     = 214;
 const int BUFFER_H     = 120;
@@ -86,10 +88,10 @@ int drawBGStr(SDL_Renderer *renderer,
   bg.y = y;
   bg.w = len + 1;
   
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+  tblack(renderer);
   SDL_RenderFillRect(renderer, &bg);
   
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  white(renderer);
   return drawStr(renderer, strBak, ++x, ++y);
 }
 
@@ -142,11 +144,11 @@ int button(SDL_Renderer *renderer,
   if(hover)
     SDL_SetRenderDrawColor(renderer, 255, 255, 160, 255);
   else
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    white(renderer);
   drawStr(renderer, str, x, y);
   
   if(hover)
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    white(renderer);
   else
     SDL_SetRenderDrawColor(renderer, 0,   0,   0,   255);
   SDL_RenderDrawRect(renderer, &rect);
@@ -247,7 +249,7 @@ void loadScreen(
     BUFFER_HALF_H - 7
   );
   
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  white(renderer);
   drawStr(
     renderer,
     str,
@@ -290,4 +292,20 @@ void chatAdd (
     str, sizeof(char) * 64
   );
   *chatHistoryIndex = nmod(*chatHistoryIndex, 11);
+}
+
+/*
+  white
+  Sets the render color to white
+*/
+void white(SDL_Renderer *renderer) {
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+}
+
+/*
+  tblack
+  Sets the render color to transparent black
+*/
+void tblack(SDL_Renderer *renderer) {
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
 }

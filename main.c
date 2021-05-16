@@ -105,7 +105,6 @@ int main(int argc, char *argv[]) {
   while(gameLoop(
     seed,
     &inputs,
-    keyboard,
     &world,
     renderer,
     window
