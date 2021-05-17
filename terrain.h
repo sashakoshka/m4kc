@@ -15,6 +15,7 @@ void genChunk(
   World*,
   unsigned int,
   int, int, int,
+  int,
   int
 );
 
@@ -262,7 +263,8 @@ void genStructure(
 /*
   genChunk
   Takes in a seed and a chunk array. Chunk is 64x64x64 blocks.
-  Fills the chunk array with generated terrain.
+  Fills the chunk array with generated terrain. If force is set
+  to true, a chunk at the same coordinates will be overwritten.
 */
 void genChunk(
   World *world,
@@ -270,7 +272,8 @@ void genChunk(
   int xOffset,
   int yOffset,
   int zOffset,
-  int type
+  int type,
+  int force
 ) {
   xOffset = (xOffset / 64) * 64;
   yOffset = (yOffset / 64) * 64;
@@ -289,6 +292,8 @@ void genChunk(
     for(; i < CHUNKARR_SIZE && world->chunk[i].loaded; i++);
   
     // Pick out the oldest chunk (loaded) and overrwrite it.
+    /* TODO: Find oldest chunk by which one is farthest away from
+    the player*/
     if(i == CHUNKARR_SIZE) {
       loadedMin = 0;
       for(i = 0; i < CHUNKARR_SIZE; i++)
@@ -299,6 +304,9 @@ void genChunk(
       i = loadedMin;
     }
     chunk = &world->chunk[i];
+  } else if(!force) {
+    return;
+  }
   
     // If there is no array, allocate one.
     if(chunk->loaded) {
@@ -440,5 +448,4 @@ void genChunk(
     
     // Sort all chunks
     sortChunks(world);
-  }
 }

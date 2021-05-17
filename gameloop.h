@@ -243,18 +243,19 @@ int gameLoop(
       ;
       if(chunkLoadNum < CHUNKARR_SIZE) {
         chunkLoadCoords.x =
-          (chunkLoadNum % CHUNKARR_DIAM) * 64 - 128;
+          ((chunkLoadNum % CHUNKARR_DIAM) -
+          CHUNKARR_RAD) * 64;
         chunkLoadCoords.y =
-          ((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) *
-          64 - 128;
+          (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
+          CHUNKARR_RAD) * 64;
         chunkLoadCoords.z =
-          (chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) *
-          64 - 128;
+          ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
+          CHUNKARR_RAD) * 64;
         genChunk(
           world, seed,
           chunkLoadCoords.x,
           chunkLoadCoords.y,
-          chunkLoadCoords.z, 1
+          chunkLoadCoords.z, 1, 1
         );
         loadScreen(
           renderer,
@@ -272,25 +273,22 @@ int gameLoop(
     case 5:
       /* Look to see if there are chunks that need to be
       loaded in*/
-      if(chunkLoadNum < CHUNKARR_SIZE) {
+      for(i = 0; i < CHUNKARR_SIZE; i++) {
         chunkLoadCoords.x =
-          (chunkLoadNum % CHUNKARR_DIAM) *
-          64 - 128 + playerPosition.x - 64;
+          ((i % CHUNKARR_DIAM) -
+          CHUNKARR_RAD) * 64 + playerPosition.x - 64;
         chunkLoadCoords.y =
-          ((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) *
-          64 - 128 + playerPosition.y - 64;
+          (((i / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
+          CHUNKARR_RAD) * 64 + playerPosition.y - 64;
         chunkLoadCoords.z =
-          (chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) *
-          64 - 128 + playerPosition.z - 64;
-          genChunk(
-            world, seed,
-            chunkLoadCoords.x,
-            chunkLoadCoords.y,
-            chunkLoadCoords.z, 1
-          );
-        chunkLoadNum++;
-      } else {
-        chunkLoadNum = 0;
+          ((i / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
+          CHUNKARR_RAD) * 64 + playerPosition.z - 64;
+        genChunk(
+          world, seed,
+          chunkLoadCoords.x,
+          chunkLoadCoords.y,
+          chunkLoadCoords.z, 1, 0
+        );
       }
       
       f9  = sin(cameraAngle_H),

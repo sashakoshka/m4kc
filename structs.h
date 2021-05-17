@@ -1,4 +1,5 @@
-#define CHUNKARR_DIAM 5
+#define CHUNKARR_DIAM 3
+#define CHUNKARR_RAD  (CHUNKARR_DIAM - 1) / 2
 #define CHUNKARR_SIZE CHUNKARR_DIAM*CHUNKARR_DIAM*CHUNKARR_DIAM
 
 typedef struct _Chunk     Chunk;

@@ -72,6 +72,7 @@ int main(int argc, char *argv[]) {
   //---- generating assets  ----//
   
   genTextures(seed);
+  
   initChunks(&world);
   
   //----   main game loop   ----//
