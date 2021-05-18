@@ -2,14 +2,34 @@
 #define CHUNKARR_RAD  (CHUNKARR_DIAM - 1) / 2
 #define CHUNKARR_SIZE CHUNKARR_DIAM*CHUNKARR_DIAM*CHUNKARR_DIAM
 
+typedef struct _Coords    Coords;
+typedef struct _IntCoords IntCoords;
 typedef struct _Chunk     Chunk;
 typedef struct _World     World;
 typedef struct _Player    Player;
 typedef struct _InvSlot   InvSlot;
 typedef struct _Inventory Inventory;
-typedef struct _Coords    Coords;
-typedef struct _IntCoords IntCoords;
 typedef struct _Inputs    Inputs;
+
+/*
+  _Coords
+  Stores xyz coordinates
+*/
+struct _Coords {
+  float x;
+  float y;
+  float z;
+};
+
+/*
+  _IntCoords
+  Stores xyz integer coordinates
+*/
+struct _IntCoords {
+  int x;
+  int y;
+  int z;
+};
 
 /*
   _Chunk
@@ -22,6 +42,7 @@ typedef struct _Inputs    Inputs;
   will be sorted by coordhash.
 */
 struct _Chunk {
+  IntCoords center;
   int coordHash;
   int loaded;
   int *blocks;
@@ -69,26 +90,6 @@ struct _Inventory {
   InvSlot slots[27];
   InvSlot hotbar[9];
   InvSlot armor[4];
-};
-
-/*
-  _Coords
-  Stores xyz coordinates
-*/
-struct _Coords {
-  float x;
-  float y;
-  float z;
-};
-
-/*
-  _IntCoords
-  Stores xyz integer coordinates
-*/
-struct _IntCoords {
-  int x;
-  int y;
-  int z;
 };
 
 /*

@@ -1,7 +1,6 @@
 int   randm(int);
 int   nmod(int, int);
 float perlin2d(int, double, double, double);
-int   heartbeat(SDL_Window*, SDL_Event*, SDL_Renderer*);
 
 /*
   randm
@@ -87,22 +86,4 @@ float perlin2d(
   }
 
   return fin/div;
-}
-
-/*
-  heartbeat
-  Pushes render to screen and checks to see if user wants to
-  quit. If quit event is recieved, returns 0.
-*/
-int heartbeat(
-  SDL_Window   *window,
-  SDL_Event    *event,
-  SDL_Renderer *renderer
-) {
-  SDL_RenderPresent(renderer);
-  SDL_UpdateWindowSurface(window);
-  while(SDL_PollEvent(event)) {
-    if(event->type == SDL_QUIT) return 0;
-  }
-  return 1;
 }

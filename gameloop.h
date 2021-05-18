@@ -255,7 +255,8 @@ int gameLoop(
           world, seed,
           chunkLoadCoords.x,
           chunkLoadCoords.y,
-          chunkLoadCoords.z, 1, 1
+          chunkLoadCoords.z, 1, 1,
+          playerPosition
         );
         loadScreen(
           renderer,
@@ -273,22 +274,27 @@ int gameLoop(
     case 5:
       /* Look to see if there are chunks that need to be
       loaded in*/
-      for(i = 0; i < CHUNKARR_SIZE; i++) {
+      if(chunkLoadNum < CHUNKARR_SIZE) {
         chunkLoadCoords.x =
-          ((i % CHUNKARR_DIAM) -
+          ((chunkLoadNum % CHUNKARR_DIAM) -
           CHUNKARR_RAD) * 64 + playerPosition.x - 64;
         chunkLoadCoords.y =
-          (((i / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
+          (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
           CHUNKARR_RAD) * 64 + playerPosition.y - 64;
         chunkLoadCoords.z =
-          ((i / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
+          ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
           CHUNKARR_RAD) * 64 + playerPosition.z - 64;
+        chunkLoadNum++;
+        
         genChunk(
           world, seed,
           chunkLoadCoords.x,
           chunkLoadCoords.y,
-          chunkLoadCoords.z, 1, 0
+          chunkLoadCoords.z, 1, 0,
+          playerPosition
         );
+      } else {
+        chunkLoadNum = 0;
       }
       
       f9  = sin(cameraAngle_H),
