@@ -1,6 +1,4 @@
-int   randm(int);
-int   nmod(int, int);
-float perlin2d(int, double, double, double);
+#include "utility.h"
 
 /*
   randm
@@ -14,7 +12,7 @@ int randm(int max) {
 
 /*
   nmod
-  Modulo operator that acts like java.
+  Modulo operator that acts like the java one.
 */
 int nmod(int left, int right) {
   left %= right;
@@ -23,14 +21,13 @@ int nmod(int left, int right) {
   return left;
 }
 
-
-int noise2(int x, int y, Uint8 *hash, int seed) {
+int perlin2d_noise2(int x, int y, u_int8_t *hash, int seed) {
   static int tmp;
   tmp = hash[(y + seed) % 256];
   return hash[(tmp + x) % 256];
 }
 
-float smooth_inter(float x, float y, float s) {
+float perlin2d_lerp(float x, float y, float s) {
   return x + s * s * (3 - 2 * s) * (y - x);
 }
 
@@ -39,7 +36,7 @@ float perlin2d(
   double x, double y,
   double freq
 ) {
-  static Uint8 hash[] =
+  static u_int8_t hash[] =
   
   {208,34,231,213,32,248,233,56,161,78,24,140,
   71,48,140,254,245,255,247,247,40,185,248,251,245,28,124,204,
@@ -72,14 +69,14 @@ float perlin2d(
     int y_int = ya;
     double x_frac = xa - x_int;
     double y_frac = ya - y_int;
-    int s = noise2(x_int, y_int, hash, seed);
-    int t = noise2(x_int + 1, y_int,     hash, seed);
-    int u = noise2(x_int,     y_int + 1, hash, seed);
-    int v = noise2(x_int + 1, y_int + 1, hash, seed);
-    double low  = smooth_inter(s, t, x_frac);
-    double high = smooth_inter(u, v, x_frac);
+    int s = perlin2d_noise2(x_int, y_int, hash, seed);
+    int t = perlin2d_noise2(x_int + 1, y_int,     hash, seed);
+    int u = perlin2d_noise2(x_int,     y_int + 1, hash, seed);
+    int v = perlin2d_noise2(x_int + 1, y_int + 1, hash, seed);
+    double low  = perlin2d_lerp(s, t, x_frac);
+    double high = perlin2d_lerp(u, v, x_frac);
     
-    fin += smooth_inter(low, high, y_frac) * amp;
+    fin += perlin2d_lerp(low, high, y_frac) * amp;
     amp /= 2;
     xa *= 2;
     ya *= 2;

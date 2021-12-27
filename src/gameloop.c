@@ -1,15 +1,16 @@
+#include "gameloop.h"
+
 /*
   gameLoop
   Does all the raycasting stuff, moves the player around, etc.
   If by chance the game ends, it returns false - which should
   terminate the main while loop and end the program.
 */
-int gameLoop(
+int gameLoop (
   unsigned int seed,
   Inputs *inputs,
   World *world,
-  SDL_Renderer *renderer,
-  SDL_Window   *window
+  SDL_Renderer *renderer
 ) {
   // We dont want to have to pass all of these by reference, so
   // have all of them as static variables
@@ -97,11 +98,12 @@ int gameLoop(
                 
                 chatDrawIndex,
                 
-                fps_lastmil  = 0,
-                fps_count    = 0,
-                fps_now      = 0,
-                
                 chunkLoadNum;
+
+  static u_int32_t fps_lastmil  = 0,
+                   fps_count    = 0,
+                   fps_now      = 0;
+                
   
   static char drawDistanceText [] = "Draw distance: 20\0";
   static char trapMouseText    [] = "Capture mouse: OFF";
@@ -136,15 +138,16 @@ int gameLoop(
   static IntCoords coordPass         = {0};
   static IntCoords blockRayPosition  = {0};
 
-  static Coords playerPosition = {0.0};
-  static Coords playerMovement = {0.0};
+  static Coords playerPosition = {0.0, 0.0, 0.0};
+  static Coords playerMovement = {0.0, 0.0, 0.0};
   
   static Chunk *chunk;
   
   static IntCoords chunkLoadCoords;
   
   static int init = 0;
-  if(init) {
+  
+  if (init) {
     l = SDL_GetTicks();
     gameTime = 2048;
     

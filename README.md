@@ -1,6 +1,6 @@
 # M4KC
 
-![Grass block icon](icon.png)
+![Grass block icon](icons/icon.png)
 
 *Minecraft 4K - C Rewrite*
 
@@ -14,6 +14,7 @@ This project is an attempt to translate the game into C in order to increase its
 
 * "Sticky" block collision - this behavior is present in the original version and I have been trying to work out ways to fix it for a while.
 * Raycaster breaks at -64 along any axis
+* Infinite terrain generation is not fully functional, issues such as chunks flashing in and out of existence are common
 
 ## Some goals for this project
 
@@ -33,10 +34,9 @@ This project is an attempt to translate the game into C in order to increase its
 
 ### Bare minimum to make this code run
 * SDL2
-* A C compiler
+* A C compiler, such as gcc or clang
 
 ### To get it down to a small size, you need
-* gcc (have not tried the flags with other compilers)
 * gzexe
 
 ### On windows, you will need
@@ -45,13 +45,15 @@ This project is an attempt to translate the game into C in order to increase its
 ## Build instructions
 
 ### Linux, unix, etc
-* To just get a binary, run `make` or `make m4kc`
-* To run an uncompressed version, run `make run`
-* To install the program, run `make install`
-* To uninstall, run `make uninstall`
-* To clean, run `make clean`
+* To just get a binary, run `./build.sh small` or `./build.sh all small`
+* To run an uncompressed version, run `./build.sh` or `./build.sh all`
+* To install the program, run `./build.sh install`
+* To uninstall, run `./build.sh uninstall`
+* To clean, run `./build.sh clean`
 
 ### Windows
+!!! NOTE !!! This doesn't work anymore. updated Windows build system coming soon.
+
 Run `win-build.bat`. Inside of the `win` directory, you will find `m4kc.exe` and `SDL2.dll`. In order for `m4kc.exe` to run, these two must be in the same folder.
 
 ## Places

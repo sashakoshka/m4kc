@@ -1,3 +1,5 @@
+#pragma once
+
 #define CHUNKARR_DIAM 3
 #define CHUNKARR_RAD  (CHUNKARR_DIAM - 1) / 2
 #define CHUNKARR_SIZE CHUNKARR_DIAM*CHUNKARR_DIAM*CHUNKARR_DIAM
@@ -80,7 +82,7 @@ struct _Player {
 struct _InvSlot {
   unsigned int amount:6;
   unsigned int blockid;
-} pack;
+};
 
 /*
   _Inventory

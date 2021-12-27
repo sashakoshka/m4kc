@@ -2,11 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "structs.h"
-#include "utility.h"
-#include "textures.h"
-#include "minecraftfont.h"
 #include "terrain.h"
+#include "structs.h"
+#include "textures.h"
 #include "gui.h"
 #include "gameloop.h"
 
@@ -18,7 +16,6 @@
     sashakoshka - C port, modifications
     samsebe     - deciphering the meaning of some of the code
     gracie bell - daylight function
-    segfault    - makefile
     https://gist.github.com/nowl/828013 - perlin noise
     samantaz    - de-obfuscating controls code
   
@@ -26,7 +23,7 @@
   notice.
 */
 
-int main(int argc, char *argv[]) {
+int main(/*int argc, char *argv[]*/) {
   Inputs inputs = {0};
   
   World world;
@@ -81,8 +78,7 @@ int main(int argc, char *argv[]) {
     seed,
     &inputs,
     &world,
-    renderer,
-    window
+    renderer
   )) {
     
     SDL_PumpEvents();

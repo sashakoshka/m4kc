@@ -1,9 +1,11 @@
+#include "minecraftfont.h"
+
 /*
   2D array, with 256 (planned) chars, where each char has an
   eight 8bit ints for each row of pixels.
 */
 
-Uint8 font[][9] = {
+u_int8_t font[][9] = {
   {0},
   {0},
   {0},

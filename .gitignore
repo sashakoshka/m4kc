@@ -1,6 +1,4 @@
 # Ignore executables
-m4kc~
-m4kc
-m4kc-large~
-m4kc-large
-m4kc.exe
+/bin/*
+/win/bin/m4kc.exe
+/o/*

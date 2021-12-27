@@ -1,5 +1,6 @@
+#include "textures.h"
+
 int textures[12288] = {0};
-void  genTextures(unsigned int);
 
 /*
   genTextures
@@ -79,3 +80,4 @@ void genTextures(unsigned int seed) {
     }
   }
 }
+
