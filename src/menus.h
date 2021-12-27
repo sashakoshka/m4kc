@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui.h"
+#include "terrain.h"
 
 void menu_hud (
   SDL_Renderer *, Inputs *,
@@ -8,4 +9,8 @@ void menu_hud (
   Inventory *, Coords *
 );
 
-void menu_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime);
+void popup_chat       (SDL_Renderer *renderer, Inputs *inputs, long *gameTime);
+void popup_pause      (SDL_Renderer *, Inputs *, int *, int *);
+void popup_options    (SDL_Renderer *, Inputs *, int *, int *, int *);
+void popup_debugTools (SDL_Renderer *, Inputs *, int *);
+void popup_chunkPeek  (SDL_Renderer *, Inputs *, World *, int *, Coords *);
