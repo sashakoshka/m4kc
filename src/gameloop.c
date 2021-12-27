@@ -700,12 +700,12 @@ int gameLoop (
         switch(gamePopup) {
           // Pause menu
           case 1:
-            menu_pause(renderer, inputs, &gamePopup, &gameState);
+            popup_pause(renderer, inputs, &gamePopup, &gameState);
             break;
           
           // Options
           case 2:
-            menu_options (
+            popup_options (
               renderer, inputs,
               &gamePopup, &drawDistance, &trapMouse
             );
@@ -718,12 +718,12 @@ int gameLoop (
           
           // Advanced debug menu
           case 4:
-            menu_debugTools(renderer, inputs, &gamePopup);
+            popup_debugTools(renderer, inputs, &gamePopup);
             break;
           
           // Chunk peek
           case 5:
-            menu_chunkPeek (
+            popup_chunkPeek (
               renderer, inputs, world,
               &gamePopup,
               &playerPosition
@@ -732,13 +732,13 @@ int gameLoop (
           
           // Chat
           case 6:
-            menu_chat(renderer, inputs, &gameTime);
+            popup_chat(renderer, inputs, &gameTime);
             break;
         }
       } else {
         if (trapMouse) SDL_SetRelativeMouseMode(1);
         if (guiOn) {
-          menu_hud (
+          popup_hud (
             renderer, inputs,
             &debugOn, &fps_now,
             &inventory, &playerPosition

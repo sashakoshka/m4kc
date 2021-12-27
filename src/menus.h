@@ -3,7 +3,7 @@
 #include "gui.h"
 #include "terrain.h"
 
-void menu_hud (
+void popup_hud (
   SDL_Renderer *, Inputs *,
   int *, u_int32_t *,
   Inventory *, Coords *
