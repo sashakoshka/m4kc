@@ -106,19 +106,19 @@ case $1 in
     clean
     buildAll small                                                      \
     && echo "... installing"                                            \
-  	&& install -d /usr/games/                                           \
-  	&& install -d /usr/share/applications/                              \
-  	&& install -d /usr/share/icons/                                     \
-  	&& install -m 644 m4kc.desktop /usr/share/applications/m4kc.desktop \
-  	&& install -m 644 icons/icon.png /usr/share/icons/m4kc.png          \
-  	&& install -m 755 "./$SMALL_PATH" /usr/games/m4kc                   \
-  	&& echo ".// installed"
+    && install -d /usr/games/                                           \
+    && install -d /usr/share/applications/                              \
+    && install -d /usr/share/icons/                                     \
+    && install -m 644 m4kc.desktop /usr/share/applications/m4kc.desktop \
+    && install -m 644 icons/icon.png /usr/share/icons/m4kc.png          \
+    && install -m 755 "./$SMALL_PATH" /usr/games/m4kc                   \
+    && echo ".// installed"
     ;;
     
   uninstall)
-  	rm "/usr/games/m4kc"
-  	rm "/usr/share/applications/m4kc.desktop"
-  	rm "/usr/share/icons/m4kc.png"
+    rm "/usr/games/m4kc"
+    rm "/usr/share/applications/m4kc.desktop"
+    rm "/usr/share/icons/m4kc.png"
     ;;
     
   *) buildModule $1 $2 ;;

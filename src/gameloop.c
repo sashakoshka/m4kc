@@ -652,17 +652,17 @@ int gameLoop (
                 // Block outline color
                 pixelColor = 0xFFFFFF;
                 if (
-                    (
-                      !blockSelected                      ||
-                      blockRayPosition.x != blockSelect.x ||
-                      blockRayPosition.y != blockSelect.y ||
-                      blockRayPosition.z != blockSelect.z
-                    ) || (
+                  (
+                    !blockSelected                      ||
+                    blockRayPosition.x != blockSelect.x ||
+                    blockRayPosition.y != blockSelect.y ||
+                    blockRayPosition.z != blockSelect.z
+                  ) || (
                        i6 > 0  
                     && i7 % 16 > 0
                     && i6 < 15
                     && i7 % 16 < 15
-                  )
+                  ) || !guiOn
                 ) {
                   pixelColor = textures[
                     i6 + (i7 << 4) + i25 * 256 * 3

@@ -19,7 +19,7 @@ This project is an attempt to translate the game into C in order to increase its
 ## Some goals for this project
 
 * Maintaining the original look and feel as closely as possible. ✅️
-* Keeping the final executable under 20 KB (on Linux, with the system I have set up in the makefile) ✅️
+* Keeping the final executable under 20 KB (on Linux, with the system I have set up in `build.sh`) ✅️
 * More blocks 🏗️
 * Perlin noise terrain generation ✅️ (water, caves, etc) 🏗️
 * Infinite worlds, possibly vertically too 🏗️
