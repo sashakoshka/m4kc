@@ -92,6 +92,7 @@ struct _Inventory {
   InvSlot slots[27];
   InvSlot hotbar[9];
   InvSlot armor[4];
+  int hotbarSelect;
 };
 
 /*

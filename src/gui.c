@@ -6,6 +6,10 @@ const int BUFFER_SCALE = 4;
 const int BUFFER_HALF_W = BUFFER_W / 2;
 const int BUFFER_HALF_H = BUFFER_H / 2;
 
+char chatHistory      [11][64] = {0};
+int  chatHistoryFade  [11]     = {0};
+int  chatHistoryIndex          = 0;
+
 /*
   strnum
   Takes in a char array and an offset and puts the specified
@@ -300,18 +304,13 @@ void loadScreen(
   chatAdd
   Adds a message to chat
 */
-void chatAdd (
-  char  chatHistory[11][64],
-  int  *chatHistoryFade,
-  int  *chatHistoryIndex,
-  char *str
-) {
-  chatHistoryFade[*chatHistoryIndex] = 480;
+void chatAdd (char *str) {
+  chatHistoryFade[chatHistoryIndex] = 480;
   memcpy(
-    chatHistory[(*chatHistoryIndex)++],
+    chatHistory[(chatHistoryIndex)++],
     str, sizeof(char) * 64
   );
-  *chatHistoryIndex = nmod(*chatHistoryIndex, 11);
+  chatHistoryIndex = nmod(chatHistoryIndex, 11);
 }
 
 /*

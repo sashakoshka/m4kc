@@ -89,14 +89,11 @@ int gameLoop (
                 */
                 gamePopup,
                 
-                hotbarSelect,
                 guiOn        = 1,
                 debugOn      = 0,
                 fogLog       = 0,
                 drawDistance = 20,
                 trapMouse    = 0,
-                
-                chatDrawIndex,
                 
                 chunkLoadNum;
 
@@ -108,29 +105,9 @@ int gameLoop (
   static char drawDistanceText [] = "Draw distance: 20\0";
   static char trapMouseText    [] = "Capture mouse: OFF";
   
-  static char debugText        [][16] = {
-    "M4KC 0.7",
-    "X: ",
-    "Y: ",
-    "Z: ",
-    "FPS: ",
-    "ChunkX: ",
-    "ChunkY: ",
-    "ChunkZ: ",
-  };
-  
-  static char  chatHistory      [11][64] = {0};
-  static int   chatHistoryFade  [11]     = {0};
-  static int   chatHistoryIndex          = 0;
-  static char  chatBox          [64]     = {0};
-  static int   chatBoxCursor             = 0;
-  
   static double d;
   
   static SDL_Rect backgroundRect;
-  static SDL_Rect hotbarRect;
-  static SDL_Rect hotbarSelectRect;
-  static SDL_Rect chatBoxRect = {0, 0, 0, 9};
   
   static Inventory inventory;
   static IntCoords blockSelect       = {0};
@@ -159,21 +136,11 @@ int gameLoop (
     cameraAngle_V    = 0.0;
     
     gamePopup    = 0;
-    hotbarSelect = 0;
     
     backgroundRect.x = 0;
     backgroundRect.y = 0;
     backgroundRect.w = BUFFER_W;
     backgroundRect.h = BUFFER_H;
-    
-    hotbarRect.x = BUFFER_HALF_W - 77;
-    hotbarRect.y = BUFFER_H - 18;
-    hotbarRect.w = 154;
-    hotbarRect.h = 18;
-    
-    hotbarSelectRect.y = hotbarRect.y;
-    hotbarSelectRect.w = 18;
-    hotbarSelectRect.h = 18;
     
     inventory.hotbar[0].blockid = 1;
     inventory.hotbar[1].blockid = 2;
@@ -194,14 +161,10 @@ int gameLoop (
     inventory.hotbar[6].amount  = 63;
     inventory.hotbar[7].amount  = 63;
     inventory.hotbar[8].amount  = 63;
+
+    inventory.hotbarSelect = 0;
     
-    chatBoxRect.y = BUFFER_H - 9;
-    chatBoxRect.w = BUFFER_W;
-    
-    chatAdd(
-      chatHistory, chatHistoryFade, &chatHistoryIndex,
-      "Game started"
-    );
+    chatAdd("Game started");
     
     chunkLoadNum = 0;
     
@@ -342,8 +305,8 @@ int gameLoop (
         if(!gamePopup) {
           // Scroll wheel
           if(inputs->mouse_Wheel != 0) {
-            hotbarSelect -= inputs->mouse_Wheel;
-            hotbarSelect = nmod(hotbarSelect, 9);
+            inventory.hotbarSelect -= inputs->mouse_Wheel;
+            inventory.hotbarSelect = nmod(inventory.hotbarSelect, 9);
             inputs->mouse_Wheel = 0;
           }
           
@@ -374,15 +337,11 @@ int gameLoop (
           }
 
           // Restrict camera vertical position
-          if (cameraAngle_V < -1.57)
-            cameraAngle_V = -1.57;
-          if (cameraAngle_V >  1.57)
-            cameraAngle_V =  1.57;
+          if (cameraAngle_V < -1.57) cameraAngle_V = -1.57;
+          if (cameraAngle_V >  1.57) cameraAngle_V =  1.57;
 
-          playerSpeedFB =
-            (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
-          playerSpeedLR =
-            (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
+          playerSpeedFB = (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
+          playerSpeedLR = (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
         } else {
           playerSpeedFB = 0;
           playerSpeedLR = 0;
@@ -393,10 +352,8 @@ int gameLoop (
         playerMovement.y *= 0.99;
         playerMovement.z *= 0.5;
 
-        playerMovement.x +=
-          f9  * playerSpeedFB + f10 * playerSpeedLR;
-        playerMovement.z +=
-          f10 * playerSpeedFB - f9  * playerSpeedLR;
+        playerMovement.x += f9  * playerSpeedFB + f10 * playerSpeedLR;
+        playerMovement.z += f10 * playerSpeedFB - f9  * playerSpeedLR;
         playerMovement.y += 0.003;
         
         
@@ -413,12 +370,9 @@ int gameLoop (
             playerMovement.z * ((m + 2) % 3 / 2);
           
           for (i12 = 0; i12 < 12; i12++) {
-            i13 = (int)
-            (f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
-            i14 = (int)
-            (f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
-            i15 = (int)
-            (f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
+            i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
+            i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
+            i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
             
             if (getBlock(world, i13, i14, i15) > 0) {
               if (m != 1) {
@@ -479,7 +433,7 @@ int gameLoop (
               blockSelectOffset.x,
               blockSelectOffset.y,
               blockSelectOffset.z,
-              inventory.hotbar[hotbarSelect].blockid, 1
+              inventory.hotbar[inventory.hotbarSelect].blockid, 1
             );
           }
           inputs->mouse_Right = 0;
@@ -583,11 +537,7 @@ int gameLoop (
                 lookup_now.y != lookup_ago.y ||
                 lookup_now.z != lookup_ago.z
               ) {
-                memcpy(
-                  &lookup_ago,
-                  &lookup_now,
-                  sizeof(IntCoords)
-                );
+                lookup_ago = lookup_now;
                 
                 lookup_now.x &= 0b1111111111;
                 lookup_now.y &= 0b1111111111;
@@ -664,9 +614,7 @@ int gameLoop (
                     && i7 % 16 < 15
                   ) || !guiOn
                 ) {
-                  pixelColor = textures[
-                    i6 + (i7 << 4) + i25 * 256 * 3
-                  ]; 
+                  pixelColor = textures[i6 + (i7 << 4) + i25 * 256 * 3]; 
                 }
                 /* See if the block is selected There must be a
                 better way to do this  check... */
@@ -687,11 +635,7 @@ int gameLoop (
                   )
                 ) {
                   selectedPass = 1;
-                  memcpy(
-                    &coordPass,
-                    &blockRayPosition,
-                    sizeof(IntCoords)
-                  );
+                   coordPass = blockRayPosition;
                   
                   /* Treating a coords set as an array and
                   blockFace as an index. */
@@ -734,12 +678,9 @@ int gameLoop (
           if(finalPixelColor > 0) {
             SDL_SetRenderDrawColor(
               renderer,
-              ((finalPixelColor >> 16 & 0xFF) * pixelShade)
-              >> 8,
-              ((finalPixelColor >> 8  & 0xFF) * pixelShade)
-              >> 8,
-              ((finalPixelColor       & 0xFF) * pixelShade)
-              >> 8,
+              ((finalPixelColor >> 16 & 0xFF) * pixelShade) >> 8,
+              ((finalPixelColor >> 8  & 0xFF) * pixelShade) >> 8,
+              ((finalPixelColor       & 0xFF) * pixelShade) >> 8,
               fogLog ? sqrt(pixelMist) * 16 : pixelMist
             );
             
@@ -876,8 +817,7 @@ int gameLoop (
             break;
           
           // Chunk peek
-          case 5:
-            ;
+          case 5: {
             static int chunkPeekRX,
                        chunkPeekRY,
                        chunkPeekRYMax = 0,
@@ -1005,71 +945,11 @@ int gameLoop (
             ) {
               gamePopup = 4;
             }
-            break;
+          } break;
           
           // Chat
           case 6:
-            // Chat history
-            chatDrawIndex = chatHistoryIndex;
-            for(i = 0; i < 11; i++) {
-              chatDrawIndex = nmod(chatDrawIndex - 1, 11);
-              drawBGStr(
-                renderer, chatHistory[chatDrawIndex],
-                0, BUFFER_H - 32 - i * 9
-              );
-            }
-            
-            // Get keyboard input
-            if(inputs->keyTyped || inputs->keySym) {
-              if(inputs->keySym == SDLK_BACKSPACE) {
-                // Delete last char and decrement cursor
-                // position
-                if(chatBoxCursor > 0) {
-                  chatBox[--chatBoxCursor] = 0;
-                }
-              } else if(
-                inputs->keySym == SDLK_RETURN &&
-                chatBoxCursor > 0
-              ) {
-                // Add input to chat
-                chatAdd(
-                  chatHistory,
-                  chatHistoryFade,
-                  &chatHistoryIndex,
-                  chatBox
-                );
-                // Clear input box
-                chatBoxCursor = 0;
-                chatBox[0] = 0;
-              } else if(
-                inputs->keyTyped > 31 &&
-                inputs->keyTyped < 127 &&
-                chatBoxCursor < 64
-              ) {
-                chatBox[chatBoxCursor++] = inputs->keyTyped;
-                chatBox[chatBoxCursor]   = 0;
-              }
-            }
-            
-            // Chat input box
-            // If char limit is reached, give some visual
-            // feedback.
-            if(chatBoxCursor == 64)
-              SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
-            else
-              tblack(renderer);
-            SDL_RenderFillRect(renderer, &chatBoxRect);
-            
-            white(renderer);
-            drawChar(
-              renderer,
-              95 + 32 * ((gameTime >> 6) % 2),
-              drawStr(
-                renderer, chatBox,
-                0, BUFFER_H - 8
-              ),
-              BUFFER_H - 8
-            );
+            menu_chat(renderer, inputs, &gameTime);
             break;
         }
       } else {
@@ -1077,65 +957,11 @@ int gameLoop (
           SDL_SetRelativeMouseMode(1);
         }
         if(guiOn) {
-          // Debug screen
-          if(debugOn) {
-            // Coordinates
-            strnum(debugText[1], 3, (int)playerPosition.x - 64);
-            strnum(debugText[2], 3, (int)playerPosition.y - 64);
-            strnum(debugText[3], 3, (int)playerPosition.z - 64);
-            
-            // FPS
-            strnum(debugText[4], 5, fps_now);
-            
-            // Chunk coordinates
-            strnum(
-              debugText[5], 8, 
-              ((int)playerPosition.x - 64) >> 6
-            );
-            strnum(
-              debugText[6], 8, 
-              ((int)playerPosition.y - 64) >> 6
-            );
-            strnum(
-              debugText[7], 8, 
-              ((int)playerPosition.z - 64) >> 6
-            );
-            
-            // Text
-            for(i = 0; i < 8; i++)
-              drawBGStr(renderer, debugText[i], 0, i * 9);
-          }
-          // Hotbar
-          tblack(renderer);
-          SDL_RenderFillRect(renderer, &hotbarRect);
-          
-          hotbarSelectRect.x =
-            BUFFER_HALF_W - 77 + hotbarSelect * 17;
-          white(renderer);
-          SDL_RenderDrawRect(renderer, &hotbarSelectRect);
-          
-          for(i = 0; i < 9; i++)
-            drawSlot(
-              renderer,
-              &inventory.hotbar[i], 
-              BUFFER_HALF_W - 76 + i * 17,
-              BUFFER_H - 17,
-              inputs->mouse_X,
-              inputs->mouse_Y
-            );
-          
-          // Chat
-          chatDrawIndex = chatHistoryIndex;
-          for(i = 0; i < 11; i++) {
-            chatDrawIndex = nmod(chatDrawIndex - 1, 11);
-            if(chatHistoryFade[chatDrawIndex] > 0) {
-              chatHistoryFade[chatDrawIndex]--;
-              drawBGStr(
-                renderer, chatHistory[chatDrawIndex],
-                0, BUFFER_H - 32 - i * 9
-              );
-            }
-          }
+          menu_hud (
+            renderer, inputs,
+            &debugOn, &fps_now,
+            &inventory, &playerPosition
+          );
         }
       }
       

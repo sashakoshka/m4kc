@@ -23,7 +23,7 @@
   notice.
 */
 
-int main(/*int argc, char *argv[]*/) {
+int main (/*int argc, char *argv[]*/) {
   Inputs inputs = {0};
   
   World world;
@@ -40,26 +40,26 @@ int main(/*int argc, char *argv[]*/) {
   const Uint8  *keyboard = SDL_GetKeyboardState(NULL);
   SDL_Event     event;
   
-  if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("cant make window\n");
     goto exit;
   }
   
-  window = SDL_CreateWindow("M4KC",
+  window = SDL_CreateWindow ("M4KC",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
     BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
     SDL_WINDOW_SHOWN
   );
-  if(window == NULL) {
+  if (window == NULL) {
     printf("%s\n", SDL_GetError());
     goto exit;
   }
   
-  renderer = SDL_CreateRenderer(
+  renderer = SDL_CreateRenderer (
     window,
     -1, 0
   );
-  if(renderer == NULL) {
+  if (renderer == NULL) {
     printf("%s\n", SDL_GetError());
     goto exit;
   }
@@ -74,7 +74,7 @@ int main(/*int argc, char *argv[]*/) {
   
   //----   main game loop   ----//
   
-  while(gameLoop(
+  while (gameLoop(
     seed,
     &inputs,
     &world,
@@ -91,18 +91,18 @@ int main(/*int argc, char *argv[]*/) {
     inputs.keyboard_A     = keyboard[SDL_SCANCODE_A];
     inputs.keyboard_D     = keyboard[SDL_SCANCODE_D];
     
-    if(!SDL_GetRelativeMouseMode()) {
+    if (!SDL_GetRelativeMouseMode()) {
       inputs.mouse_X = mouseX;
       inputs.mouse_Y = mouseY;
     }
     
-    while(SDL_PollEvent(&event)) {
+    while (SDL_PollEvent(&event)) {
       switch (event.type) {
         case SDL_QUIT:
           goto exit;
           
         case SDL_MOUSEBUTTONDOWN:
-          switch(event.button.button) {
+          switch (event.button.button) {
             case SDL_BUTTON_LEFT:
               inputs.mouse_Left = 1;
               break;
@@ -113,7 +113,7 @@ int main(/*int argc, char *argv[]*/) {
           break;
         
         case SDL_KEYDOWN:
-          if(event.key.repeat == 0) {
+          if (event.key.repeat == 0) {
             // Detect UI hotkeys
             inputs.keyboard_Esc = keyboard[SDL_SCANCODE_ESCAPE];
             inputs.keyboard_F1  = keyboard[SDL_SCANCODE_F1];
@@ -131,7 +131,7 @@ int main(/*int argc, char *argv[]*/) {
           break;
         
         case SDL_MOUSEMOTION:
-          if(SDL_GetRelativeMouseMode()) {
+          if (SDL_GetRelativeMouseMode()) {
             inputs.mouse_X = event.motion.xrel;
             inputs.mouse_Y = event.motion.yrel;
           }
