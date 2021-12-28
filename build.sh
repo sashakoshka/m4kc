@@ -19,10 +19,19 @@ FLAGS_LIBS="-L/usr/local/lib -lSDL2 -lm"
 
 buildModule () {
   mkdir -p "$OBJ_PATH"
+  mkdir -p "$OBJ_PATH/small"
+  mkdir -p "$OBJ_PATH/debug"
 
-  modOut="$OBJ_PATH/$1.o"
   modIn="$SRC_PATH/$1.c"
   modHead="$SRC_PATH/$1.h"
+
+  flags="-c"
+  if [ "$2" = "small" ]
+  then flags="$flags $FLAGS_SMALL"
+       modOut="$OBJ_PATH/small/$1.o"
+  else flags="$flags $FLAGS_DEBUG"
+       modOut="$OBJ_PATH/debug/$1.o"
+  fi
   
   if [ ! -f "$modIn" ]; then
   echo "!!! module $1 does not exist, skipping" >&2; return
@@ -33,12 +42,6 @@ buildModule () {
   fi
   
   echo "... building module $1: $1.c ---> $1.o"
-
-  flags="-c"
-  if [ "$2" = "small" ]
-  then flags="$flags $FLAGS_SMALL"
-  else flags="$flags $FLAGS_DEBUG"
-  fi
   
   $CC "$modIn" -o "$modOut" $flags && echo ".// built module $1" \
   || echo "ERR could not build module $1" >&2
@@ -60,12 +63,14 @@ buildAll () {
   flags="$FLAGS_LIBS"
   if [ "$1" = "small" ]
   then flags="$flags $FLAGS_SMALL -s"
+       allIn="$OBJ_PATH/small/*.o"
        allOut="$SMALL_PATH"
   else flags="$flags $FLAGS_DEBUG"
+       allIn="$OBJ_PATH/debug/*.o"
        allOut="$DEBUG_PATH"
   fi
 
-  if $CC $OBJ_PATH/*.o -o "$allOut" $flags
+  if $CC $allIn -o "$allOut" $flags
   then echo ".// built entire executable"
   else echo "ERR could not build executable" >&2
        return
@@ -84,15 +89,15 @@ buildAll () {
 # clean everything
 
 clean () {
-  rm -f $OBJ_PATH/* $OUT_PATH/* && echo "(i) cleaned"
+  rm -f $OBJ_PATH/debug/* $OBJ_PATH/small/* $OUT_PATH/* && echo "(i) cleaned"
 }
 
 # control script
 
 case $1 in
-  all)   buildAll $2       ;;
-  small) buildAll small    ;;
-  "")    buildAll          ;;
+  all)   buildAll $2    ;;
+  small) buildAll small ;;
+  "")    buildAll       ;;
   
   clean)
     clean
