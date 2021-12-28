@@ -26,15 +26,11 @@ void strnum(char *ptr, int offset, int num) {
   draws it at the specified x and y coordinates, and then returns
   the character's width.
 */
-int drawChar(SDL_Renderer *renderer,
-  int c, int x, int y
-) {
-  for(int yy = 0; yy < 8; yy++) {
-    for(int xx = 0; xx < 8; xx++) {
-      if((font[c][yy] >> (7 - xx)) & 0x1)
+int drawChar (SDL_Renderer *renderer,int c, int x, int y) {
+  for (int yy = 0; yy < 8; yy++)
+    for (int xx = 0; xx < 8; xx++)
+      if ((font[c][yy] >> (7 - xx)) & 0x1)
         SDL_RenderDrawPoint(renderer, x + xx, y + yy);
-    }
-  }
   
   return font[c][8];
 }
@@ -45,57 +41,68 @@ int drawChar(SDL_Renderer *renderer,
   specified x and y coordinates, and then returns the x position
   it left off on.
 */
-int drawStr(SDL_Renderer *renderer,
-  char *str, int x, int y
-) {
-  while(*str > 0) {
-    x += drawChar(renderer, *(str++), x, y);
-  }
-  
+int drawStr(SDL_Renderer *renderer,char *str, int x, int y) {
+  while (*str > 0) x += drawChar(renderer, *(str++), x, y);
   return x;
+}
+
+/*
+  shadowStr
+  Identical to drawStr, but draws white text with a grey shadow.
+*/
+int shadowStr(SDL_Renderer *renderer, char *str, int x, int y) {
+  SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
+  drawStr(renderer, str, x + 1, y + 1);
+  white(renderer);
+  return drawStr(renderer, str, x, y);
 }
 
 /*
   centerStr
   Identical to drawStr, but centers the text
 */
-int centerStr(SDL_Renderer *renderer,
-  char *str, int x, int y
-) {
+int centerStr (SDL_Renderer *renderer, char *str, int x, int y) {
   x *= 2;
   char *strsave = str;
-  while(*str > 0) {
+  while (*str > 0)
     x -= font[(int)*(str++)][8];
-  }
+  
   str = strsave;
   x /= 2;
   
-  while(*str > 0) {
+  while(*str > 0)
     x += drawChar(renderer, *(str++), x, y);
-  }
   
   return x;
 }
 
+/*
+  shadowStr
+  Identical to centerStr, but draws white text with a grey shadow.
+*/
+int shadowCenterStr(SDL_Renderer *renderer, char *str, int x, int y) {
+  SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
+  centerStr(renderer, str, x + 1, y + 1);
+  white(renderer);
+  return centerStr(renderer, str, x, y);
+}
 
 /*
   drawBig
   Draws centered text at a large scale
 */
-int drawBig(SDL_Renderer *renderer,
-  char *str, int x, int y
-) {
+int drawBig (SDL_Renderer *renderer, char *str, int x, int y ) {
   char *strsave = str;
-  while(*str > 0) {
+  while (*str > 0)
     x -= font[(int)*(str++)][8];
-  }
+  
   str = strsave;
   
-  while(*str > 0) {
+  while (*str > 0) {
     int c = *(str++);
-    for(int yy = 0; yy < 16; yy++) {
-      for(int xx = 0; xx < 16; xx++) {
-        if((font[c][yy / 2] >> (7 - xx / 2)) & 0x1)
+    for (int yy = 0; yy < 16; yy++) {
+      for (int xx = 0; xx < 16; xx++) {
+        if ((font[c][yy / 2] >> (7 - xx / 2)) & 0x1)
           SDL_RenderDrawPoint(renderer, x + xx, y + yy);
       }
     }
@@ -204,12 +211,16 @@ int drawSlot(SDL_Renderer *renderer,
              xx,
              yy,
              color;
+
+  static char count[4];
   
   hover =
     mouseX >= x      &&
     mouseY >= y      &&
     mouseX <  x + 16 &&
     mouseY <  y + 16 ;
+
+  if (slot->amount == 0) return hover;
   
   i = slot->blockid * 256 * 3;
   for(yy = 0; yy < 16; yy++)
@@ -226,6 +237,9 @@ int drawSlot(SDL_Renderer *renderer,
         SDL_RenderDrawPoint(renderer, x + xx, y + yy);
       i++;
     }
+
+  strnum(count, 0, slot->amount);
+  shadowStr(renderer, count, x + (slot->amount >= 10 ? 4 : 10), y + 8);
   
   return hover;
 }
@@ -265,25 +279,11 @@ void loadScreen(
   float prog, float max
 ) {
   dirtBg(renderer);
+
+  shadowCenterStr(renderer, str, BUFFER_HALF_W, BUFFER_HALF_H - 8);
   
   SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
-  centerStr(
-    renderer,
-    str,
-    BUFFER_HALF_W + 1,
-    BUFFER_HALF_H - 7
-  );
-  
-  white(renderer);
-  centerStr(
-    renderer,
-    str,
-    BUFFER_HALF_W,
-    BUFFER_HALF_H - 8
-  );
-  
-  SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
-  SDL_RenderDrawLine(
+  SDL_RenderDrawLine (
     renderer,
     BUFFER_HALF_W - 32,
     BUFFER_HALF_H + 6,
@@ -292,7 +292,7 @@ void loadScreen(
   );
   
   SDL_SetRenderDrawColor(renderer, 132, 255, 132, 255);
-  SDL_RenderDrawLine(
+  SDL_RenderDrawLine ( 
     renderer,
     BUFFER_HALF_W - 32,
     BUFFER_HALF_H + 6,

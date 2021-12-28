@@ -20,6 +20,8 @@ int state_title (
     16
   );
   
+  shadowStr(renderer, "version 0.7 (pre-release)", 1, BUFFER_H - 9);
+  
   if(button(renderer, "Singleplayer",
     BUFFER_HALF_W - 64, 42, 128,
     inputs->mouse_X, inputs->mouse_Y) &&

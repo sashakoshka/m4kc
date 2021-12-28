@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 #define CHUNKARR_DIAM 3
 #define CHUNKARR_RAD  (CHUNKARR_DIAM - 1) / 2
 #define CHUNKARR_SIZE CHUNKARR_DIAM*CHUNKARR_DIAM*CHUNKARR_DIAM
@@ -65,7 +67,7 @@ struct _World {
 */
 struct _InvSlot {
   float durability;
-  unsigned int amount:6;
+  u_int8_t amount;
   unsigned int blockid;
 };
 
