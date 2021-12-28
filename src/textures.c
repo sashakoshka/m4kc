@@ -1,6 +1,24 @@
 #include "textures.h"
 
 int textures[12288] = {0};
+const u_int16_t cobbleCracks[16] = {
+  0b0000001110000100,
+  0b0010110010000110,
+  0b1011100011001110,
+  0b1110100011110011,
+  0b0011000110001001,
+  0b0001000100001111,
+  0b0001111110000001,
+  0b0011001111100110,
+  0b1110001000111100,
+  0b0100010100011000,
+  0b1000010000011100,
+  0b0100110000110111,
+  0b0011111011000010,
+  0b1100001010000001,
+  0b0010000111000011,
+  0b0000111100111110,
+};
 
 /*
   genTextures
@@ -33,10 +51,6 @@ void genTextures(unsigned int seed) {
           baseColor = 0xAAAAAA;
           noiseScale = 140;
         }
-        
-        // cobblestone noise scale
-        if (blockId == 9)
-          noiseScale = 64;
   
         // add noise
         if (blockId != 4 || randm(3) == 0)
@@ -76,11 +90,11 @@ void genTextures(unsigned int seed) {
           if ((x + y / 4 * 4) % 8 == 0 || y % 4 == 0)
             baseColor = 12365733; 
         }
-
+        
         // cobblestone
         if (blockId == 9) {
-          baseColor = 8355711;
-          k -= sin((float)x * 3.14159 / 6) * cos((float)y * 3.14159 / 6) * 64;
+          baseColor = 0x999999;
+          k -= ((cobbleCracks[y & 0xF] >> x) & 0b1) * 128;
         }
         
         int i2 = k;

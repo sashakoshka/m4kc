@@ -300,7 +300,7 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
     inputs->mouse_X, inputs->mouse_Y) &&
     inputs->mouse_Left
   ) {
-    *gamePopup = 2;
+    *gamePopup = 1;
   }
 }
 

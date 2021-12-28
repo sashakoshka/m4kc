@@ -250,11 +250,10 @@ int drawSlot(SDL_Renderer *renderer,
 void dirtBg (
   SDL_Renderer *renderer
 ) {
-  Uint8 i = 0;
   int color;
   for(int y = 0; y < BUFFER_H; y++) {
     for(int x = 0; x < BUFFER_W; x++) {
-      color = textures[i + 2 * 256 * 3];
+      color = textures[(x & 0xF) + (y & 0xF) * 16 + 2 * 256 * 3];
       SDL_SetRenderDrawColor(
         renderer,
         (color >> 16 & 0xFF) >> 1,
@@ -263,9 +262,7 @@ void dirtBg (
         255
       );
       SDL_RenderDrawPoint(renderer, x, y);
-      i++;
     }
-    i &= 0b11110000;
   }
 }
 

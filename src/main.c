@@ -74,12 +74,7 @@ int main (/*int argc, char *argv[]*/) {
   
   //----   main game loop   ----//
   
-  while (gameLoop(
-    seed,
-    &inputs,
-    &world,
-    renderer
-  )) {
+  do {
     
     SDL_PumpEvents();
     SDL_GetMouseState(&mouseX, &mouseY);
@@ -144,7 +139,7 @@ int main (/*int argc, char *argv[]*/) {
     }
     SDL_RenderPresent(renderer);
     SDL_UpdateWindowSurface(window);
-  }
+  } while (gameLoop(seed, &inputs, &world, renderer));
   
   exit:
   SDL_Quit();
