@@ -75,7 +75,7 @@ int gameLoop (
                   7: Join game
                   8: Options
                 */
-                gameState    = 0,
+                gameState = 0,
                 
                 /*
                   0: Gameplay
@@ -103,14 +103,14 @@ int gameLoop (
   static double d;
   
   static SDL_Rect backgroundRect;
+
+  static Player player = {0};
   
-  static Inventory inventory;
   static IntCoords blockSelect       = {0};
   static IntCoords blockSelectOffset = {0};
   static IntCoords coordPass         = {0};
   static IntCoords blockRayPosition  = {0};
 
-  static Coords playerPosition = {0.0, 0.0, 0.0};
   static Coords playerMovement = {0.0, 0.0, 0.0};
   
   static Chunk *chunk;
@@ -123,41 +123,41 @@ int gameLoop (
     l = SDL_GetTicks();
     gameTime = 2048;
     
-    playerPosition.x = 96.5;
-    playerPosition.y = 65.0;
-    playerPosition.z = 96.5;
+    player.pos.x = 96.5;
+    player.pos.y = 65.0;
+    player.pos.z = 96.5;
     
-    cameraAngle_H    = 0.0;
-    cameraAngle_V    = 0.0;
+    cameraAngle_H = 0.0;
+    cameraAngle_V = 0.0;
     
-    gamePopup    = 0;
+    gamePopup = 0;
     
     backgroundRect.x = 0;
     backgroundRect.y = 0;
     backgroundRect.w = BUFFER_W;
     backgroundRect.h = BUFFER_H;
     
-    inventory.hotbar[0].blockid = 1;
-    inventory.hotbar[1].blockid = 2;
-    inventory.hotbar[2].blockid = 4;
-    inventory.hotbar[3].blockid = 5;
-    inventory.hotbar[4].blockid = 7;
-    inventory.hotbar[5].blockid = 8;
-    inventory.hotbar[6].blockid = 9;
-    inventory.hotbar[7].blockid = 10;
-    inventory.hotbar[8].blockid = 11;
+    player.inventory.hotbar[0].blockid = 1;
+    player.inventory.hotbar[1].blockid = 2;
+    player.inventory.hotbar[2].blockid = 4;
+    player.inventory.hotbar[3].blockid = 5;
+    player.inventory.hotbar[4].blockid = 7;
+    player.inventory.hotbar[5].blockid = 8;
+    player.inventory.hotbar[6].blockid = 9;
+    player.inventory.hotbar[7].blockid = 10;
+    player.inventory.hotbar[8].blockid = 11;
     
-    inventory.hotbar[0].amount  = 63;
-    inventory.hotbar[1].amount  = 63;
-    inventory.hotbar[2].amount  = 63;
-    inventory.hotbar[3].amount  = 63;
-    inventory.hotbar[4].amount  = 63;
-    inventory.hotbar[5].amount  = 63;
-    inventory.hotbar[6].amount  = 63;
-    inventory.hotbar[7].amount  = 63;
-    inventory.hotbar[8].amount  = 63;
+    player.inventory.hotbar[0].amount  = 63;
+    player.inventory.hotbar[1].amount  = 63;
+    player.inventory.hotbar[2].amount  = 63;
+    player.inventory.hotbar[3].amount  = 63;
+    player.inventory.hotbar[4].amount  = 63;
+    player.inventory.hotbar[5].amount  = 63;
+    player.inventory.hotbar[6].amount  = 63;
+    player.inventory.hotbar[7].amount  = 63;
+    player.inventory.hotbar[8].amount  = 63;
 
-    inventory.hotbarSelect = 0;
+    player.inventory.hotbarSelect = 0;
     
     chatAdd("Game started");
     
@@ -169,39 +169,11 @@ int gameLoop (
   switch(gameState) {
     // A main menu
     case 0:
-      inputs->mouse_X /= BUFFER_SCALE;
-      inputs->mouse_Y /= BUFFER_SCALE;
-      
-      dirtBg(renderer);
-      white(renderer);
-      drawBig(
-        renderer,
-        "M4KC",
-        BUFFER_HALF_W,
-        16
-      );
-      
-      if(button(renderer, "Singleplayer",
-        BUFFER_HALF_W - 64, 42, 128,
-        inputs->mouse_X, inputs->mouse_Y) &&
-        inputs->mouse_Left
-      ) {
-        gameState = 4;
-        init = 1;
-      }
-      
-      if(button(renderer, "Quit Game",
-        BUFFER_HALF_W - 64, 64, 128,
-        inputs->mouse_X, inputs->mouse_Y) &&
-        inputs->mouse_Left
-      ) {
-        return 0;
-      }
+      if (state_title(renderer, inputs, &gameState, &init)) return 0;
       break;
     
     // Generate a world and present a loading screen
     case 4:
-      ;
       if(chunkLoadNum < CHUNKARR_SIZE) {
         chunkLoadCoords.x =
           ((chunkLoadNum % CHUNKARR_DIAM) -
@@ -212,14 +184,14 @@ int gameLoop (
         chunkLoadCoords.z =
           ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
           CHUNKARR_RAD) * 64;
-        genChunk(
+        genChunk (
           world, seed,
           chunkLoadCoords.x,
           chunkLoadCoords.y,
           chunkLoadCoords.z, 1, 1,
-          playerPosition
+          player.pos
         );
-        loadScreen(
+        loadScreen (
           renderer,
           "Generating world...",
           chunkLoadNum, CHUNKARR_SIZE
@@ -238,13 +210,13 @@ int gameLoop (
       if(chunkLoadNum < CHUNKARR_SIZE) {
         chunkLoadCoords.x =
           ((chunkLoadNum % CHUNKARR_DIAM) -
-          CHUNKARR_RAD) * 64 + playerPosition.x - 64;
+          CHUNKARR_RAD) * 64 + player.pos.x - 64;
         chunkLoadCoords.y =
           (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
-          CHUNKARR_RAD) * 64 + playerPosition.y - 64;
+          CHUNKARR_RAD) * 64 + player.pos.y - 64;
         chunkLoadCoords.z =
           ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
-          CHUNKARR_RAD) * 64 + playerPosition.z - 64;
+          CHUNKARR_RAD) * 64 + player.pos.z - 64;
         chunkLoadNum++;
         
         genChunk(
@@ -252,7 +224,7 @@ int gameLoop (
           chunkLoadCoords.x,
           chunkLoadCoords.y,
           chunkLoadCoords.z, 1, 0,
-          playerPosition
+          player.pos
         );
       } else {
         chunkLoadNum = 0;
@@ -300,8 +272,10 @@ int gameLoop (
         if(!gamePopup) {
           // Scroll wheel
           if(inputs->mouse_Wheel != 0) {
-            inventory.hotbarSelect -= inputs->mouse_Wheel;
-            inventory.hotbarSelect = nmod(inventory.hotbarSelect, 9);
+            player.inventory.hotbarSelect -= inputs->mouse_Wheel;
+            player.inventory.hotbarSelect = nmod (
+              player.inventory.hotbarSelect, 9
+            );
             inputs->mouse_Wheel = 0;
           }
           
@@ -355,13 +329,13 @@ int gameLoop (
         // TODO: update this to check for collisions properly
         for (m = 0; m < 3; m++) {
           f16 =
-            playerPosition.x +
+            player.pos.x +
             playerMovement.x * ((m + 2) % 3 / 2);
           f17 =
-            playerPosition.y +
+            player.pos.y +
             playerMovement.y * ((m + 1) % 3 / 2);
           f19 =
-            playerPosition.z +
+            player.pos.z +
             playerMovement.z * ((m + 2) % 3 / 2);
           
           for (i12 = 0; i12 < 12; i12++) {
@@ -387,9 +361,9 @@ int gameLoop (
             }
           }
 
-          playerPosition.x = f16;
-          playerPosition.y = f17;
-          playerPosition.z = f19;
+          player.pos.x = f16;
+          player.pos.y = f17;
+          player.pos.z = f19;
         }
         label208:;
       }
@@ -413,14 +387,14 @@ int gameLoop (
         if(inputs->mouse_Right > 0) {
           if(!(
             blockSelectOffset.x ==
-              (int)playerPosition.x - 64 &&
+              (int)player.pos.x - 64 &&
             blockSelectOffset.z == 
-              (int)playerPosition.z - 64 &&
+              (int)player.pos.z - 64 &&
             (
               blockSelectOffset.y ==
-                (int)playerPosition.y - 64 ||
+                (int)player.pos.y - 64 ||
               blockSelectOffset.y ==
-                (int)playerPosition.y - 63
+                (int)player.pos.y - 63
             )
           )) {
             setBlock(
@@ -428,7 +402,7 @@ int gameLoop (
               blockSelectOffset.x,
               blockSelectOffset.y,
               blockSelectOffset.z,
-              inventory.hotbar[inventory.hotbarSelect].blockid, 1
+              player.inventory.hotbar[player.inventory.hotbarSelect].blockid, 1
             );
           }
           inputs->mouse_Right = 0;
@@ -487,17 +461,17 @@ int gameLoop (
             f29 = f24 * f28;
             f30 = f23 * f28;
             f31 = f25 * f28;
-            f32 = playerPosition.x - (int)playerPosition.x;
+            f32 = player.pos.x - (int)player.pos.x;
             if (blockFace == 1)
-              f32 = playerPosition.y - (int)playerPosition.y;
+              f32 = player.pos.y - (int)player.pos.y;
             if (blockFace == 2)
-              f32 = playerPosition.z - (int)playerPosition.z;
+              f32 = player.pos.z - (int)player.pos.z;
             if (f27 > 0.0)
               f32 = 1.0 - f32; 
             f33 = f28 * f32;
-            f34 = playerPosition.x + f29 * f32;
-            f35 = playerPosition.y + f30 * f32;
-            f36 = playerPosition.z + f31 * f32;
+            f34 = player.pos.x + f29 * f32;
+            f35 = player.pos.y + f30 * f32;
+            f36 = player.pos.z + f31 * f32;
             if (f27 < 0.0) {
               if (blockFace == 0)
                 f34--; 
@@ -689,92 +663,74 @@ int gameLoop (
       inputs->mouse_Y /= BUFFER_SCALE;
       
       // In-game menus
-      if(gamePopup) {
+
+      if (gamePopup) {
         SDL_SetRelativeMouseMode(0);
-        
-        if(gamePopup != 6) {
+        if(gamePopup != 6 && gamePopup != 0) {
           tblack(renderer);
           SDL_RenderFillRect(renderer, &backgroundRect);
         }
-        
-        switch(gamePopup) {
-          // Pause menu
-          case 1:
-            popup_pause(renderer, inputs, &gamePopup, &gameState);
-            break;
-          
-          // Options
-          case 2:
-            popup_options (
-              renderer, inputs,
-              &gamePopup, &drawDistance, &trapMouse
-            );
-            break;
-          
-          // Inventory
-          case 3:
-            // TODO: draw inventory
-            break;
-          
-          // Advanced debug menu
-          case 4:
-            popup_debugTools(renderer, inputs, &gamePopup);
-            break;
-          
-          // Chunk peek
-          case 5:
-            popup_chunkPeek (
-              renderer, inputs, world,
-              &gamePopup,
-              &playerPosition
-            );
-            break;
-          
-          // Chat
-          case 6:
-            popup_chat(renderer, inputs, &gameTime);
-            break;
-        }
-      } else {
-        if (trapMouse) SDL_SetRelativeMouseMode(1);
-        if (guiOn) {
-          popup_hud (
-            renderer, inputs,
-            &debugOn, &fps_now,
-            &inventory, &playerPosition
-          );
-        }
       }
       
-      if(inputs->mouse_Left) inputs->mouse_Left = 0;
-      if(inputs->mouse_X)    inputs->mouse_X    = 0;
+      switch(gamePopup) {
+        // HUD
+        case 0:
+          if (trapMouse) SDL_SetRelativeMouseMode(1);
+          if (guiOn) popup_hud(renderer, inputs, &debugOn, &fps_now, &player);
+          break;
+           
+        // Pause menu
+        case 1:
+          popup_pause(renderer, inputs, &gamePopup, &gameState);
+          break;
+        
+        // Options
+        case 2:
+          popup_options (
+            renderer, inputs,
+            &gamePopup, &drawDistance, &trapMouse
+          );
+          break;
+        
+        // Inventory
+        case 3:
+          // TODO: draw inventory
+          break;
+        
+        // Advanced debug menu
+        case 4:
+          popup_debugTools(renderer, inputs, &gamePopup);
+          break;
+        
+        // Chunk peek
+        case 5:
+          popup_chunkPeek(renderer, inputs, world, &gamePopup, &player);
+          break;
+        
+        // Chat
+        case 6:
+          popup_chat(renderer, inputs, &gameTime);
+          break;
+      }
       
       // Clean up input struct
       inputs->keyTyped = 0;
       inputs->keySym   = 0;
       break;
+
+    case 8:
+      state_options(renderer, inputs, &gameState, &drawDistance, &trapMouse);
+      break;
     
-    // IDK lol
     default:
-      inputs->mouse_X /= BUFFER_SCALE;
-      inputs->mouse_Y /= BUFFER_SCALE;
-      
-      dirtBg(renderer);
-      white(renderer);
-      centerStr(
-        renderer,
-        "Go away, this is my house.",
-        BUFFER_HALF_W,
-        BUFFER_HALF_H - 16
-      );
-      if(button(renderer, "Ok",
-        BUFFER_HALF_W - 64, BUFFER_HALF_H, 128,
-        inputs->mouse_X, inputs->mouse_Y) &&
-        inputs->mouse_Left
-      ) {
-        gameState = 0;
-      }
+      state_egg(renderer, inputs, &gameState);
       break;
   }
+
+  if (gameState != 5 || gamePopup) {
+    inputs->mouse_Left  = 0;
+    inputs->mouse_Right = 0;
+  }
+  
   return 1;
 }

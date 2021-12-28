@@ -1,9 +1,93 @@
 #include "menus.h"
 
+int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *);
+
+/* === GAME STATES === */
+
+int state_title (
+  SDL_Renderer *renderer, Inputs *inputs,
+  int *gameState, int *init
+) {
+  inputs->mouse_X /= BUFFER_SCALE;
+  inputs->mouse_Y /= BUFFER_SCALE;
+  
+  dirtBg(renderer);
+  white(renderer);
+  drawBig(
+    renderer,
+    "M4KC",
+    BUFFER_HALF_W,
+    16
+  );
+  
+  if(button(renderer, "Singleplayer",
+    BUFFER_HALF_W - 64, 42, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    *gameState = 4;
+    *init = 1;
+  }
+  
+  if(button(renderer, "Options",
+    BUFFER_HALF_W - 64, 64, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    *gameState = 8;
+  }
+  
+  if(button(renderer, "Quit Game",
+    BUFFER_HALF_W - 64, 86, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    return 1;
+  }
+
+  return 0;
+}
+
+void state_options (
+  SDL_Renderer *renderer, Inputs *inputs,
+  int *gameState, int *drawDistance, int *trapMouse
+) {
+  inputs->mouse_X /= BUFFER_SCALE;
+  inputs->mouse_Y /= BUFFER_SCALE;
+  
+  dirtBg(renderer);
+
+  if(menu_optionsMain(renderer, inputs, drawDistance, trapMouse))
+    *gameState = 0;
+}
+
+void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
+  inputs->mouse_X /= BUFFER_SCALE;
+  inputs->mouse_Y /= BUFFER_SCALE;
+  
+  dirtBg(renderer);
+  white(renderer);
+  centerStr (
+    renderer,
+    "Go away, this is my house.",
+    BUFFER_HALF_W,
+    BUFFER_HALF_H - 16
+  );
+  if (button(renderer, "Ok",
+    BUFFER_HALF_W - 64, BUFFER_HALF_H, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    *gameState = 0;
+  }
+}
+
+/* === INGAME POPUPS === */
+
 void popup_hud (
   SDL_Renderer *renderer, Inputs *inputs,
   int *debugOn, u_int32_t *fps_now,
-  Inventory *inventory, Coords *playerPosition
+  Player *player
 ) {
   static SDL_Rect hotbarRect;
   static SDL_Rect hotbarSelectRect;
@@ -33,9 +117,9 @@ void popup_hud (
   // Debug screen
   if(*debugOn) {
     // Coordinates
-    strnum(debugText[1], 3, (int)playerPosition->x - 64);
-    strnum(debugText[2], 3, (int)playerPosition->y - 64);
-    strnum(debugText[3], 3, (int)playerPosition->z - 64);
+    strnum(debugText[1], 3, (int)player->pos.x - 64);
+    strnum(debugText[2], 3, (int)player->pos.y - 64);
+    strnum(debugText[3], 3, (int)player->pos.z - 64);
     
     // FPS
     strnum(debugText[4], 5, *fps_now);
@@ -43,15 +127,15 @@ void popup_hud (
     // Chunk coordinates
     strnum(
       debugText[5], 8, 
-      ((int)playerPosition->x - 64) >> 6
+      ((int)player->pos.x - 64) >> 6
     );
     strnum(
       debugText[6], 8, 
-      ((int)playerPosition->y - 64) >> 6
+      ((int)player->pos.y - 64) >> 6
     );
     strnum(
       debugText[7], 8, 
-      ((int)playerPosition->z - 64) >> 6
+      ((int)player->pos.z - 64) >> 6
     );
     
     // Text
@@ -63,14 +147,14 @@ void popup_hud (
   SDL_RenderFillRect(renderer, &hotbarRect);
   
   hotbarSelectRect.x =
-    BUFFER_HALF_W - 77 + inventory->hotbarSelect * 17;
+    BUFFER_HALF_W - 77 + player->inventory.hotbarSelect * 17;
   white(renderer);
   SDL_RenderDrawRect(renderer, &hotbarSelectRect);
   
   for(i = 0; i < 9; i++)
-    drawSlot(
+    drawSlot (
       renderer,
-      &inventory->hotbar[i], 
+      &player->inventory.hotbar[i],
       BUFFER_HALF_W - 76 + i * 17,
       BUFFER_H - 17,
       inputs->mouse_X,
@@ -175,8 +259,16 @@ void popup_pause (
     *gamePopup = 2;
   }
   
-  if(button(renderer, "Quit to Title",
+  if (button(renderer, "Debug...",
     BUFFER_HALF_W - 64, 64, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    *gamePopup = 4;
+  }
+  
+  if(button(renderer, "Quit to Title",
+    BUFFER_HALF_W - 64, 86, 128,
     inputs->mouse_X, inputs->mouse_Y) &&
     inputs->mouse_Left
   ) {
@@ -188,63 +280,8 @@ void popup_options (
   SDL_Renderer *renderer, Inputs *inputs,
   int *gamePopup, int *drawDistance, int *trapMouse
 ) {
-  static char drawDistanceText [] = "Draw distance: 20\0";
-  static char trapMouseText    [] = "Capture mouse: OFF";
-  
-  if (button(renderer, drawDistanceText,
-    BUFFER_HALF_W - 64, 20, 128,
-    inputs->mouse_X, inputs->mouse_Y) &&
-    inputs->mouse_Left
-  ) {
-    switch(*drawDistance) {
-      case 20:
-        *drawDistance = 32;
-        break;
-      case 32:
-        *drawDistance = 64;
-        break;
-      case 64:
-        *drawDistance = 96;
-        break;
-      case 96:
-        *drawDistance = 128;
-        break;
-      default:
-        *drawDistance = 20;
-        break;
-    }
-    strnum(drawDistanceText, 15, *drawDistance);
-  }
-  
-  if (button(renderer, trapMouseText,
-    BUFFER_HALF_W - 64, 42, 128,
-    inputs->mouse_X, inputs->mouse_Y) &&
-    inputs->mouse_Left
-  ) {
-    if (*trapMouse) {
-      *trapMouse = 0;
-      sprintf(trapMouseText + 15, "OFF");
-    } else {
-      *trapMouse = 1;
-      sprintf(trapMouseText + 15, "ON");
-    }
-  }
-  
-  if (button(renderer, "Debug...",
-    BUFFER_HALF_W - 64, 64, 128,
-    inputs->mouse_X, inputs->mouse_Y) &&
-    inputs->mouse_Left
-  ) {
-    *gamePopup = 4;
-  }
-  
-  if (button(renderer, "Done",
-    BUFFER_HALF_W - 64, 86, 128,
-    inputs->mouse_X, inputs->mouse_Y) &&
-    inputs->mouse_Left
-  ) {
+  if(menu_optionsMain(renderer, inputs, drawDistance, trapMouse))
     *gamePopup = 1;
-  }
 }
 
 void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
@@ -268,7 +305,7 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
 void popup_chunkPeek (
   SDL_Renderer *renderer, Inputs *inputs, World *world,
   int *gamePopup,
-  Coords *playerPosition
+  Player *player
 ) {
   static int chunkPeekRX,
              chunkPeekRY,
@@ -283,9 +320,9 @@ void popup_chunkPeek (
   
   debugChunk = chunkLookup (
     world,
-    (int)playerPosition->x - 64,
-    (int)playerPosition->y - 64,
-    (int)playerPosition->z - 64
+    (int)player->pos.x - 64,
+    (int)player->pos.y - 64,
+    (int)player->pos.z - 64
   );
   
   white(renderer);
@@ -392,4 +429,61 @@ void popup_chunkPeek (
 
     *gamePopup = 4;
   }
+}
+
+int menu_optionsMain (
+  SDL_Renderer *renderer, Inputs *inputs,
+  int *drawDistance, int *trapMouse
+) {
+  static char drawDistanceText [] = "Draw distance: 20\0";
+  static char trapMouseText    [] = "Capture mouse: OFF";
+  
+  if (button(renderer, drawDistanceText,
+    BUFFER_HALF_W - 64, 20, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    switch(*drawDistance) {
+      case 20:
+        *drawDistance = 32;
+        break;
+      case 32:
+        *drawDistance = 64;
+        break;
+      case 64:
+        *drawDistance = 96;
+        break;
+      case 96:
+        *drawDistance = 128;
+        break;
+      default:
+        *drawDistance = 20;
+        break;
+    }
+    strnum(drawDistanceText, 15, *drawDistance);
+  }
+  
+  if (button(renderer, trapMouseText,
+    BUFFER_HALF_W - 64, 42, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    if (*trapMouse) {
+      *trapMouse = 0;
+      sprintf(trapMouseText + 15, "OFF");
+    } else {
+      *trapMouse = 1;
+      sprintf(trapMouseText + 15, "ON");
+    }
+  }
+  
+  if (button(renderer, "Done",
+    BUFFER_HALF_W - 64, 64, 128,
+    inputs->mouse_X, inputs->mouse_Y) &&
+    inputs->mouse_Left
+  ) {
+    return 1;
+  }
+
+  return 0;
 }

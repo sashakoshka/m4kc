@@ -198,6 +198,7 @@ int button(SDL_Renderer *renderer,
 int drawSlot(SDL_Renderer *renderer,
   InvSlot *slot, int x, int y, int mouseX, int mouseY
 ) {
+  
   static int hover,
              i,
              xx,

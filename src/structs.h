@@ -59,27 +59,12 @@ struct _World {
 };
 
 /*
-  _Player
-  Stores player data. This will be passed as reference to game
-  loop.
-*/
-struct _Player {
-  float xPos;
-  float yPos;
-  float zPos;
-  float hRot;
-  float vRot;
-  
-  unsigned int health;
-  unsigned int xp;
-};
-
-/*
   _InvSlot
   This will be used to store a single stack in the player's
   inventory.
 */
 struct _InvSlot {
+  float durability;
   unsigned int amount:6;
   unsigned int blockid;
 };
@@ -92,7 +77,23 @@ struct _Inventory {
   InvSlot slots[27];
   InvSlot hotbar[9];
   InvSlot armor[4];
+  InvSlot offhand;
   int hotbarSelect;
+};
+
+/*
+  _Player
+  Stores player data. This will be passed as reference to game
+  loop.
+*/
+struct _Player {
+  Coords pos;
+  Inventory inventory;
+  float hRot;
+  float vRot;
+  
+  unsigned int health;
+  unsigned int xp;
 };
 
 /*
