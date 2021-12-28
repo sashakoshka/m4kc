@@ -9,73 +9,97 @@ int textures[12288] = {0};
 */
 void genTextures(unsigned int seed) {
   srand(seed);
-  static int j  = 0,
-             k  = 0,
-             m  = 0,
-             n  = 0,
-             i1 = 0,
-             i2 = 0,
-             i3 = 0,
-             i6 = 0,
-             i7 = 0;
   
-  for (j = 1; j < 16; j++) {
-    k = 255 - randm(96);
-    for (m = 0; m < 48; m++) {
-      for (n = 0; n < 16; n++) {
-        i1 = 9858122;
-        if (j == 4)
-          i1 = 8355711; 
-        if (j != 4 || randm(3) == 0)
-          k = 255 - randm(96); 
-        if (j == 1
-          && m < (n * n * (3 + n) * 81 >> 2 & 0x3) + 18)
-        {
-          i1 = 6990400;
-        } else if (j == 1
-          && m < (n * n * (3 + n) * 81 >> 2 & 0x3) + 19)
-        {
+  for (int blockId = 1; blockId < 16; blockId++) {
+    int k = 255 - randm(96);
+    for (int y = 0; y < 48; y++) {
+      for (int x = 0; x < 16; x++) {
+        int baseColor = 9858122;
+        int noiseFloor = 255;
+        int noiseScale = 96;
+
+        // sand
+        if (blockId == 3) {
+          baseColor = 0xd8ce9b;
+          noiseScale = 48;
+        }
+
+        // stone
+        if (blockId == 4)
+          baseColor = 8355711;
+        
+        // gravel
+        if (blockId == 6) {
+          baseColor = 0xAAAAAA;
+          noiseScale = 140;
+        }
+        
+        // cobblestone noise scale
+        if (blockId == 9)
+          noiseScale = 64;
+  
+        // add noise
+        if (blockId != 4 || randm(3) == 0)
+          k = noiseFloor - randm(noiseScale);
+
+        // grass
+        if (blockId == 1 && y < (x * x * (3 + x) * 81 >> 2 & 0x3) + 18) {
+          baseColor = 6990400;
+        } else if (blockId == 1 && y < (x * x * (3 + x) * 81 >> 2 & 0x3) + 19) {
           k = k * 2 / 3;
-        } 
-        if (j == 7) {
-          i1 = 6771249;
-          if (n > 0 && n < 15
-            && ((m > 0 && m < 15) || (m > 32 && m < 47)))
-          {
-            i1 = 12359778;
-            i6 = n - 7;
-            i7 = (m & 0xF) - 7;
-            if (i6 < 0)
-              i6 = 1 - i6; 
-            if (i7 < 0)
-              i7 = 1 - i7; 
-            if (i7 > i6)
-              i6 = i7; 
+        }
+
+        // logs
+        if (blockId == 7) {
+          baseColor = 6771249;
+          if (
+            x > 0 && x < 15 &&
+            ((y > 0 && y < 15) || (y > 32 && y < 47))
+          ) {
+            baseColor = 12359778;
+            int i6 = x - 7;
+            int i7 = (y & 0xF) - 7;
+            
+            if (i6 < 0)  i6 = 1 - i6;
+            if (i7 < 0)  i7 = 1 - i7;
+            if (i7 > i6) i6 = i7;
+            
             k = 196 - randm(32) + i6 % 3 * 32;
           } else if (randm(2) == 0) {
-            k = k * (150 - (n & 0x1) * 100) / 100;
-          } 
-        } 
-        if (j == 5) {
-          i1 = 11876885;
-          if ((n + m / 4 * 4) % 8 == 0 || m % 4 == 0)
-            i1 = 12365733; 
-        } 
-        i2 = k;
-        if (m >= 32)
+            k = k * (150 - (x & 0x1) * 100) / 100;
+          }
+        }
+
+        // bricks
+        if (blockId == 5) {
+          baseColor = 11876885;
+          if ((x + y / 4 * 4) % 8 == 0 || y % 4 == 0)
+            baseColor = 12365733; 
+        }
+
+        // cobblestone
+        if (blockId == 9) {
+          baseColor = 8355711;
+          k -= sin((float)x * 3.14159 / 6) * cos((float)y * 3.14159 / 6) * 64;
+        }
+        
+        int i2 = k;
+        if (y >= 32)
           i2 /= 2; 
-        if (j == 8) {
-          i1 = 5298487;
+        if (blockId == 8) {
+          baseColor = 5298487;
           if (randm(2) == 0) {
-            i1 = 0;
+            baseColor = 0;
             i2 = 255;
           }
         }
-        i3 = (i1 >> 16 & 0xFF)
-          * i2 / 255 << 16 | (i1 >> 8 & 0xFF)
-          * i2 / 255 << 8 | (i1 & 0xFF)
+
+        // darken bottom of blocks
+        int i3 = (baseColor >> 16 & 0xFF)
+          * i2 / 255 << 16 | (baseColor >> 8 & 0xFF)
+          * i2 / 255 << 8  | (baseColor & 0xFF)
           * i2 / 255;
-        textures[n + m * 16 + j * 256 * 3] = i3;
+        textures[x + y * 16 + blockId * 256 * 3] = i3;
       }
     }
   }

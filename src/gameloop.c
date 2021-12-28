@@ -139,13 +139,13 @@ int gameLoop (
     
     player.inventory.hotbar[0].blockid = 1;
     player.inventory.hotbar[1].blockid = 2;
-    player.inventory.hotbar[2].blockid = 4;
-    player.inventory.hotbar[3].blockid = 5;
-    player.inventory.hotbar[4].blockid = 7;
-    player.inventory.hotbar[5].blockid = 8;
-    player.inventory.hotbar[6].blockid = 9;
-    player.inventory.hotbar[7].blockid = 10;
-    player.inventory.hotbar[8].blockid = 11;
+    player.inventory.hotbar[2].blockid = 3;
+    player.inventory.hotbar[3].blockid = 4;
+    player.inventory.hotbar[4].blockid = 5;
+    player.inventory.hotbar[5].blockid = 6;
+    player.inventory.hotbar[6].blockid = 7;
+    player.inventory.hotbar[7].blockid = 8;
+    player.inventory.hotbar[8].blockid = 9;
     
     player.inventory.hotbar[0].amount  = 64;
     player.inventory.hotbar[1].amount  = 64;
@@ -153,9 +153,9 @@ int gameLoop (
     player.inventory.hotbar[3].amount  = 64;
     player.inventory.hotbar[4].amount  = 64;
     player.inventory.hotbar[5].amount  = 64;
-    player.inventory.hotbar[6].amount  = 0;
-    player.inventory.hotbar[7].amount  = 0;
-    player.inventory.hotbar[8].amount  = 0;
+    player.inventory.hotbar[6].amount  = 6;
+    player.inventory.hotbar[7].amount  = 2;
+    player.inventory.hotbar[8].amount  = 1;
 
     player.inventory.hotbarSelect = 0;
     
