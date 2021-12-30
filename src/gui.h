@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <SDL2/SDL.h>
-#include "structs.h"
+#include "player.h"
 #include "minecraftfont.h"
 #include "textures.h"
 

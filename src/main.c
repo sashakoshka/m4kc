@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <math.h>
 #include "terrain.h"
-#include "structs.h"
 #include "textures.h"
 #include "gui.h"
 #include "gameloop.h"
+#include "main.h"
 
 /*
   Minecraft 4k, C edition. Version 0.7
@@ -70,7 +70,7 @@ int main (/*int argc, char *argv[]*/) {
   
   genTextures(seed);
   
-  initChunks(&world);
+  World_init(&world);
   
   //----   main game loop   ----//
   

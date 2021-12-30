@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include "utility.h"
-#include "structs.h"
+#include "main.h"
 #include "gui.h"
 #include "terrain.h"
 #include "textures.h"

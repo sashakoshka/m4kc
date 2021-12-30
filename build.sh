@@ -11,7 +11,7 @@ SMALL_PATH="$OUT_PATH/m4kc"
 DEBUG_PATH="$OUT_PATH/m4kc-debug"
 
 FLAGS_SMALL="-Os -g0 -fno-stack-protector -fno-unwind-tables \
--fno-asynchronous-unwind-tables"
+-fno-asynchronous-unwind-tables -Dsmall"
 FLAGS_DEBUG="-g"
 FLAGS_LIBS="-L/usr/local/lib -lSDL2 -lm"
 
@@ -77,12 +77,19 @@ buildAll () {
   fi
 
   if [ "$1" = "small" ]; then
-  	strip "$SMALL_PATH" -S --strip-unneeded \
-  	      --remove-section=.note.gnu.gold-version --remove-section=.comment \
-  	      --remove-section=.note --remove-section=.note.gnu.build-id \
-  	      --remove-section=.note.ABI-tag
-  	gzexe "$SMALL_PATH"
-  	ls -l "$SMALL_PATH"
+    echo "... compressing executable"
+
+  	if strip "$SMALL_PATH" -S --strip-unneeded \
+  	     --remove-section=.note.gnu.gold-version --remove-section=.comment \
+  	     --remove-section=.note --remove-section=.note.gnu.build-id \
+  	     --remove-section=.note.ABI-tag & \
+  	   gzexe "$SMALL_PATH"
+  	then
+  	  ls -l "$SMALL_PATH"
+      echo ".// compressed executable"
+    else
+      echo "ERR could not compress executable" >&2
+    fi
   fi
 }
 
@@ -98,6 +105,11 @@ case $1 in
   all)   buildAll $2    ;;
   small) buildAll small ;;
   "")    buildAll       ;;
+
+  redo)
+    clean
+    buildAll $2
+    ;;
   
   clean)
     clean

@@ -343,7 +343,7 @@ int gameLoop (
             i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
             i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
             
-            if (getBlock(world, i13, i14, i15) > 0) {
+            if (World_getBlock(world, i13, i14, i15) > 0) {
               if (m != 1) {
                 goto label208;
               }
@@ -372,7 +372,7 @@ int gameLoop (
       i7 = 0;
       if(!gamePopup) {
         if(inputs->mouse_Left > 0 && blockSelected) {
-          setBlock(
+          World_setBlock (
             world,
             blockSelect.x,
             blockSelect.y,
@@ -397,7 +397,7 @@ int gameLoop (
                 (int)player.pos.y - 63
             )
           )) {
-            setBlock(
+            World_setBlock (
               world,
               blockSelectOffset.x,
               blockSelectOffset.y,
@@ -676,7 +676,10 @@ int gameLoop (
         // HUD
         case 0:
           if (trapMouse) SDL_SetRelativeMouseMode(1);
-          if (guiOn) popup_hud(renderer, inputs, &debugOn, &fps_now, &player);
+          if (guiOn) popup_hud (
+            renderer, inputs, world,
+            &debugOn, &fps_now, &player
+          );
           break;
            
         // Pause menu

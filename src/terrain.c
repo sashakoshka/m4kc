@@ -1,30 +1,14 @@
 #include "terrain.h"
 
 /*
-  initChunks
-  Initializes all chunk slots
-*/
-void initChunks(World *world) {
-  static int i;
-  for(i = 0; i < CHUNKARR_SIZE; i++) {
-    world->chunk[i].center.x  = 0;
-    world->chunk[i].center.y  = 0;
-    world->chunk[i].center.z  = 0;
-    world->chunk[i].coordHash = 0;
-    world->chunk[i].loaded    = 0;
-    world->chunk[i].blocks    = NULL;
-  }
-}
-
-/*
-  sortChunks
+  World_sort
   Sorts all chunks in a world by hash
 */
-void sortChunks (World* world) {
+void World_sort (World* world) {
   int i, j;
   Chunk temp;
-  for(i = 0; i < CHUNKARR_SIZE; i++)
-  for(j = 0; j < (CHUNKARR_SIZE - 1 - i); j++)
+  for (i = 0; i < CHUNKARR_SIZE; i++)
+  for (j = 0; j < (CHUNKARR_SIZE - 1 - i); j++)
   if (
     world->chunk[j].coordHash < world->chunk[j + 1].coordHash
   ) {
@@ -41,7 +25,7 @@ void sortChunks (World* world) {
   same as last time, it does not do another lookup, meaning this
   function can be called very frequently.
 */
-Chunk* chunkLookup(World *world, int x, int y, int z) {
+Chunk* chunkLookup (World *world, int x, int y, int z) {
   static Chunk *chunk;
   // Rather unlikely position. Not a coord because integers are
   // faster
@@ -98,14 +82,14 @@ Chunk* chunkLookup(World *world, int x, int y, int z) {
 }
 
 /*
-  setBlock
-  Takes in a world array, xyz coordinates, and a block id.
+  World_setBlock
+  Takes in a world, xyz coordinates, and a block id.
   Returns true if the block could be set, otherwise returns
   false. Eventually will add block to a stack of set requests if
   the chunk is not loaded, and will set the block when the chunk
   loads. If force is true, blocks other than air will be set.
 */
-int setBlock(
+int World_setBlock (
   World *world,
   int x, int y, int z,
   int block,
@@ -113,7 +97,7 @@ int setBlock(
 ) {
   static int   b;
   static Chunk *chunk;
-  b = getBlock(world, x, y, z) < 1;
+  b = World_getBlock(world, x, y, z) < 1;
   
   if(force || b) { // If the block was air or we don't care
     chunk = chunkLookup(world, x, y, z);
@@ -131,11 +115,11 @@ int setBlock(
 }
 
 /*
-  getBlock
-  Takes in a world array, xyz coordinates, and outputs the block
+  World_getBlock
+  Takes in a world, xyz coordinates, and outputs the block
   id there. Returns -1 if chunk is not loaded
 */
-int getBlock(
+int World_getBlock (
   World *world,
   int x, int y, int z
 ) {
@@ -156,7 +140,7 @@ int getBlock(
   Sets the block. For usage in terrain generation. Returns false
   if the block was previously air.
 */
-int ch_setBlock(
+int ch_setBlock (
   int *blocks,
   int x, int y, int z,
   int block
@@ -178,7 +162,7 @@ int ch_setBlock(
   other than air will be filled. If no blocks were previously
   air, returns false.
 */
-int setCube(
+int setCube (
   World *world,
   int x, int y, int z,
   int w, int h, int l,
@@ -190,7 +174,7 @@ int setCube(
   for(xx = w + x; xx > x; xx--)
   for(yy = h + y; yy > y; yy--)
   for(zz = l + z; zz > z; zz--)
-    b |= setBlock(world, xx, yy, zz, block, force);
+    b |= World_setBlock(world, xx, yy, zz, block, force);
   return b;
 }
 
@@ -199,7 +183,7 @@ int setCube(
   Takes in a world array, xyz coordinates, and generates the
   specified structure.
 */
-void genStructure(
+void genStructure (
   World *world,
   int x, int y, int z,
   int type
@@ -222,7 +206,7 @@ void genStructure(
   switch(type) {
     case 0: // tree
       for(i = randm(2) + 4; i > 0; i--) {
-        setBlock(world, x, y--, z, 7, 1);
+        World_setBlock(world, x, y--, z, 7, 1);
       }
       setCube(world, x - 2, y + 1, z - 2, 5, 2, 5, 8, 0);
       setCube(world, x - 1, y - 1, z - 1, 3, 2, 3, 8, 0);
@@ -250,7 +234,7 @@ void genStructure(
   Fills the chunk array with generated terrain. If force is set
   to true, a chunk at the same coordinates will be overwritten.
 */
-int genChunk(
+int genChunk (
   World *world,
   unsigned int seed,
   int xOffset,
@@ -266,7 +250,7 @@ int genChunk(
   // To make sure structure generation accross chunks is
   // different, but predictable
   srand(seed * (xOffset * yOffset * zOffset + 1));
-  int heightmap[64][64], i, x, z, loadedMin, distMax, distMaxI;
+  int heightmap[64][64], i, x, z, /*loadedMin,*/ distMax, distMaxI;
   static int count = 0;
   
   Chunk *chunk = chunkLookup(world, xOffset, yOffset, zOffset);
@@ -449,9 +433,35 @@ int genChunk(
           for(int y = 32; y < 64; y++)
             ch_setBlock(blocks, x, y, z, 5);
         }
+
+    // Flat
+    case 3:
+      for(int x = 0; x < 64; x++)
+        for(int z = 0; z < 64; z++) {
+          for(int y = 0; y < 64; y++) {
+            if (y < 32)  ch_setBlock(blocks, x, y, z, 0);
+            if (y == 32) ch_setBlock(blocks, x, y, z, 1);
+            if (y > 32)  ch_setBlock(blocks, x, y, z, 2);
+          }
+        }
+      break;
   }
   
   // Sort all chunks
-  sortChunks(world);
+  World_sort(world);
   return 1;
+}
+
+void World_init (World *world) {  
+  for (int i = 0; i < CHUNKARR_SIZE; i++)
+    Chunk_init(&world->chunk[i]);
+}
+
+void Chunk_init (Chunk *chunk) {
+  chunk->center.x  = 0;
+  chunk->center.y  = 0;
+  chunk->center.z  = 0;
+  chunk->coordHash = 0;
+  chunk->loaded    = 0;
+  chunk->blocks    = NULL;
 }

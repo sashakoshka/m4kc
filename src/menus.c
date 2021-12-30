@@ -87,23 +87,12 @@ void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
 /* === INGAME POPUPS === */
 
 void popup_hud (
-  SDL_Renderer *renderer, Inputs *inputs,
+  SDL_Renderer *renderer, Inputs *inputs, World *world,
   int *debugOn, u_int32_t *fps_now,
   Player *player
 ) {
   static SDL_Rect hotbarRect;
   static SDL_Rect hotbarSelectRect;
-  
-  static char debugText        [][16] = {
-    "M4KC 0.7",
-    "X: ",
-    "Y: ",
-    "Z: ",
-    "FPS: ",
-    "ChunkX: ",
-    "ChunkY: ",
-    "ChunkZ: ",
-  };
 
   int i;
     
@@ -118,6 +107,17 @@ void popup_hud (
 
   // Debug screen
   if(*debugOn) {
+    static char debugText [][16] = {
+      "M4KC 0.7",
+      "X: ",
+      "Y: ",
+      "Z: ",
+      "FPS: ",
+      "ChunkX: ",
+      "ChunkY: ",
+      "ChunkZ: ",
+    };
+  
     // Coordinates
     strnum(debugText[1], 3, (int)player->pos.x - 64);
     strnum(debugText[2], 3, (int)player->pos.y - 64);
@@ -127,22 +127,41 @@ void popup_hud (
     strnum(debugText[4], 5, *fps_now);
     
     // Chunk coordinates
-    strnum(
-      debugText[5], 8, 
-      ((int)player->pos.x - 64) >> 6
-    );
-    strnum(
-      debugText[6], 8, 
-      ((int)player->pos.y - 64) >> 6
-    );
-    strnum(
-      debugText[7], 8, 
-      ((int)player->pos.z - 64) >> 6
-    );
+    strnum(debugText[5], 8, ((int)player->pos.x - 64) >> 6);
+    strnum(debugText[6], 8, ((int)player->pos.y - 64) >> 6);
+    strnum(debugText[7], 8, ((int)player->pos.z - 64) >> 6);
     
     // Text
-    for(i = 0; i < 8; i++)
-      drawBGStr(renderer, debugText[i], 0, i * 9);
+    for (i = 0; i < 8; i++) drawBGStr(renderer, debugText[i], 0, i * 9);
+
+    // Chunk monitor
+    #ifndef small
+    #define CHUNKMONW   10
+    #define CHUNKMONCOL 9
+    
+    SDL_Rect chunkMonitorRect = {0, 1 - CHUNKMONW, CHUNKMONW, CHUNKMONW};
+    for (i = 0; i < CHUNKARR_SIZE; i++) {
+      if (i % CHUNKMONCOL == 0) {
+        chunkMonitorRect.x = BUFFER_W - ((CHUNKMONW * (CHUNKMONCOL - 1)) + 2);
+        chunkMonitorRect.y += CHUNKMONW - 1;
+      } else chunkMonitorRect.x += CHUNKMONW - 1;
+
+      int stamp = world->chunk[i].loaded;
+      SDL_SetRenderDrawColor (
+        renderer,
+        (stamp & 0b000011) * 64,
+        (stamp & 0b001100) * 16,
+        (stamp & 0b110000) * 4,
+        0xFF
+      );
+      SDL_RenderFillRect(renderer, &chunkMonitorRect);
+      white(renderer);
+      SDL_RenderDrawRect(renderer, &chunkMonitorRect);
+    }
+
+    #undef CHUNKMONW
+    #undef CHUNKMONCOL
+    #endif
   }
   // Hotbar
   tblack(renderer);
@@ -375,7 +394,7 @@ void popup_chunkPeek (
       128, chunkPeekRYMax,
       191, chunkPeekRYMax
     );
-    for(
+    for (
       chunkPeekRY = 64;
       chunkPeekRY >= chunkPeekRYMax;
       chunkPeekRY--
@@ -385,35 +404,35 @@ void popup_chunkPeek (
       chunkPeekRX++
     ) for(
       chunkPeekRZ = 0;
-      chunkPeekRZ < 64;
+      chunkPeekRZ < 63;
       chunkPeekRZ++
     ) {
-      chunkPeekColor = textures[
-        debugChunk->blocks[
+      chunkPeekColor = textures [
+        debugChunk->blocks [
           chunkPeekRX +
           (chunkPeekRY << 6) +
           (chunkPeekRZ << 12)
         ] * 256 * 3 + 6 * 16
       ];
       if(chunkPeekColor) {
-        SDL_SetRenderDrawColor(
+        SDL_SetRenderDrawColor (
           renderer,
           (chunkPeekColor >> 16 & 0xFF),
           (chunkPeekColor >> 8 & 0xFF),
           (chunkPeekColor & 0xFF),
           255
         );
-        SDL_RenderDrawPoint(
+        SDL_RenderDrawPoint (
           renderer,
           chunkPeekRX + 128,
           chunkPeekRY + chunkPeekRZ
         );
         // A little shadow for depth
-        SDL_SetRenderDrawColor(
+        SDL_SetRenderDrawColor (
           renderer,
           0, 0, 0, 64
         );
-        SDL_RenderDrawPoint(
+        SDL_RenderDrawPoint (
           renderer,
           chunkPeekRX + 128,
           chunkPeekRY + chunkPeekRZ + 1
