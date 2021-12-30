@@ -114,6 +114,7 @@ int main (/*int argc, char *argv[]*/) {
             inputs.keyboard_F1  = keyboard[SDL_SCANCODE_F1];
             inputs.keyboard_F2  = keyboard[SDL_SCANCODE_F2];
             inputs.keyboard_F3  = keyboard[SDL_SCANCODE_F3];
+            inputs.keyboard_F4  = keyboard[SDL_SCANCODE_F4];
             inputs.keyboard_E   = keyboard[SDL_SCANCODE_E];
             inputs.keyboard_T   = keyboard[SDL_SCANCODE_T];
             

@@ -280,16 +280,8 @@ void popup_pause (
     *gamePopup = 2;
   }
   
-  if (button(renderer, "Debug...",
-    BUFFER_HALF_W - 64, 64, 128,
-    inputs->mouse_X, inputs->mouse_Y) &&
-    inputs->mouse_Left
-  ) {
-    *gamePopup = 4;
-  }
-  
   if(button(renderer, "Quit to Title",
-    BUFFER_HALF_W - 64, 86, 128,
+    BUFFER_HALF_W - 64, 64, 128,
     inputs->mouse_X, inputs->mouse_Y) &&
     inputs->mouse_Left
   ) {
@@ -305,6 +297,7 @@ void popup_options (
     *gamePopup = 1;
 }
 
+#ifndef small
 void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
   if (button(renderer, "Chunk Peek",
     BUFFER_HALF_W - 64, 20, 128,
@@ -319,7 +312,7 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
     inputs->mouse_X, inputs->mouse_Y) &&
     inputs->mouse_Left
   ) {
-    *gamePopup = 1;
+    *gamePopup = 0;
   }
 }
 
@@ -398,11 +391,11 @@ void popup_chunkPeek (
       chunkPeekRY = 64;
       chunkPeekRY >= chunkPeekRYMax;
       chunkPeekRY--
-    ) for(
+    ) for (
       chunkPeekRX = 0;
       chunkPeekRX < 64;
       chunkPeekRX++
-    ) for(
+    ) for (
       chunkPeekRZ = 0;
       chunkPeekRZ < 63;
       chunkPeekRZ++
@@ -451,6 +444,7 @@ void popup_chunkPeek (
     *gamePopup = 4;
   }
 }
+#endif
 
 int menu_optionsMain (
   SDL_Renderer *renderer, Inputs *inputs,

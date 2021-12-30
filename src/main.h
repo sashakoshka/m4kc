@@ -24,6 +24,7 @@ typedef struct {
   int keyboard_F1;     // M[5]
   int keyboard_F2;     // M[6]
   int keyboard_F3;     // M[7]
+  int keyboard_F4;
   
   int keyTyped;
   int keySym;

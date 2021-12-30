@@ -370,8 +370,8 @@ int gameLoop (
       
       i6 = 0;
       i7 = 0;
-      if(!gamePopup) {
-        if(inputs->mouse_Left > 0 && blockSelected) {
+      if (!gamePopup) {
+        if (inputs->mouse_Left > 0 && blockSelected) {
           World_setBlock (
             world,
             blockSelect.x,
@@ -384,8 +384,8 @@ int gameLoop (
         blockSelectOffset.x += blockSelect.x;
         blockSelectOffset.y += blockSelect.y;
         blockSelectOffset.z += blockSelect.z;
-        if(inputs->mouse_Right > 0) {
-          if(!(
+        if (inputs->mouse_Right > 0) {
+          if (!(
             blockSelectOffset.x ==
               (int)player.pos.x - 64 &&
             blockSelectOffset.z == 
@@ -407,11 +407,13 @@ int gameLoop (
           }
           inputs->mouse_Right = 0;
         }
-        if(inputs->keyboard_F1) {
+        
+        if (inputs->keyboard_F1) {
           inputs->keyboard_F1 = 0;
           guiOn ^= 1;
         }
-        if(inputs->keyboard_F2) {
+        
+        if (inputs->keyboard_F2) {
           inputs->keyboard_F2 = 0;
           // TODO: This segfaults. Fix
           /*
@@ -423,17 +425,25 @@ int gameLoop (
           }
           */
         }
-        if(inputs->keyboard_F3) {
+        
+        if (inputs->keyboard_F3) {
           inputs->keyboard_F3 = 0;
           debugOn = !debugOn;
         }
-        if(inputs->keyboard_T) {
+        
+        if (inputs->keyboard_T) {
           inputs->keyboard_T = 0;
           inputs->keyTyped   = 0;
           gamePopup = 6;
         }
-        
       }
+
+      #ifndef small
+      if (inputs->keyboard_F4) {
+        inputs->keyboard_F4 = 0;
+        gamePopup = (gamePopup == 4) ? 0 : 4;
+      }
+      #endif
       
       /* Cast rays selectedPass passes wether or not a block is
       selected to  the blockSelected variable */
@@ -699,7 +709,8 @@ int gameLoop (
         case 3:
           // TODO: draw inventory
           break;
-        
+
+        #ifndef small
         // Advanced debug menu
         case 4:
           popup_debugTools(renderer, inputs, &gamePopup);
@@ -709,6 +720,7 @@ int gameLoop (
         case 5:
           popup_chunkPeek(renderer, inputs, world, &gamePopup, &player);
           break;
+        #endif
         
         // Chat
         case 6:
