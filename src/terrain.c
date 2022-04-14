@@ -255,15 +255,15 @@ int genChunk (
 
         // Only generate if that chunk hasn't been generated yet.
         i = 0;
-        if(chunk == NULL) {
+        if (chunk == NULL) {
                 // See if there is an empty slot
-                for (; i < CHUNKARR_SIZE && world->chunk[i].loaded; i++);
+                for (; i < CHUNKARR_SIZE && world->chunk[i].loaded; i ++);
 
                 // Pick out the oldest chunk (loaded) and overrwrite it.
                 if (i == CHUNKARR_SIZE) {
                         distMax  = 0;
                         distMaxI = 0;
-                        for (i = 0; i < CHUNKARR_SIZE; i++) {
+                        for (i = 0; i < CHUNKARR_SIZE; i ++) {
                                 int dist = sqrt(
                                         pow(coords.x - world->chunk[i].center.x, 2) +
                                         pow(coords.y - world->chunk[i].center.y, 2) +
@@ -285,7 +285,7 @@ int genChunk (
         if (chunk->loaded) {
                 // TODO: Save chunk to disk
         } else {
-                chunk->blocks = (int*)calloc(262144, sizeof(int));
+                chunk->blocks = (int *)calloc(262144, sizeof(int));
         }
 
         if (chunk->blocks == NULL) {
@@ -300,7 +300,7 @@ int genChunk (
         }
 
         // Generate a hash
-        static int hashX, hashY, hashZ;
+        int hashX, hashY, hashZ;
 
         hashX = xOffset >> 6;
         hashY = yOffset >> 6;
@@ -314,7 +314,7 @@ int genChunk (
         hashZ <<= 20;
 
         chunk->coordHash = hashX | hashY | hashZ;
-        chunk->coordHash++;
+        chunk->coordHash ++;
 
         chunk->center.x = xOffset + 32;
         chunk->center.y = xOffset + 32;
@@ -322,7 +322,7 @@ int genChunk (
 
         // What we have here won't cause a segfault, so it is safe to
         // mark the chunk as loaded and set its stamp.
-        chunk->loaded = ++count;
+        chunk->loaded = ++ count;
 
         printf (
                 "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
@@ -356,9 +356,9 @@ int genChunk (
 }
 
 void ch_genClassic (int *blocks) {
-        for(int x = 0; x < 64; x++)
-        for(int y = 32; y < 64; y++)
-        for(int z = 0; z < 64; z++) {
+        for (int x = 0;  x < 64; x ++)
+        for (int y = 32; y < 64; y ++)
+        for (int z = 0;  z < 64; z ++) {
                 ch_setBlock(blocks, x, y, z,
                         randm(2) == 0 ? randm(8) : 0);
         }
@@ -374,16 +374,16 @@ void ch_genNew (
 ) {
         // Generate heightmap
         int heightmap[CHUNK_SIZE][CHUNK_SIZE];
-        for (int x = 0; x < 64; x++)
-        for (int z = 0; z < 64; z++) {
+        for (int x = 0; x < 64; x ++)
+        for (int z = 0; z < 64; z ++) {
                 heightmap[x][z] =
-                        perlin2d ( // Detail noise
+                        perlin2d ( // Base noise
                                 seed,
                                 x + xOffset + 16777215,
                                 z + zOffset + 16777215,
                                 0.0625
                         ) * 16 +
-                                perlin2d( // Detail noise
+                        perlin2d ( // Detail noise
                                 seed,
                                 x + xOffset + 16777215,
                                 z + zOffset + 16777215,
@@ -392,9 +392,9 @@ void ch_genNew (
         }
 
         // Make terrain from heightmap
-        for (int x = 0; x < 64; x++)
-        for (int y = 0; y < 64; y++)
-        for (int z = 0; z < 64; z++) {
+        for (int x = 0; x < 64; x ++)
+        for (int y = 0; y < 64; y ++)
+        for (int z = 0; z < 64; z ++) {
                 if (y + yOffset > heightmap[x][z] + 4)
                         ch_setBlock(blocks, x, y, z, 4);
                 else if (y + yOffset > heightmap[x][z])
@@ -405,10 +405,34 @@ void ch_genNew (
                         ch_setBlock(blocks, x, y, z, 0);
         }
 
+        // Generate caves
+        for (int x = 0; x < 64; x ++)
+        for (int z = 0; z < 64; z ++) {
+                float noisePoint = perlin2d (
+                        seed + yOffset,
+                        x + xOffset + 16777215,
+                        z + zOffset + 16777215,
+                        0.0625
+                );
+
+                if (noisePoint < 0.47 || noisePoint > 0.53) { continue; }
+
+                int height = perlin2d (
+                        seed + 2,
+                        x + xOffset + 16777215,
+                        z + zOffset + 16777215,
+                        0.0625
+                ) * 4;
+
+                ch_setBlock(blocks, x, 60 - height, z, 0);
+                ch_setBlock(blocks, x, 61 - height, z, 0);
+                ch_setBlock(blocks, x, 62 - height, z, 0);
+        }
+        
         // Generate structures
         // TODO: fix structures not properly generating in some
         // chunks
-        for (int i = randm(16) + 64; i > 0; i--) {
+        for (int i = randm(16) + 64; i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
                 if (
@@ -423,7 +447,7 @@ void ch_genNew (
                 }
         }
 
-        for (int i = randm(2); i > 0; i--) {
+        for (int i = randm(2); i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
                 if (
@@ -440,27 +464,29 @@ void ch_genNew (
 }
 
 void ch_genStone (int *blocks) {
-        for (int x = 0; x < 64; x++)
-        for (int z = 0; z < 64; z++) {
-                for (int y = 0; y < 32; y++)
+        for (int x = 0; x < 64; x ++)
+        for (int z = 0; z < 64; z ++) {
+                for (int y = 0;  y < 32; y ++) {
                         ch_setBlock(blocks, x, y, z, 4);
-                for (int y = 32; y < 64; y++)
+                }
+                for (int y = 32; y < 64; y ++) {
                         ch_setBlock(blocks, x, y, z, 5);
+                }
         }
 }
 
 void ch_genFlat (int *blocks) {
-        for (int x = 0; x < 64; x++)
-        for (int z = 0; z < 64; z++)
-        for (int y = 0; y < 64; y++) {
-                if (y < 32)  ch_setBlock(blocks, x, y, z, 0);
-                if (y == 32) ch_setBlock(blocks, x, y, z, 1);
-                if (y > 32)  ch_setBlock(blocks, x, y, z, 2);
+        for (int x = 0; x < 64; x ++)
+        for (int z = 0; z < 64; z ++)
+        for (int y = 0; y < 64; y ++) {
+                if (y <  32) { ch_setBlock(blocks, x, y, z, 0); }
+                if (y == 32) { ch_setBlock(blocks, x, y, z, 1); }
+                if (y >  32) { ch_setBlock(blocks, x, y, z, 2); }
         }
 }
 
 void World_init (World *world) {  
-        for (int i = 0; i < CHUNKARR_SIZE; i++) {
+        for (int i = 0; i < CHUNKARR_SIZE; i ++) {
                 Chunk_init(&world->chunk[i]);
         }
 }
