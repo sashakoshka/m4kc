@@ -9,8 +9,8 @@ void state_options    (SDL_Renderer *, Inputs *, int *, int *, int *);
 void state_egg        (SDL_Renderer *, Inputs *, int *);
 
 void popup_hud (
-  SDL_Renderer *, Inputs *, World *world,
-  int *, u_int32_t *, Player *
+        SDL_Renderer *, Inputs *, World *world,
+        int *, u_int32_t *, Player *
 );
 void popup_chat       (SDL_Renderer *renderer, Inputs *inputs, long *gameTime);
 void popup_pause      (SDL_Renderer *, Inputs *, int *, int *);

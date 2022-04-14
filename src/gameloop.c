@@ -1,16 +1,15 @@
 #include "gameloop.h"
 
-/*
-  gameLoop
-  Does all the raycasting stuff, moves the player around, etc.
-  If by chance the game ends, it returns false - which should
-  terminate the main while loop and end the program.
-*/
+/* gameLoop
+ * Does all the raycasting stuff, moves the player around, etc.
+ * If by chance the game ends, it returns false - which should
+ * terminate the main while loop and end the program.
+ */
 int gameLoop (
-  unsigned int seed,
-  Inputs *inputs,
-  World *world,
-  SDL_Renderer *renderer
+        unsigned int seed,
+        Inputs *inputs,
+        World *world,
+        SDL_Renderer *renderer
 ) {
   // We dont want to have to pass all of these by reference, so
   // have all of them as static variables
@@ -207,6 +206,7 @@ int gameLoop (
     case 5:
       /* Look to see if there are chunks that need to be
       loaded in*/
+      /*
       if(chunkLoadNum < CHUNKARR_SIZE) {
         chunkLoadCoords.x =
           ((chunkLoadNum % CHUNKARR_DIAM) -
@@ -229,6 +229,7 @@ int gameLoop (
       } else {
         chunkLoadNum = 0;
       }
+      */
       
       f9  = sin(cameraAngle_H),
       f10 = cos(cameraAngle_H),

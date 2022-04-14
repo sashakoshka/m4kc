@@ -8,9 +8,9 @@
 #include "textures.h"
 #include "menus.h"
 
-int gameLoop(
-  unsigned int seed,
-  Inputs *inputs,
-  World *world,
-  SDL_Renderer *renderer
+int gameLoop (
+        unsigned int seed,
+        Inputs *inputs,
+        World *world,
+        SDL_Renderer *renderer
 );

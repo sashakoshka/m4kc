@@ -6,3 +6,4 @@
 
 extern int textures[12288];
 void genTextures(unsigned int);
+void genTexture (int);
