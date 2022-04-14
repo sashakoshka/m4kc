@@ -21,11 +21,11 @@ struct _InvSlot {
  * This will be used to store the player's inventory.
  */
 struct _Inventory {
-  InvSlot slots[27];
-  InvSlot hotbar[9];
-  InvSlot armor[4];
-  InvSlot offhand;
-  int hotbarSelect;
+        InvSlot slots[27];
+        InvSlot hotbar[9];
+        InvSlot armor[4];
+        InvSlot offhand;
+        int hotbarSelect;
 };
 
 /* _Player
@@ -33,11 +33,11 @@ struct _Inventory {
  * loop.
  */
 struct _Player {
-  Coords pos;
-  Inventory inventory;
-  float hRot;
-  float vRot;
-  
-  unsigned int health;
-  unsigned int xp;
+        Coords pos;
+        Inventory inventory;
+        float hRot;
+        float vRot;
+
+        unsigned int health;
+        unsigned int xp;
 };
