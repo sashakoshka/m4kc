@@ -76,3 +76,13 @@ A lot of this code is decompiled from the original java version, and those are n
 > Why is it so slow?
 
 The game uses a 3D voxel raycaster to render things, which is a lot slower than more traditional methods of rendering. Luckily, C provides more powerful ways to optimize something like this than Java - and optimizations will keep coming.
+
+## Screenshots
+
+What this actually looks like.
+
+![Main menu](screenshots/0.png)
+![Structure generation](screenshots/1.png)
+![Caves](screenshots/2.png)
+![More caves](screenshots/3.png)
+![Cool house](screenshots/4.png)
