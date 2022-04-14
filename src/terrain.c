@@ -146,7 +146,7 @@ int ch_setBlock (
         int x, int y, int z,
         int block
 ) {
-        static int b;
+        int b;
         b = blocks [
                 nmod(x, CHUNK_SIZE) +
                 (nmod(y, CHUNK_SIZE) * CHUNK_SIZE) +
@@ -154,6 +154,17 @@ int ch_setBlock (
         ] > 0;
         blocks[x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE)] = block;
         return b;
+}
+
+/* ch_getBlock
+ * Takes in a blocks array, xyz coordinates, and returns the block id at those
+ * coordinates. For usage in terrain generation.
+ */
+int ch_getBlock (
+        int *blocks,
+        int x, int y, int z
+) {
+        return blocks[x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE)];
 }
 
 /* setCube
@@ -422,11 +433,21 @@ void ch_genNew (
                         x + xOffset + 16777215,
                         z + zOffset + 16777215,
                         0.0625
-                ) * 4;
+                ) * 8;
 
-                ch_setBlock(blocks, x, 60 - height, z, 0);
                 ch_setBlock(blocks, x, 61 - height, z, 0);
                 ch_setBlock(blocks, x, 62 - height, z, 0);
+                ch_setBlock(blocks, x, 63 - height, z, 0);
+
+                // Don't have bare dirt
+                if (ch_getBlock(blocks, x, 64 - height, z) == 2) {
+                        // What block we place down depends on the block above
+                        if (ch_getBlock(blocks, x, 60 - height, z) == 0) {
+                                ch_setBlock(blocks, x, 64 - height, z, 1);
+                        } else {
+                                ch_setBlock(blocks, x, 64 - height, z, 6);
+                        }
+                }
         }
         
         // Generate structures
