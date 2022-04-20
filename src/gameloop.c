@@ -230,7 +230,23 @@ int gameLoop (
         chunkLoadNum = 0;
       }
       */
-      
+
+      if (inputs->keyboard_F2) {
+        inputs->keyboard_F2 = 0;
+
+        SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat(0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE, 32, SDL_PIXELFORMAT_ARGB8888);
+
+        SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, grab->pixels, grab->pitch);
+
+        if(SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
+          chatAdd("Saved screenshot\n");
+        } else {
+          chatAdd("Couldn't save screenshot\n");
+        }
+
+        SDL_FreeSurface(grab);
+      }
+
       f9  = sin(cameraAngle_H),
       f10 = cos(cameraAngle_H),
       f11 = sin(cameraAngle_V),
@@ -413,20 +429,7 @@ int gameLoop (
           inputs->keyboard_F1 = 0;
           guiOn ^= 1;
         }
-        
-        if (inputs->keyboard_F2) {
-          inputs->keyboard_F2 = 0;
-          // TODO: This segfaults. Fix
-          /*
-          SDL_Surface *grab = SDL_GetWindowSurface(window);
-          if(SDL_SaveBMP(grab, "screenshot.bmp")) {
-            printf("saved screenshot\n");
-          } else {
-            printf("couldn't save screenshot\n");
-          }
-          */
-        }
-        
+
         if (inputs->keyboard_F3) {
           inputs->keyboard_F3 = 0;
           debugOn = !debugOn;
