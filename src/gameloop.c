@@ -143,25 +143,25 @@ int gameLoop (
     backgroundRect.w = BUFFER_W;
     backgroundRect.h = BUFFER_H;
     
-    player.inventory.hotbar[0].blockid = 1;
-    player.inventory.hotbar[1].blockid = 2;
-    player.inventory.hotbar[2].blockid = 3;
-    player.inventory.hotbar[3].blockid = 4;
-    player.inventory.hotbar[4].blockid = 5;
-    player.inventory.hotbar[5].blockid = 6;
-    player.inventory.hotbar[6].blockid = 7;
-    player.inventory.hotbar[7].blockid = 8;
-    player.inventory.hotbar[8].blockid = 9;
+    player.inventory.hotbar[0].blockid = 0;
+    player.inventory.hotbar[1].blockid = 0;
+    player.inventory.hotbar[2].blockid = 0;
+    player.inventory.hotbar[3].blockid = 0;
+    player.inventory.hotbar[4].blockid = 0;
+    player.inventory.hotbar[5].blockid = 0;
+    player.inventory.hotbar[6].blockid = 0;
+    player.inventory.hotbar[7].blockid = 0;
+    player.inventory.hotbar[8].blockid = 0;
     
-    player.inventory.hotbar[0].amount  = 64;
-    player.inventory.hotbar[1].amount  = 64;
-    player.inventory.hotbar[2].amount  = 64;
-    player.inventory.hotbar[3].amount  = 64;
-    player.inventory.hotbar[4].amount  = 64;
-    player.inventory.hotbar[5].amount  = 64;
-    player.inventory.hotbar[6].amount  = 64;
-    player.inventory.hotbar[7].amount  = 64;
-    player.inventory.hotbar[8].amount  = 64;
+    player.inventory.hotbar[0].amount  = 0;
+    player.inventory.hotbar[1].amount  = 0;
+    player.inventory.hotbar[2].amount  = 0;
+    player.inventory.hotbar[3].amount  = 0;
+    player.inventory.hotbar[4].amount  = 0;
+    player.inventory.hotbar[5].amount  = 0;
+    player.inventory.hotbar[6].amount  = 0;
+    player.inventory.hotbar[7].amount  = 0;
+    player.inventory.hotbar[8].amount  = 0;
 
     player.inventory.hotbarSelect = 0;
     
@@ -305,8 +305,6 @@ int gameLoop (
         playerMovement.z += f10 * playerSpeedFB - f9  * playerSpeedLR;
         playerMovement.y += 0.003;
         
-        
-        // TODO: update this to check for collisions properly
         for (m = 0; m < 3; m++) {
           f16 =
             player.pos.x +
@@ -361,6 +359,19 @@ int gameLoop (
 
           // Breaking blocks
           if (inputs->mouse_Left > 0) {
+            InvSlot pickedUp = {
+              .blockid = World_getBlock (
+                world,
+                blockSelect.x,
+                blockSelect.y,
+                blockSelect.z
+              ),
+              .amount     = 1,
+              .durability = 1
+            };
+
+            Inventory_transferIn(&player.inventory, &pickedUp);
+            
             World_setBlock (
               world,
               blockSelect.x,

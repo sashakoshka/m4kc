@@ -4,6 +4,9 @@
 #include "coords.h"
 #include "terrain.h"
 
+#define HOTBAR_SIZE 9
+#define INVENTORY_SIZE 27
+
 typedef struct _Player    Player;
 typedef struct _InvSlot   InvSlot;
 typedef struct _Inventory Inventory;
@@ -18,16 +21,20 @@ struct _InvSlot {
         Block blockid;
 };
 
+int InvSlot_transfer (InvSlot *, InvSlot *);
+
 /* _Inventory
  * This will be used to store the player's inventory.
  */
 struct _Inventory {
-        InvSlot slots[27];
-        InvSlot hotbar[9];
+        InvSlot slots[INVENTORY_SIZE];
+        InvSlot hotbar[HOTBAR_SIZE];
         InvSlot armor[4];
         InvSlot offhand;
         int hotbarSelect;
 };
+
+int Inventory_transferIn (Inventory *, InvSlot *);
 
 /* _Player
  * Stores player data. This will be passed as reference to game
