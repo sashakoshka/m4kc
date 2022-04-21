@@ -428,25 +428,35 @@ void ch_genNew (
 
                 if (noisePoint < 0.47 || noisePoint > 0.53) { continue; }
 
-                int height = perlin2d (
+                int elevation = perlin2d (
                         seed + 2 + yOffset,
                         x + xOffset + 16777215,
                         z + zOffset + 16777215,
                         0.0625
                 ) * 8;
 
-                if (randm(16) > 0) // stalagmite-esque things
-                        ch_setBlock(blocks, x, 61 - height, z, 0);
-                ch_setBlock(blocks, x, 62 - height, z, 0);
-                ch_setBlock(blocks, x, 63 - height, z, 0);
+                int height = perlin2d (
+                        seed + 3 + yOffset,
+                        x + xOffset + 16777215,
+                        z + zOffset + 16777215,
+                        0.0625
+                ) * 4 + 2 - (randm(1) > 0);
 
-                // Don't have bare dirt
-                if (ch_getBlock(blocks, x, 64 - height, z) == 2) {
+                // Cave starts at lowPoint and 
+                int lowPoint  = 64 - elevation;
+                int highPoint = 64 - elevation - height;
+
+                for (int y = highPoint; y < lowPoint; y ++) {
+                        ch_setBlock(blocks, x, y, z, 0);
+                }
+
+                // Don't have bare dirt on the bottom
+                if (ch_getBlock(blocks, x, lowPoint, z) == 2) {
                         // What block we place down depends on the block above
-                        if (ch_getBlock(blocks, x, 60 - height, z) == 0) {
-                                ch_setBlock(blocks, x, 64 - height, z, 1);
+                        if (ch_getBlock(blocks, x, highPoint - 1, z) == 0) {
+                                ch_setBlock(blocks, x, lowPoint, z, 1);
                         } else {
-                                ch_setBlock(blocks, x, 64 - height, z, 6);
+                                ch_setBlock(blocks, x, lowPoint, z, 6);
                         }
                 }
         }
