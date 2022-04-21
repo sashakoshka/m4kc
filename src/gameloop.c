@@ -242,22 +242,6 @@ int gameLoop (
       }
       */
 
-      if (inputs->keyboard_F2) {
-        inputs->keyboard_F2 = 0;
-
-        SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat (0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE, 32, SDL_PIXELFORMAT_ARGB8888);
-
-        SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, grab->pixels, grab->pitch);
-
-        if (SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
-          chatAdd("Saved screenshot\n");
-        } else {
-          chatAdd("Couldn't save screenshot\n");
-        }
-
-        SDL_FreeSurface(grab);
-      }
-
       f9  = sin(cameraAngle_H),
       f10 = cos(cameraAngle_H),
       f11 = sin(cameraAngle_V),
@@ -687,6 +671,30 @@ int gameLoop (
       inputs->mouse_X /= BUFFER_SCALE;
       inputs->mouse_Y /= BUFFER_SCALE;
       
+      // If we need to take a screenshot, do so
+      
+      if (inputs->keyboard_F2) {
+        inputs->keyboard_F2 = 0;
+        
+        SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat (
+                0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
+                32, SDL_PIXELFORMAT_ARGB8888
+        );
+        
+        SDL_RenderReadPixels (
+                renderer, NULL, SDL_PIXELFORMAT_ARGB8888,
+                grab->pixels, grab->pitch
+        );
+        
+        if (SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
+          chatAdd("Saved screenshot\n");
+        } else {
+          chatAdd("Couldn't save screenshot\n");
+        }
+        
+        SDL_FreeSurface(grab);
+      }
+      
       // In-game menus
 
       if (gamePopup) {
@@ -742,7 +750,7 @@ int gameLoop (
           popup_chat(renderer, inputs, &gameTime);
           break;
       }
-      
+
       // Clean up input struct
       inputs->keyTyped = 0;
       inputs->keySym   = 0;
