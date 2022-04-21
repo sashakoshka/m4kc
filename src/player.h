@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include "coords.h"
+#include "terrain.h"
 
 typedef struct _Player    Player;
 typedef struct _InvSlot   InvSlot;
@@ -14,7 +15,7 @@ typedef struct _Inventory Inventory;
 struct _InvSlot {
         float durability;
         u_int8_t amount;
-        unsigned int blockid;
+        Block blockid;
 };
 
 /* _Inventory

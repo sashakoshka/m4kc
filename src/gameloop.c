@@ -155,13 +155,13 @@ int gameLoop (
     
     player.inventory.hotbar[0].amount  = 64;
     player.inventory.hotbar[1].amount  = 64;
-    player.inventory.hotbar[2].amount  = 10;
+    player.inventory.hotbar[2].amount  = 64;
     player.inventory.hotbar[3].amount  = 64;
     player.inventory.hotbar[4].amount  = 64;
     player.inventory.hotbar[5].amount  = 64;
-    player.inventory.hotbar[6].amount  = 6;
-    player.inventory.hotbar[7].amount  = 2;
-    player.inventory.hotbar[8].amount  = 1;
+    player.inventory.hotbar[6].amount  = 64;
+    player.inventory.hotbar[7].amount  = 64;
+    player.inventory.hotbar[8].amount  = 64;
 
     player.inventory.hotbarSelect = 0;
     
@@ -170,7 +170,7 @@ int gameLoop (
     init = 0;
   }
   
-  switch(gameState) {
+  switch (gameState) {
     // A main menu
     case 0:
       if (state_title(renderer, inputs, &gameState, &init)) return 0;
@@ -350,54 +350,75 @@ int gameLoop (
       
       i6 = 0;
       i7 = 0;
+      
       if (!gamePopup) {
-        if (inputs->mouse_Left > 0 && blockSelected) {
-          World_setBlock (
-            world,
-            blockSelect.x,
-            blockSelect.y,
-            blockSelect.z, 0, 1
-          );
-          inputs->mouse_Left = 0;
-        }
-        
-        blockSelectOffset.x += blockSelect.x;
-        blockSelectOffset.y += blockSelect.y;
-        blockSelectOffset.z += blockSelect.z;
-        if (inputs->mouse_Right > 0) {
-          if (!(
-            blockSelectOffset.x ==
-              (int)player.pos.x - 64 &&
-            blockSelectOffset.z == 
-              (int)player.pos.z - 64 &&
-            (
-              blockSelectOffset.y ==
-                (int)player.pos.y - 64 ||
-              blockSelectOffset.y ==
-                (int)player.pos.y - 63
-            )
-          )) {
+
+        if (blockSelected) {
+          InvSlot *activeSlot = &player.inventory.hotbar [
+            player.inventory.hotbarSelect
+          ];
+
+          // Breaking blocks
+          if (inputs->mouse_Left > 0) {
             World_setBlock (
               world,
-              blockSelectOffset.x,
-              blockSelectOffset.y,
-              blockSelectOffset.z,
-              player.inventory.hotbar[player.inventory.hotbarSelect].blockid, 1
+              blockSelect.x,
+              blockSelect.y,
+              blockSelect.z, 0, 1
             );
           }
-          inputs->mouse_Right = 0;
+          
+          blockSelectOffset.x += blockSelect.x;
+          blockSelectOffset.y += blockSelect.y;
+          blockSelectOffset.z += blockSelect.z;
+
+          // Placing blocks
+          if (inputs->mouse_Right > 0) {
+            if (
+              // Player cannot be obstructing the block
+              !(
+                blockSelectOffset.x == (int)player.pos.x - 64 &&
+                blockSelectOffset.z == (int)player.pos.z - 64 &&
+                (
+                  blockSelectOffset.y == (int)player.pos.y - 64 ||
+                  blockSelectOffset.y == (int)player.pos.y - 63
+                )
+              ) &&
+              // Player must have enough of that block
+              activeSlot->amount > 0
+            ) {
+              int blockSet = World_setBlock (
+                world,
+                blockSelectOffset.x,
+                blockSelectOffset.y,
+                blockSelectOffset.z,
+                activeSlot->blockid, 1
+              );
+
+              if (blockSet) {
+                activeSlot->amount --;
+                if (activeSlot->amount == 0) activeSlot->blockid = 0;
+              }
+            }
+          }
         }
-        
+
+        inputs->mouse_Left = 0;
+        inputs->mouse_Right = 0;
+
+        // Toggle GUI
         if (inputs->keyboard_F1) {
           inputs->keyboard_F1 = 0;
           guiOn ^= 1;
         }
 
+        // Toggle debug mode
         if (inputs->keyboard_F3) {
           inputs->keyboard_F3 = 0;
           debugOn = !debugOn;
         }
-        
+
+        // Enter chat
         if (inputs->keyboard_T) {
           inputs->keyboard_T = 0;
           inputs->keyTyped   = 0;
@@ -412,8 +433,8 @@ int gameLoop (
       }
       #endif
       
-      /* Cast rays selectedPass passes wether or not a block is
-      selected to  the blockSelected variable */
+      /* Cast rays. selectedPass passes wether or not a block is
+      selected to the blockSelected variable */
       selectedPass = 0;
       for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
         f18 = (pixelX - 107) / 90.0;
@@ -545,6 +566,7 @@ int gameLoop (
                   if (f30 < 0.0)
                     i7 += 32; 
                 }
+                
                 // Block outline color
                 pixelColor = 0xFFFFFF;
                 if (
@@ -560,8 +582,9 @@ int gameLoop (
                     && i7 % 16 < 15
                   ) || !guiOn || gamePopup
                 ) {
-                  pixelColor = textures[i6 + (i7 << 4) + i25 * 256 * 3]; 
+                  pixelColor = textures[i6 + (i7 << 4) + i25 * 256 * 3];
                 }
+                
                 /* See if the block is selected. There must be a
                 better way to do this check... */
                 if (
@@ -578,7 +601,7 @@ int gameLoop (
                   )
                 ) {
                   selectedPass = 1;
-                   coordPass = blockRayPosition;
+                  coordPass = blockRayPosition;
                   
                   /* Treating a coords set as an array and
                   blockFace as an index. */
@@ -589,7 +612,8 @@ int gameLoop (
                     = 1 - 2 * (f27 > 0.0);
                   
                   f26 = f33;
-                } 
+                }
+                
                 if (pixelColor > 0) {
                   finalPixelColor = pixelColor;
                   pixelMist =
@@ -634,7 +658,7 @@ int gameLoop (
       
       // Pass info about selected block on
       blockSelected = selectedPass;
-      memcpy(&blockSelect, &coordPass, sizeof(IntCoords));
+      blockSelect   = coordPass;
       
       inputs->mouse_X /= BUFFER_SCALE;
       inputs->mouse_Y /= BUFFER_SCALE;
@@ -735,11 +759,14 @@ int screenshot (SDL_Renderer *renderer) {
                 grab->pixels, grab->pitch
         );
 
-        if (SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
+        int saved = SDL_SaveBMP(grab, "screenshot.bmp"); 
+        SDL_FreeSurface(grab);
+
+        if (saved == 0) {
                 chatAdd("Saved screenshot\n");
+                return 0;
         } else {
                 chatAdd("Couldn't save screenshot\n");
+                return 1;
         }
-
-        SDL_FreeSurface(grab);
 }
