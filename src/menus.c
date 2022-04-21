@@ -50,6 +50,45 @@ int state_title (
         return 0;
 }
 
+int state_loading (
+        SDL_Renderer *renderer,
+        World *world,
+        unsigned int seed,
+        Coords center
+) {
+        IntCoords chunkLoadCoords;
+        static int chunkLoadNum = 0;
+        
+        if(chunkLoadNum < CHUNKARR_SIZE) {
+                chunkLoadCoords.x =
+                        ((chunkLoadNum % CHUNKARR_DIAM) -
+                        CHUNKARR_RAD) * 64;
+                chunkLoadCoords.y =
+                        (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
+                        CHUNKARR_RAD) * 64;
+                chunkLoadCoords.z =
+                        ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
+                        CHUNKARR_RAD) * 64;
+                genChunk (
+                        world, seed,
+                        chunkLoadCoords.x,
+                        chunkLoadCoords.y,
+                        chunkLoadCoords.z, 1, 1,
+                        center
+                );
+                loadScreen (
+                        renderer,
+                        "Generating world...",
+                        chunkLoadNum, CHUNKARR_SIZE
+                );
+                chunkLoadNum++;
+                return 0;
+        } else {
+                chunkLoadNum = 0;
+                return 1;
+        }
+}
+
 void state_options (
         SDL_Renderer *renderer, Inputs *inputs,
         int *gameState, int *drawDistance, int *trapMouse

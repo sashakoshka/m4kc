@@ -102,9 +102,7 @@ int gameLoop (
                 debugOn      = 0,
                 fogLog       = 0,
                 drawDistance = 20,
-                trapMouse    = 0,
-                
-                chunkLoadNum;
+                trapMouse    = 0;
 
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
@@ -124,8 +122,6 @@ int gameLoop (
   static Coords playerMovement = {0.0, 0.0, 0.0};
   
   static Chunk *chunk;
-  
-  static IntCoords chunkLoadCoords;
   
   static int init = 0;
   
@@ -171,8 +167,6 @@ int gameLoop (
     
     chatAdd("Game started");
     
-    chunkLoadNum = 0;
-    
     init = 0;
   }
   
@@ -184,33 +178,7 @@ int gameLoop (
     
     // Generate a world and present a loading screen
     case 4:
-      if(chunkLoadNum < CHUNKARR_SIZE) {
-        chunkLoadCoords.x =
-          ((chunkLoadNum % CHUNKARR_DIAM) -
-          CHUNKARR_RAD) * 64;
-        chunkLoadCoords.y =
-          (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
-          CHUNKARR_RAD) * 64;
-        chunkLoadCoords.z =
-          ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
-          CHUNKARR_RAD) * 64;
-        genChunk (
-          world, seed,
-          chunkLoadCoords.x,
-          chunkLoadCoords.y,
-          chunkLoadCoords.z, 1, 1,
-          player.pos
-        );
-        loadScreen (
-          renderer,
-          "Generating world...",
-          chunkLoadNum, CHUNKARR_SIZE
-        );
-        chunkLoadNum++;
-      } else {
-        gameState = 5;
-        chunkLoadNum = 0;
-      }
+      if (state_loading(renderer, world, seed, player.pos)) gameState = 5;
       break;
     
     // The actual gameplay
@@ -675,24 +643,7 @@ int gameLoop (
       
       if (inputs->keyboard_F2) {
         inputs->keyboard_F2 = 0;
-        
-        SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat (
-                0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
-                32, SDL_PIXELFORMAT_ARGB8888
-        );
-        
-        SDL_RenderReadPixels (
-                renderer, NULL, SDL_PIXELFORMAT_ARGB8888,
-                grab->pixels, grab->pitch
-        );
-        
-        if (SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
-          chatAdd("Saved screenshot\n");
-        } else {
-          chatAdd("Couldn't save screenshot\n");
-        }
-        
-        SDL_FreeSurface(grab);
+        screenshot(renderer);
       }
       
       // In-game menus
@@ -771,4 +722,24 @@ int gameLoop (
   }
   
   return 1;
+}
+
+int screenshot (SDL_Renderer *renderer) {
+        SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat (
+                0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
+                32, SDL_PIXELFORMAT_ARGB8888
+        );
+
+        SDL_RenderReadPixels (
+                renderer, NULL, SDL_PIXELFORMAT_ARGB8888,
+                grab->pixels, grab->pitch
+        );
+
+        if (SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
+                chatAdd("Saved screenshot\n");
+        } else {
+                chatAdd("Couldn't save screenshot\n");
+        }
+
+        SDL_FreeSurface(grab);
 }

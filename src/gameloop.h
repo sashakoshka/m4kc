@@ -14,3 +14,5 @@ int gameLoop (
         World *world,
         SDL_Renderer *renderer
 );
+
+int screenshot ();

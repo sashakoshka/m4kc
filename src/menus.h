@@ -5,6 +5,7 @@
 #include "main.h"
 
 int  state_title      (SDL_Renderer *, Inputs *, int *, int *);
+int state_loading     (SDL_Renderer *, World *, unsigned int, Coords);
 void state_options    (SDL_Renderer *, Inputs *, int *, int *, int *);
 void state_egg        (SDL_Renderer *, Inputs *, int *);
 
