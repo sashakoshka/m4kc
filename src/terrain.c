@@ -452,36 +452,27 @@ void ch_genNew (
         }
         
         // Generate structures
-        // TODO: fix structures not properly generating in some
-        // chunks
         for (int i = randm(16) + 64; i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
-                if (
-                        heightmap[x][z] >= yOffset &&
-                        heightmap[x][z] <  yOffset + 64
-                ) {
-                        genStructure(
-                                world,
-                                x + xOffset, heightmap[x][z] - 1, z + zOffset,
-                                0
-                        );
-                }
+
+                genStructure( 
+                        world,
+                        x + xOffset, heightmap[x][z] - 1, z + zOffset,
+                        0
+                );
+
         }
 
         for (int i = randm(2); i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
-                if (
-                        heightmap[x][z] >= yOffset &&
-                        heightmap[x][z] <  yOffset + 64
-                ) {
-                        genStructure(
-                                world,
-                                x + xOffset, heightmap[x][z] + 1, z + zOffset,
-                                1
-                        );
-                }
+
+                genStructure(
+                        world,
+                        x + xOffset, heightmap[x][z] + 1, z + zOffset,
+                        1
+                );
         }
 }
 
