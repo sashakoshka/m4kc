@@ -368,9 +368,10 @@ void popup_chunkPeek (
         int *gamePopup,
         Player *player
 ) {
+        static int chunkPeekRYMax = 0;
+
         int chunkPeekRX,
             chunkPeekRY,
-            chunkPeekRYMax = 0,
             chunkPeekRZ,
             chunkPeekColor;
         

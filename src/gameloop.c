@@ -664,7 +664,6 @@ int gameLoop (
       inputs->mouse_Y /= BUFFER_SCALE;
       
       // If we need to take a screenshot, do so
-      
       if (inputs->keyboard_F2) {
         inputs->keyboard_F2 = 0;
         screenshot(renderer);
