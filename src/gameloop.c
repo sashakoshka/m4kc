@@ -433,6 +433,13 @@ int gameLoop (
           inputs->keyTyped   = 0;
           gamePopup = 6;
         }
+
+        // Enter inventory
+        if (inputs->keyboard_E) {
+          inputs->keyboard_E = 0;
+          inputs->keyTyped   = 0;
+          gamePopup = 3;
+        }
       }
 
       #ifndef small
@@ -682,10 +689,6 @@ int gameLoop (
 
       if (gamePopup) {
         SDL_SetRelativeMouseMode(0);
-        if(gamePopup != 6 && gamePopup != 0) {
-          tblack(renderer);
-          SDL_RenderFillRect(renderer, &backgroundRect);
-        }
       }
       
       switch (gamePopup) {
@@ -700,11 +703,15 @@ int gameLoop (
            
         // Pause menu
         case 1:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_pause(renderer, inputs, &gamePopup, &gameState);
           break;
         
         // Options
         case 2:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_options (
             renderer, inputs,
             &gamePopup, &drawDistance, &trapMouse
@@ -713,17 +720,21 @@ int gameLoop (
         
         // Inventory
         case 3:
-          // TODO: draw inventory
+          popup_inventory(renderer, inputs, &player, &gamePopup);
           break;
 
         #ifndef small
         // Advanced debug menu
         case 4:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_debugTools(renderer, inputs, &gamePopup);
           break;
         
         // Chunk peek
         case 5:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_chunkPeek(renderer, inputs, world, &gamePopup, &player);
           break;
         #endif

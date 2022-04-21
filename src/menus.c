@@ -240,6 +240,51 @@ void popup_hud (
         }
 }
 
+void popup_inventory (
+        SDL_Renderer *renderer,
+        Inputs *inputs,
+        Player *player,
+        int *gamePopup
+) {
+        (void)(inputs);
+        (void)(player);
+        
+        static SDL_Rect inventoryRect;
+        inventoryRect.x = BUFFER_HALF_W - 77;
+        inventoryRect.y = (BUFFER_H - 18) / 2 - 26;
+        inventoryRect.w = 154;
+        inventoryRect.h = 52;
+
+        static SDL_Rect hotbarRect;
+        hotbarRect.x = BUFFER_HALF_W - 77;
+        hotbarRect.y = BUFFER_H - 18;
+        hotbarRect.w = 154;
+        hotbarRect.h = 18;
+
+        // Inventory background
+        tblack(renderer);
+        SDL_RenderFillRect(renderer, &inventoryRect);
+        SDL_RenderFillRect(renderer, &hotbarRect);
+        
+        for (int i = 0; i < 9; i++) {
+                drawSlot (
+                        renderer,
+                        &player->inventory.hotbar[i],
+                        BUFFER_HALF_W - 76 + i * 17,
+                        BUFFER_H - 17,
+                        inputs->mouse_X,
+                        inputs->mouse_Y
+                );
+        }
+        
+        // Exit inventory
+        if (inputs->keyboard_E) {
+                inputs->keyboard_E = 0;
+                inputs->keyTyped   = 0;
+                *gamePopup = 0;
+        }
+}
+
 void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         static int  chatBoxCursor = 0;
         static char chatBox [64]  = {0};
