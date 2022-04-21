@@ -71,7 +71,7 @@ I've either been asked these, or I expect to be at some point.
 
 > What's with the cryptic variable names like `f22` and `i6`?
 
-A lot of this code is decompiled from the original java version, and those are names the compiler assigned to the variables.
+A lot of this code is decompiled from the original java version, and those are names the compiler assigned to the variables. Much of the code is extremely obfuscated due to what are probably compiler optimizations, and a lot of them have not been deciphered and renamed yet. This is why they mostly appear in the `gameLoop` function.
 
 > Why is it so slow?
 

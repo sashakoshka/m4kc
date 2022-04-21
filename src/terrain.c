@@ -91,7 +91,7 @@ Chunk* chunkLookup (World *world, int x, int y, int z) {
 int World_setBlock (
         World *world,
         int x, int y, int z,
-        int block,
+        Block block,
         int force
 ) {
         static int   b;
@@ -119,7 +119,7 @@ int World_setBlock (
  * Takes in a world, xyz coordinates, and outputs the block
  * id there. Returns -1 if chunk is not loaded
  */
-int World_getBlock (
+Block World_getBlock (
         World *world,
         int x, int y, int z
 ) {
@@ -142,9 +142,9 @@ int World_getBlock (
  * if the block was previously air.
  */
 int ch_setBlock (
-        int *blocks,
+        Block *blocks,
         int x, int y, int z,
-        int block
+        Block block
 ) {
         int b;
         b = blocks [
@@ -160,8 +160,8 @@ int ch_setBlock (
  * Takes in a blocks array, xyz coordinates, and returns the block id at those
  * coordinates. For usage in terrain generation.
  */
-int ch_getBlock (
-        int *blocks,
+Block ch_getBlock (
+        Block *blocks,
         int x, int y, int z
 ) {
         return blocks[x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE)];
@@ -177,7 +177,7 @@ int setCube (
         World *world,
         int x, int y, int z,
         int w, int h, int l,
-        int block,
+        Block block,
         int force
 ) {
         static int xx, yy, zz, b;
@@ -296,7 +296,7 @@ int genChunk (
         if (chunk->loaded) {
                 // TODO: Save chunk to disk
         } else {
-                chunk->blocks = (int *)calloc(262144, sizeof(int));
+                chunk->blocks = (Block *)calloc(CHUNK_DATA_SIZE, sizeof(Block));
         }
 
         if (chunk->blocks == NULL) {
@@ -304,7 +304,7 @@ int genChunk (
                 return 0;
         }
 
-        int *blocks = chunk->blocks;
+        Block *blocks = chunk->blocks;
 
         for (int i = 0; i < 262144; i++) {
                 blocks[i] = 0;
@@ -366,7 +366,7 @@ int genChunk (
         return 1;
 }
 
-void ch_genClassic (int *blocks) {
+void ch_genClassic (Block *blocks) {
         for (int x = 0;  x < 64; x ++)
         for (int y = 32; y < 64; y ++)
         for (int z = 0;  z < 64; z ++) {
@@ -376,7 +376,7 @@ void ch_genClassic (int *blocks) {
 }
 
 void ch_genNew (
-        int *blocks,
+        Block *blocks,
         World *world,
         unsigned int seed,
         int xOffset,
@@ -484,7 +484,7 @@ void ch_genNew (
         }
 }
 
-void ch_genStone (int *blocks) {
+void ch_genStone (Block *blocks) {
         for (int x = 0; x < 64; x ++)
         for (int z = 0; z < 64; z ++) {
                 for (int y = 0;  y < 32; y ++) {
@@ -496,7 +496,7 @@ void ch_genStone (int *blocks) {
         }
 }
 
-void ch_genFlat (int *blocks) {
+void ch_genFlat (Block *blocks) {
         for (int x = 0; x < 64; x ++)
         for (int z = 0; z < 64; z ++)
         for (int y = 0; y < 64; y ++) {
