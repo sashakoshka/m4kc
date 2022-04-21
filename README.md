@@ -63,7 +63,9 @@ Run `win-build.bat`. Inside of the `win` directory, you will find `m4kc.exe` and
 
 There is a forum thread for this project [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/3081789-minecraft-4k-c-rewrite)
 
-I will be uploading binaries [here](https://holanet.xyz/soft/m4kc/)
+~~I will be uploading binaries [here](https://holanet.xyz/soft/m4kc/)~~
+
+[Holanet](https://holanet.xyz) was recently migrated to the [hlhv architecture](https://github.com/hlhv). The software page has not been migrated yet. For now, binaries will be uploaded to the releases section on GitHub.
 
 ## FAQ
 
