@@ -376,13 +376,10 @@ int gameLoop (
           if (inputs->mouse_Right > 0) {
             if (
               // Player cannot be obstructing the block
-              !(
-                blockSelectOffset.x == (int)player.pos.x - 64 &&
-                blockSelectOffset.z == (int)player.pos.z - 64 &&
-                (
-                  blockSelectOffset.y == (int)player.pos.y - 64 ||
-                  blockSelectOffset.y == (int)player.pos.y - 63
-                )
+              (
+                fabs(player.pos.x - 64.5 - blockSelectOffset.x) >= 0.8 ||
+                fabs(player.pos.y - 64 - blockSelectOffset.y) >= 1.45 ||
+                fabs(player.pos.z - 64.5 - blockSelectOffset.z) >= 0.8
               ) &&
               // Player must have enough of that block
               activeSlot->amount > 0
