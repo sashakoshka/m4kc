@@ -16,7 +16,9 @@
  *   samsebe     - deciphering the meaning of some of the code
  *   gracie bell - daylight function
  *   https://gist.github.com/nowl/828013 - perlin noise
- *   samantaz    - de-obfuscating controls code
+ *   
+ *   ... & contributors on github!
+ *   https://github.com/sashakoshka/m4kc/graphs/contributors
  * 
  * If you distribute a modified copy of this, just include this
  * notice.
