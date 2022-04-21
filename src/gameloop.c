@@ -75,27 +75,25 @@ int gameLoop (
                 i25,
                 pixelColor,
                 
-                /*
-                  1: Main menu
-                  2: World select
-                  3: World creation
-                  4: Loading
-                  5: Gameplay
-                  6: World editing (renaming etc)
-                  7: Join game
-                  8: Options
-                */
+                /* 1: Main menu
+                 * 2: World select
+                 * 3: World creation
+                 * 4: Loading
+                 * 5: Gameplay
+                 * 6: World editing (renaming etc)
+                 * 7: Join game
+                 * 8: Options
+                 */
                 gameState = 0,
                 
-                /*
-                  0: Gameplay
-                  1: Pause menu
-                  2: In-game options menu
-                  3: Inventory
-                  4: Advanced debug menu
-                  5: Chunk peek
-                  6: Chat
-                */
+                /* 0: Gameplay
+                 * 1: Pause menu
+                 * 2: In-game options menu
+                 * 3: Inventory
+                 * 4: Advanced debug menu
+                 * 5: Chunk peek
+                 * 6: Chat
+                 */
                 gamePopup,
                 
                 guiOn        = 1,

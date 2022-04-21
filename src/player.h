@@ -22,7 +22,8 @@ struct _InvSlot {
         Block blockid;
 };
 
-int InvSlot_transfer (InvSlot *, InvSlot *);
+int  InvSlot_transfer (InvSlot *, InvSlot *);
+void InvSlot_swap     (InvSlot *, InvSlot *);
 
 /* _Inventory
  * This will be used to store the player's inventory.

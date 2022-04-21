@@ -245,10 +245,7 @@ void popup_inventory (
         Inputs *inputs,
         Player *player,
         int *gamePopup
-) {
-        (void)(inputs);
-        (void)(player);
-        
+) {     
         static SDL_Rect inventoryRect;
         inventoryRect.x = BUFFER_HALF_W - 77;
         inventoryRect.y = (BUFFER_H - 18) / 2 - 26;
@@ -261,6 +258,8 @@ void popup_inventory (
         hotbarRect.w = 154;
         hotbarRect.h = 18;
 
+        static InvSlot *selected = NULL;
+
         // Inventory background
         tblack(renderer);
         SDL_RenderFillRect(renderer, &inventoryRect);
@@ -268,26 +267,46 @@ void popup_inventory (
 
         // Hotbar items
         for (int i = 0; i < HOTBAR_SIZE; i++) {
-                drawSlot (
+                InvSlot *current = &player->inventory.hotbar[i];
+        
+                if (drawSlot (
                         renderer,
-                        &player->inventory.hotbar[i],
+                        current,
                         BUFFER_HALF_W - 76 + i * 17,
                         BUFFER_H - 17,
                         inputs->mouse_X,
                         inputs->mouse_Y
-                );
+                ) && inputs->mouse_Left) {
+                        inputs->mouse_Left = 0;
+                        if (selected == NULL) {
+                                selected = current;
+                        } else {
+                                InvSlot_swap(current, selected);
+                                selected = NULL;
+                        }
+                }
         }
 
         // Inventory items
         for (int i = 0; i < INVENTORY_SIZE; i++) {
-                drawSlot (
+                InvSlot *current = &player->inventory.slots[i];
+        
+                if (drawSlot (
                         renderer,
-                        &player->inventory.slots[i],
+                        current,
                         BUFFER_HALF_W - 76 + (i % HOTBAR_SIZE) * 17,
                         inventoryRect.y + 1 + (i / HOTBAR_SIZE) * 17,
                         inputs->mouse_X,
                         inputs->mouse_Y
-                );
+                ) && inputs->mouse_Left) {
+                        inputs->mouse_Left = 0;
+                        if (selected == NULL) {
+                                selected = current;
+                        } else {
+                                InvSlot_swap(current, selected);
+                                selected = NULL;
+                        }
+                }
         }
         
         // Exit inventory

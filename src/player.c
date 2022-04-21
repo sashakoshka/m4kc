@@ -64,3 +64,12 @@ int InvSlot_transfer (InvSlot *dest, InvSlot *src) {
 
         return src->amount == 0;
 }
+
+/* InvSlow_swap
+ * Swaps the data in two inventory slots. This is used for inventory management.
+ */
+void InvSlot_swap (InvSlot *left, InvSlot *right) {
+        InvSlot temp = *left;
+        *left  = *right;
+        *right = temp;
+}
