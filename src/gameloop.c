@@ -128,7 +128,8 @@ int gameLoop (
   if (init) {
     l = SDL_GetTicks();
     gameTime = 2048;
-    
+
+    player = (const Player) { 0 };
     player.pos.x = 96.5;
     player.pos.y = 65.0;
     player.pos.z = 96.5;
@@ -142,28 +143,6 @@ int gameLoop (
     backgroundRect.y = 0;
     backgroundRect.w = BUFFER_W;
     backgroundRect.h = BUFFER_H;
-    
-    player.inventory.hotbar[0].blockid = 0;
-    player.inventory.hotbar[1].blockid = 0;
-    player.inventory.hotbar[2].blockid = 0;
-    player.inventory.hotbar[3].blockid = 0;
-    player.inventory.hotbar[4].blockid = 0;
-    player.inventory.hotbar[5].blockid = 0;
-    player.inventory.hotbar[6].blockid = 0;
-    player.inventory.hotbar[7].blockid = 0;
-    player.inventory.hotbar[8].blockid = 0;
-    
-    player.inventory.hotbar[0].amount  = 0;
-    player.inventory.hotbar[1].amount  = 0;
-    player.inventory.hotbar[2].amount  = 0;
-    player.inventory.hotbar[3].amount  = 0;
-    player.inventory.hotbar[4].amount  = 0;
-    player.inventory.hotbar[5].amount  = 0;
-    player.inventory.hotbar[6].amount  = 0;
-    player.inventory.hotbar[7].amount  = 0;
-    player.inventory.hotbar[8].amount  = 0;
-
-    player.inventory.hotbarSelect = 0;
     
     chatAdd("Game started");
     
