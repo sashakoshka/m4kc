@@ -12,9 +12,9 @@ This project is an attempt to translate the game into C in order to increase its
 
 ## Bug list
 
-* "Sticky" block collision - this behavior is present in the original version and I have been trying to work out ways to fix it for a while.
 * Raycaster breaks at -64 along any axis
 * Infinite terrain generation is not fully functional, issues such as chunks flashing in and out of existence are common
+* Structure generation does not work in some chunks
 
 ## Some goals for this project
 

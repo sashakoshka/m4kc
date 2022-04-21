@@ -429,13 +429,14 @@ void ch_genNew (
                 if (noisePoint < 0.47 || noisePoint > 0.53) { continue; }
 
                 int height = perlin2d (
-                        seed + 2,
+                        seed + 2 + yOffset,
                         x + xOffset + 16777215,
                         z + zOffset + 16777215,
                         0.0625
                 ) * 8;
 
-                ch_setBlock(blocks, x, 61 - height, z, 0);
+                if (randm(16) > 0) // stalagmite-esque things
+                        ch_setBlock(blocks, x, 61 - height, z, 0);
                 ch_setBlock(blocks, x, 62 - height, z, 0);
                 ch_setBlock(blocks, x, 63 - height, z, 0);
 
