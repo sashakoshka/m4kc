@@ -1,5 +1,16 @@
 #include "gameloop.h"
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * WARNING!!!                                                                *
+ *                                                                           *
+ * This file is where all the decompiled nonsense is. Things are so heavily  *
+ * nested and spaghetti-like that its the only place with an indent size of  *
+ * two spaces.                                                               *
+ *                                                                           *
+ * Looking at this code for extended periods of time can cause adverse       *
+ * psychological effects.                                                    *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /* gameLoop
  * Does all the raycasting stuff, moves the player around, etc.
  * If by chance the game ends, it returns false - which should
@@ -599,8 +610,8 @@ int gameLoop (
                 ) {
                   pixelColor = textures[i6 + (i7 << 4) + i25 * 256 * 3]; 
                 }
-                /* See if the block is selected There must be a
-                better way to do this  check... */
+                /* See if the block is selected. There must be a
+                better way to do this check... */
                 if (
                   f33 < f26 && (
                     (
