@@ -316,7 +316,7 @@ int gameLoop (
             playerMovement.y * ((m + 1) % 3 / 2);
           f19 =
             player.pos.z +
-            playerMovement.z * ((m + 2) % 3 / 2);
+            playerMovement.z * ((m + 3) % 3 / 2);
           
           for (i12 = 0; i12 < 12; i12++) {
             i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
@@ -344,8 +344,9 @@ int gameLoop (
           player.pos.x = f16;
           player.pos.y = f17;
           player.pos.z = f19;
+          
+          label208:;
         }
-        label208:;
       }
       
       i6 = 0;
