@@ -2,3 +2,6 @@
 /bin/*
 /win/bin/m4kc.exe
 /o/*
+
+# Just in case
+screenshot.bmp

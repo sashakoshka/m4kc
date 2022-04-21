@@ -245,11 +245,11 @@ int gameLoop (
       if (inputs->keyboard_F2) {
         inputs->keyboard_F2 = 0;
 
-        SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat(0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE, 32, SDL_PIXELFORMAT_ARGB8888);
+        SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat (0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE, 32, SDL_PIXELFORMAT_ARGB8888);
 
         SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, grab->pixels, grab->pitch);
 
-        if(SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
+        if (SDL_SaveBMP(grab, "screenshot.bmp") == 0) {
           chatAdd("Saved screenshot\n");
         } else {
           chatAdd("Couldn't save screenshot\n");
@@ -269,7 +269,7 @@ int gameLoop (
       timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
       timeCoef  = (timeCoef + 1) / 2;
       
-      SDL_SetRenderDrawColor(
+      SDL_SetRenderDrawColor (
         renderer,
         153 * timeCoef,
         204 * timeCoef,
@@ -279,13 +279,13 @@ int gameLoop (
       
       SDL_RenderClear(renderer);
       
-      if(inputs->keyboard_Esc) {
+      if (inputs->keyboard_Esc) {
         gamePopup = gamePopup ? 0 : 1;
         inputs->keyboard_Esc = 0;
       }
       
       fps_count++;
-      if(fps_lastmil < SDL_GetTicks() - 1000) {
+      if (fps_lastmil < SDL_GetTicks() - 1000) {
         fps_lastmil = SDL_GetTicks();
         fps_now     = fps_count;
         fps_count   = 0;
@@ -294,10 +294,10 @@ int gameLoop (
       /* Things that should run at a constant speed, regardless
       of CPU power. If the rendering takes a long time, this
       will fire more times to compensate. */
-      while(SDL_GetTicks() - l > 10L) {
+      while (SDL_GetTicks() - l > 10L) {
         gameTime++;
         l += 10L;
-        if(!gamePopup) {
+        if (!gamePopup) {
           // Scroll wheel
           if(inputs->mouse_Wheel != 0) {
             player.inventory.hotbarSelect -= inputs->mouse_Wheel;
@@ -308,7 +308,7 @@ int gameLoop (
           }
           
           // Looking around
-          if(trapMouse) {
+          if (trapMouse) {
             cameraAngle_H += (float)inputs->mouse_X / 64;
             cameraAngle_V -= (float)inputs->mouse_Y / 64;
           } else {
@@ -526,7 +526,7 @@ int gameLoop (
               lookup_now.y = blockRayPosition.y >> 6;
               lookup_now.z = blockRayPosition.z >> 6;
               
-              if(
+              if (
                 lookup_now.x != lookup_ago.x ||
                 lookup_now.y != lookup_ago.y ||
                 lookup_now.z != lookup_ago.z
@@ -548,12 +548,12 @@ int gameLoop (
                     lookup_last   = CHUNKARR_SIZE - 1,
                     lookup_middle = (CHUNKARR_SIZE - 1) / 2;
                 
-                while(lookup_first <= lookup_last) {
-                  if(
+                while (lookup_first <= lookup_last) {
+                  if (
                     world->chunk[lookup_middle].coordHash
                     > lookup_hash
                   ) lookup_first = lookup_middle + 1;
-                  else if(
+                  else if (
                     world->chunk[lookup_middle].coordHash
                     == lookup_hash
                   ) {
@@ -657,7 +657,7 @@ int gameLoop (
           }
           
           // Draw inverted color crosshair
-          if(trapMouse && (
+          if (trapMouse && (
             (pixelX == BUFFER_HALF_W
               && abs(BUFFER_HALF_H - pixelY) < 4) ||
             (pixelY == BUFFER_HALF_H
@@ -666,7 +666,7 @@ int gameLoop (
             finalPixelColor = 16777216 - finalPixelColor;
           }
           
-          if(finalPixelColor > 0) {
+          if (finalPixelColor > 0) {
             SDL_SetRenderDrawColor(
               renderer,
               ((finalPixelColor >> 16 & 0xFF) * pixelShade) >> 8,
@@ -697,7 +697,7 @@ int gameLoop (
         }
       }
       
-      switch(gamePopup) {
+      switch (gamePopup) {
         // HUD
         case 0:
           if (trapMouse) SDL_SetRelativeMouseMode(1);
