@@ -16,8 +16,8 @@ int Inventory_transferIn (Inventory *dest, InvSlot *src) {
 
         // Look for exact match in inventory
         for (int i = 0; i < INVENTORY_SIZE; i ++) {
-                if(dest->hotbar[i].blockid == src->blockid) {
-                        if (InvSlot_transfer(&dest->hotbar[i], src)) {
+                if(dest->slots[i].blockid == src->blockid) {
+                        if (InvSlot_transfer(&dest->slots[i], src)) {
                                 return 1;
                         }
                 }
@@ -33,8 +33,8 @@ int Inventory_transferIn (Inventory *dest, InvSlot *src) {
 
         // Look for exact match in inventory
         for (int i = 0; i < INVENTORY_SIZE; i ++) {
-                if(dest->hotbar[i].blockid == 0) {
-                        if (InvSlot_transfer(&dest->hotbar[i], src)) {
+                if(dest->slots[i].blockid == 0) {
+                        if (InvSlot_transfer(&dest->slots[i], src)) {
                                 return 1;
                         }
                 }

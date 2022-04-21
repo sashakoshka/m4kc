@@ -265,13 +265,26 @@ void popup_inventory (
         tblack(renderer);
         SDL_RenderFillRect(renderer, &inventoryRect);
         SDL_RenderFillRect(renderer, &hotbarRect);
-        
-        for (int i = 0; i < 9; i++) {
+
+        // Hotbar items
+        for (int i = 0; i < HOTBAR_SIZE; i++) {
                 drawSlot (
                         renderer,
                         &player->inventory.hotbar[i],
                         BUFFER_HALF_W - 76 + i * 17,
                         BUFFER_H - 17,
+                        inputs->mouse_X,
+                        inputs->mouse_Y
+                );
+        }
+
+        // Inventory items
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+                drawSlot (
+                        renderer,
+                        &player->inventory.slots[i],
+                        BUFFER_HALF_W - 76 + (i % HOTBAR_SIZE) * 17,
+                        inventoryRect.y + 1 + (i / HOTBAR_SIZE) * 17,
                         inputs->mouse_X,
                         inputs->mouse_Y
                 );

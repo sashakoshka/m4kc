@@ -5,7 +5,8 @@
 #include "terrain.h"
 
 #define HOTBAR_SIZE 9
-#define INVENTORY_SIZE 27
+#define INVENTORY_ROWS 3
+#define INVENTORY_SIZE HOTBAR_SIZE * INVENTORY_ROWS
 
 typedef struct _Player    Player;
 typedef struct _InvSlot   InvSlot;
