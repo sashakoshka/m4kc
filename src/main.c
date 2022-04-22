@@ -134,6 +134,7 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
                         inputs->keyboard_F4  = keyboard[SDL_SCANCODE_F4];
                         inputs->keyboard_E   = keyboard[SDL_SCANCODE_E];
                         inputs->keyboard_T   = keyboard[SDL_SCANCODE_T];
+                        inputs->keyboard_F   = keyboard[SDL_SCANCODE_F];
 
                         inputs->keySym       = event.key.keysym.sym;
                 }

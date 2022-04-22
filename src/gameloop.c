@@ -417,6 +417,16 @@ int gameLoop (
           inputs->keyTyped   = 0;
           gamePopup = 3;
         }
+
+        // Swap hotbar selection with offhand
+        if (inputs->keyboard_F) {
+          inputs->keyboard_F = 0;
+          inputs->keyTyped   = 0;
+          InvSlot_swap (
+            &player.inventory.hotbar[player.inventory.hotbarSelect],
+            &player.inventory.offhand
+          );
+        }
       }
 
       #ifndef small

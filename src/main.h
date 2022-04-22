@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL2/SDL.h>
 #include <stdlib.h>
 
 /* Inputs
@@ -20,6 +21,7 @@ typedef struct {
         int keyboard_D;      // M[100]
         int keyboard_E;
         int keyboard_T;
+        int keyboard_F;
 
         int keyboard_Esc;    // M[27]
         int keyboard_F1;     // M[5]
