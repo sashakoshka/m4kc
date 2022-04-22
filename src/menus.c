@@ -281,11 +281,16 @@ void popup_inventory (
                         inputs->mouse_Left = 0;
                         if (dragging) {
                                 // Place down item
+                                if (current->blockid == 0) {
+                                        *current = selected;
+                                        selected = (const InvSlot) { 0 };
+                                        dragging = 0;
+                                } else if (current->blockid == selected.blockid) {
+                                        InvSlot_transfer(current, &selected);
+                                } else {
+                                        InvSlot_swap(current, &selected);
+                                }
                                 
-                                
-                                *current = selected;
-                                selected = (const InvSlot) { 0 };
-                                dragging = 0;
                         } else if (current->blockid != 0) {
                                 // Pick up item
                                 selected = *current;
@@ -310,9 +315,16 @@ void popup_inventory (
                         inputs->mouse_Left = 0;
                         if (dragging) {
                                 // Place down item
-                                *current = selected;
-                                selected = (const InvSlot) { 0 };
-                                dragging = 0;
+                                if (current->blockid == 0) {
+                                        *current = selected;
+                                        selected = (const InvSlot) { 0 };
+                                        dragging = 0;
+                                } else if (current->blockid == selected.blockid) {
+                                        InvSlot_transfer(current, &selected);
+                                } else {
+                                        InvSlot_swap(current, &selected);
+                                }
+                                
                         } else if (current->blockid != 0) {
                                 // Pick up item
                                 selected = *current;
