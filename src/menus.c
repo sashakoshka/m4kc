@@ -258,7 +258,8 @@ void popup_inventory (
         hotbarRect.w = 154;
         hotbarRect.h = 18;
 
-        static InvSlot *selected = NULL;
+        static InvSlot selected = { 0 };
+        static int dragging = 0;
 
         // Inventory background
         tblack(renderer);
@@ -278,11 +279,18 @@ void popup_inventory (
                         inputs->mouse_Y
                 ) && inputs->mouse_Left) {
                         inputs->mouse_Left = 0;
-                        if (selected == NULL) {
-                                selected = current;
-                        } else {
-                                InvSlot_swap(current, selected);
-                                selected = NULL;
+                        if (dragging) {
+                                // Place down item
+                                
+                                
+                                *current = selected;
+                                selected = (const InvSlot) { 0 };
+                                dragging = 0;
+                        } else if (current->blockid != 0) {
+                                // Pick up item
+                                selected = *current;
+                                *current = (const InvSlot) { 0 };
+                                dragging = 1;
                         }
                 }
         }
@@ -300,13 +308,28 @@ void popup_inventory (
                         inputs->mouse_Y
                 ) && inputs->mouse_Left) {
                         inputs->mouse_Left = 0;
-                        if (selected == NULL) {
-                                selected = current;
-                        } else {
-                                InvSlot_swap(current, selected);
-                                selected = NULL;
+                        if (dragging) {
+                                // Place down item
+                                *current = selected;
+                                selected = (const InvSlot) { 0 };
+                                dragging = 0;
+                        } else if (current->blockid != 0) {
+                                // Pick up item
+                                selected = *current;
+                                *current = (const InvSlot) { 0 };
+                                dragging = 1;
                         }
                 }
+        }
+
+        if (dragging) {
+                drawSlot (
+                        renderer,
+                        &selected,
+                        inputs->mouse_X - 8,
+                        inputs->mouse_Y - 8,
+                        0, 0
+                );
         }
         
         // Exit inventory
