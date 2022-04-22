@@ -131,19 +131,26 @@ void popup_hud (
         int *debugOn, u_int32_t *fps_now,
         Player *player
 ) {
-        static SDL_Rect hotbarRect;
-        static SDL_Rect hotbarSelectRect;
 
         int i;
 
+        static SDL_Rect hotbarRect;
         hotbarRect.x = BUFFER_HALF_W - 77;
         hotbarRect.y = BUFFER_H - 18;
         hotbarRect.w = 154;
         hotbarRect.h = 18;
 
+        static SDL_Rect hotbarSelectRect;
+        hotbarSelectRect.x = 0;
         hotbarSelectRect.y = hotbarRect.y;
         hotbarSelectRect.w = 18;
         hotbarSelectRect.h = 18;
+
+        static SDL_Rect offhandRect;
+        offhandRect.x = 0;
+        offhandRect.y = BUFFER_H - 18;
+        offhandRect.w = 18;
+        offhandRect.h = 18;
 
         // Debug screen
         if (*debugOn) {
@@ -226,6 +233,20 @@ void popup_hud (
                 );
         }
 
+        // Offhand
+        if (player->inventory.offhand.blockid != 0) {
+                tblack(renderer);
+                SDL_RenderDrawRect(renderer, &offhandRect);
+                drawSlot (
+                        renderer,
+                        &player->inventory.offhand,
+                        1,
+                        BUFFER_H - 17,
+                        inputs->mouse_X,
+                        inputs->mouse_Y
+                );
+        }
+
         // Chat
         int chatDrawIndex = chatHistoryIndex;
         for (i = 0; i < 11; i++) {
@@ -236,6 +257,44 @@ void popup_hud (
                                 renderer, chatHistory[chatDrawIndex],
                                 0, BUFFER_H - 32 - i * 9
                         );
+                }
+        }
+}
+
+void manageInvSlot (
+        SDL_Renderer *renderer,
+        Inputs  *inputs,
+        int     x,
+        int     y,
+        InvSlot *current,
+        InvSlot *selected,
+        int     *dragging
+) {
+        if (drawSlot (
+                renderer,
+                current,
+                x, y,
+                inputs->mouse_X,
+                inputs->mouse_Y
+        ) && inputs->mouse_Left) {
+                inputs->mouse_Left = 0;
+                if (*dragging) {
+                        // Place down item
+                        if (current->blockid == 0) {
+                                *current  = *selected;
+                                *selected = (const InvSlot) { 0 };
+                                *dragging = 0;
+                        } else if (current->blockid == selected->blockid) {
+                                InvSlot_transfer(current, selected);
+                        } else {
+                                InvSlot_swap(current, selected);
+                        }
+                        
+                } else if (current->blockid != 0) {
+                        // Pick up item
+                        *selected = *current;
+                        *current  = (const InvSlot) { 0 };
+                        *dragging = 1;
                 }
         }
 }
@@ -258,6 +317,12 @@ void popup_inventory (
         hotbarRect.w = 154;
         hotbarRect.h = 18;
 
+        static SDL_Rect offhandRect;
+        offhandRect.x = 0;
+        offhandRect.y = BUFFER_H - 18;
+        offhandRect.w = 18;
+        offhandRect.h = 18;
+
         static InvSlot selected = { 0 };
         static int dragging = 0;
 
@@ -265,74 +330,41 @@ void popup_inventory (
         tblack(renderer);
         SDL_RenderFillRect(renderer, &inventoryRect);
         SDL_RenderFillRect(renderer, &hotbarRect);
+        SDL_RenderFillRect(renderer, &offhandRect);
 
         // Hotbar items
         for (int i = 0; i < HOTBAR_SIZE; i++) {
-                InvSlot *current = &player->inventory.hotbar[i];
-        
-                if (drawSlot (
-                        renderer,
-                        current,
+                manageInvSlot (
+                        renderer, inputs,
                         BUFFER_HALF_W - 76 + i * 17,
                         BUFFER_H - 17,
-                        inputs->mouse_X,
-                        inputs->mouse_Y
-                ) && inputs->mouse_Left) {
-                        inputs->mouse_Left = 0;
-                        if (dragging) {
-                                // Place down item
-                                if (current->blockid == 0) {
-                                        *current = selected;
-                                        selected = (const InvSlot) { 0 };
-                                        dragging = 0;
-                                } else if (current->blockid == selected.blockid) {
-                                        InvSlot_transfer(current, &selected);
-                                } else {
-                                        InvSlot_swap(current, &selected);
-                                }
-                                
-                        } else if (current->blockid != 0) {
-                                // Pick up item
-                                selected = *current;
-                                *current = (const InvSlot) { 0 };
-                                dragging = 1;
-                        }
-                }
+                        &player->inventory.hotbar[i],
+                        &selected,
+                        &dragging
+                );
         }
 
         // Inventory items
         for (int i = 0; i < INVENTORY_SIZE; i++) {
-                InvSlot *current = &player->inventory.slots[i];
-        
-                if (drawSlot (
-                        renderer,
-                        current,
+                manageInvSlot (
+                        renderer, inputs,
                         BUFFER_HALF_W - 76 + (i % HOTBAR_SIZE) * 17,
                         inventoryRect.y + 1 + (i / HOTBAR_SIZE) * 17,
-                        inputs->mouse_X,
-                        inputs->mouse_Y
-                ) && inputs->mouse_Left) {
-                        inputs->mouse_Left = 0;
-                        if (dragging) {
-                                // Place down item
-                                if (current->blockid == 0) {
-                                        *current = selected;
-                                        selected = (const InvSlot) { 0 };
-                                        dragging = 0;
-                                } else if (current->blockid == selected.blockid) {
-                                        InvSlot_transfer(current, &selected);
-                                } else {
-                                        InvSlot_swap(current, &selected);
-                                }
-                                
-                        } else if (current->blockid != 0) {
-                                // Pick up item
-                                selected = *current;
-                                *current = (const InvSlot) { 0 };
-                                dragging = 1;
-                        }
-                }
+                        &player->inventory.slots[i],
+                        &selected,
+                        &dragging
+                );
         }
+
+        // Offhand
+        manageInvSlot (
+                renderer, inputs,
+                1,
+                BUFFER_H - 17,
+                &player->inventory.offhand,
+                &selected,
+                &dragging
+        );
 
         if (dragging) {
                 drawSlot (
