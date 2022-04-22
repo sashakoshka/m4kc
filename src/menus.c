@@ -240,6 +240,118 @@ void popup_hud (
         }
 }
 
+void popup_inventory (
+        SDL_Renderer *renderer,
+        Inputs *inputs,
+        Player *player,
+        int *gamePopup
+) {     
+        static SDL_Rect inventoryRect;
+        inventoryRect.x = BUFFER_HALF_W - 77;
+        inventoryRect.y = (BUFFER_H - 18) / 2 - 26;
+        inventoryRect.w = 154;
+        inventoryRect.h = 52;
+
+        static SDL_Rect hotbarRect;
+        hotbarRect.x = BUFFER_HALF_W - 77;
+        hotbarRect.y = BUFFER_H - 18;
+        hotbarRect.w = 154;
+        hotbarRect.h = 18;
+
+        static InvSlot selected = { 0 };
+        static int dragging = 0;
+
+        // Inventory background
+        tblack(renderer);
+        SDL_RenderFillRect(renderer, &inventoryRect);
+        SDL_RenderFillRect(renderer, &hotbarRect);
+
+        // Hotbar items
+        for (int i = 0; i < HOTBAR_SIZE; i++) {
+                InvSlot *current = &player->inventory.hotbar[i];
+        
+                if (drawSlot (
+                        renderer,
+                        current,
+                        BUFFER_HALF_W - 76 + i * 17,
+                        BUFFER_H - 17,
+                        inputs->mouse_X,
+                        inputs->mouse_Y
+                ) && inputs->mouse_Left) {
+                        inputs->mouse_Left = 0;
+                        if (dragging) {
+                                // Place down item
+                                if (current->blockid == 0) {
+                                        *current = selected;
+                                        selected = (const InvSlot) { 0 };
+                                        dragging = 0;
+                                } else if (current->blockid == selected.blockid) {
+                                        InvSlot_transfer(current, &selected);
+                                } else {
+                                        InvSlot_swap(current, &selected);
+                                }
+                                
+                        } else if (current->blockid != 0) {
+                                // Pick up item
+                                selected = *current;
+                                *current = (const InvSlot) { 0 };
+                                dragging = 1;
+                        }
+                }
+        }
+
+        // Inventory items
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+                InvSlot *current = &player->inventory.slots[i];
+        
+                if (drawSlot (
+                        renderer,
+                        current,
+                        BUFFER_HALF_W - 76 + (i % HOTBAR_SIZE) * 17,
+                        inventoryRect.y + 1 + (i / HOTBAR_SIZE) * 17,
+                        inputs->mouse_X,
+                        inputs->mouse_Y
+                ) && inputs->mouse_Left) {
+                        inputs->mouse_Left = 0;
+                        if (dragging) {
+                                // Place down item
+                                if (current->blockid == 0) {
+                                        *current = selected;
+                                        selected = (const InvSlot) { 0 };
+                                        dragging = 0;
+                                } else if (current->blockid == selected.blockid) {
+                                        InvSlot_transfer(current, &selected);
+                                } else {
+                                        InvSlot_swap(current, &selected);
+                                }
+                                
+                        } else if (current->blockid != 0) {
+                                // Pick up item
+                                selected = *current;
+                                *current = (const InvSlot) { 0 };
+                                dragging = 1;
+                        }
+                }
+        }
+
+        if (dragging) {
+                drawSlot (
+                        renderer,
+                        &selected,
+                        inputs->mouse_X - 8,
+                        inputs->mouse_Y - 8,
+                        0, 0
+                );
+        }
+        
+        // Exit inventory
+        if (inputs->keyboard_E) {
+                inputs->keyboard_E = 0;
+                inputs->keyTyped   = 0;
+                *gamePopup = 0;
+        }
+}
+
 void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         static int  chatBoxCursor = 0;
         static char chatBox [64]  = {0};

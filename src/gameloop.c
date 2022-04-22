@@ -75,27 +75,25 @@ int gameLoop (
                 i25,
                 pixelColor,
                 
-                /*
-                  1: Main menu
-                  2: World select
-                  3: World creation
-                  4: Loading
-                  5: Gameplay
-                  6: World editing (renaming etc)
-                  7: Join game
-                  8: Options
-                */
+                /* 1: Main menu
+                 * 2: World select
+                 * 3: World creation
+                 * 4: Loading
+                 * 5: Gameplay
+                 * 6: World editing (renaming etc)
+                 * 7: Join game
+                 * 8: Options
+                 */
                 gameState = 0,
                 
-                /*
-                  0: Gameplay
-                  1: Pause menu
-                  2: In-game options menu
-                  3: Inventory
-                  4: Advanced debug menu
-                  5: Chunk peek
-                  6: Chat
-                */
+                /* 0: Gameplay
+                 * 1: Pause menu
+                 * 2: In-game options menu
+                 * 3: Inventory
+                 * 4: Advanced debug menu
+                 * 5: Chunk peek
+                 * 6: Chat
+                 */
                 gamePopup,
                 
                 guiOn        = 1,
@@ -128,7 +126,8 @@ int gameLoop (
   if (init) {
     l = SDL_GetTicks();
     gameTime = 2048;
-    
+
+    player = (const Player) { 0 };
     player.pos.x = 96.5;
     player.pos.y = 65.0;
     player.pos.z = 96.5;
@@ -142,28 +141,6 @@ int gameLoop (
     backgroundRect.y = 0;
     backgroundRect.w = BUFFER_W;
     backgroundRect.h = BUFFER_H;
-    
-    player.inventory.hotbar[0].blockid = 0;
-    player.inventory.hotbar[1].blockid = 0;
-    player.inventory.hotbar[2].blockid = 0;
-    player.inventory.hotbar[3].blockid = 0;
-    player.inventory.hotbar[4].blockid = 0;
-    player.inventory.hotbar[5].blockid = 0;
-    player.inventory.hotbar[6].blockid = 0;
-    player.inventory.hotbar[7].blockid = 0;
-    player.inventory.hotbar[8].blockid = 0;
-    
-    player.inventory.hotbar[0].amount  = 0;
-    player.inventory.hotbar[1].amount  = 0;
-    player.inventory.hotbar[2].amount  = 0;
-    player.inventory.hotbar[3].amount  = 0;
-    player.inventory.hotbar[4].amount  = 0;
-    player.inventory.hotbar[5].amount  = 0;
-    player.inventory.hotbar[6].amount  = 0;
-    player.inventory.hotbar[7].amount  = 0;
-    player.inventory.hotbar[8].amount  = 0;
-
-    player.inventory.hotbarSelect = 0;
     
     chatAdd("Game started");
     
@@ -433,6 +410,13 @@ int gameLoop (
           inputs->keyTyped   = 0;
           gamePopup = 6;
         }
+
+        // Enter inventory
+        if (inputs->keyboard_E) {
+          inputs->keyboard_E = 0;
+          inputs->keyTyped   = 0;
+          gamePopup = 3;
+        }
       }
 
       #ifndef small
@@ -682,10 +666,6 @@ int gameLoop (
 
       if (gamePopup) {
         SDL_SetRelativeMouseMode(0);
-        if(gamePopup != 6 && gamePopup != 0) {
-          tblack(renderer);
-          SDL_RenderFillRect(renderer, &backgroundRect);
-        }
       }
       
       switch (gamePopup) {
@@ -700,11 +680,15 @@ int gameLoop (
            
         // Pause menu
         case 1:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_pause(renderer, inputs, &gamePopup, &gameState);
           break;
         
         // Options
         case 2:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_options (
             renderer, inputs,
             &gamePopup, &drawDistance, &trapMouse
@@ -713,17 +697,21 @@ int gameLoop (
         
         // Inventory
         case 3:
-          // TODO: draw inventory
+          popup_inventory(renderer, inputs, &player, &gamePopup);
           break;
 
         #ifndef small
         // Advanced debug menu
         case 4:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_debugTools(renderer, inputs, &gamePopup);
           break;
         
         // Chunk peek
         case 5:
+          tblack(renderer);
+          SDL_RenderFillRect(renderer, &backgroundRect);
           popup_chunkPeek(renderer, inputs, world, &gamePopup, &player);
           break;
         #endif
