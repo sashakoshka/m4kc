@@ -427,6 +427,12 @@ int gameLoop (
             &player.inventory.offhand
           );
         }
+
+        if (!gamePopup && inputs->numPressed != 0 && inputs->numPressed != 10) {
+          player.inventory.hotbarSelect = inputs->numPressed - 1;
+
+          inputs->numPressed = 0;
+        }
       }
 
       #ifndef small
