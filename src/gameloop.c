@@ -208,9 +208,9 @@ int gameLoop (
       
       SDL_RenderClear(renderer);
       
-      if (inputs->keyboard.Esc) {
+      if (inputs->keyboard.esc) {
         gamePopup = gamePopup ? 0 : 1;
-        inputs->keyboard.Esc = 0;
+        inputs->keyboard.esc = 0;
       }
       
       fps_count++;
@@ -266,8 +266,8 @@ int gameLoop (
           if (cameraAngle_V < -1.57) cameraAngle_V = -1.57;
           if (cameraAngle_V >  1.57) cameraAngle_V =  1.57;
 
-          playerSpeedFB = (inputs->keyboard.W - inputs->keyboard.S) * 0.02;
-          playerSpeedLR = (inputs->keyboard.D - inputs->keyboard.A) * 0.02;
+          playerSpeedFB = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
+          playerSpeedLR = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
         } else {
           playerSpeedFB = 0;
           playerSpeedLR = 0;
@@ -303,11 +303,11 @@ int gameLoop (
                 goto label208;
               }
               if (
-                inputs->keyboard.Space > 0 &&
+                inputs->keyboard.space > 0 &&
                 (playerMovement.y > 0.0)   &!
                 gamePopup
               ) {
-                inputs->keyboard.Space = 0;
+                inputs->keyboard.space = 0;
                 playerMovement.y = -0.1;
                 goto label208;
               } 
@@ -393,34 +393,34 @@ int gameLoop (
         inputs->mouse.right = 0;
 
         // Toggle GUI
-        if (inputs->keyboard.F1) {
-          inputs->keyboard.F1 = 0;
+        if (inputs->keyboard.f1) {
+          inputs->keyboard.f1 = 0;
           guiOn ^= 1;
         }
 
         // Toggle debug mode
-        if (inputs->keyboard.F3) {
-          inputs->keyboard.F3 = 0;
+        if (inputs->keyboard.f3) {
+          inputs->keyboard.f3 = 0;
           debugOn = !debugOn;
         }
 
         // Enter chat
-        if (inputs->keyboard.T) {
+        if (inputs->keyboard.t) {
           // reset text input
-          inputs->keyboard.T = 0;
+          inputs->keyboard.t = 0;
           inputs->keyTyped   = 0;
           gamePopup = 6;
         }
 
         // Enter inventory
-        if (inputs->keyboard.E) {
-          inputs->keyboard.E = 0;
+        if (inputs->keyboard.e) {
+          inputs->keyboard.e = 0;
           gamePopup = 3;
         }
 
         // Swap hotbar selection with offhand
-        if (inputs->keyboard.F) {
-          inputs->keyboard.F = 0;
+        if (inputs->keyboard.f) {
+          inputs->keyboard.f = 0;
           InvSlot_swap (
             &player.inventory.hotbar[player.inventory.hotbarSelect],
             &player.inventory.offhand
@@ -440,8 +440,8 @@ int gameLoop (
       }
 
       #ifndef small
-      if (inputs->keyboard.F4) {
-        inputs->keyboard.F4 = 0;
+      if (inputs->keyboard.f4) {
+        inputs->keyboard.f4 = 0;
         gamePopup = (gamePopup == 4) ? 0 : 4;
       }
       #endif
@@ -677,8 +677,8 @@ int gameLoop (
       inputs->mouse.y /= BUFFER_SCALE;
       
       // If we need to take a screenshot, do so
-      if (inputs->keyboard.F2) {
-        inputs->keyboard.F2 = 0;
+      if (inputs->keyboard.f2) {
+        inputs->keyboard.f2 = 0;
         screenshot(renderer);
       }
       

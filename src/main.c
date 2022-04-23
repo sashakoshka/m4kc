@@ -87,11 +87,11 @@ int controlLoop (Inputs *inputs, const Uint8 *keyboard) {
         SDL_GetMouseState(&mouseX, &mouseY);
 
         // Detect movement controls
-        inputs->keyboard.Space = keyboard[SDL_SCANCODE_SPACE];
-        inputs->keyboard.W     = keyboard[SDL_SCANCODE_W];
-        inputs->keyboard.S     = keyboard[SDL_SCANCODE_S];
-        inputs->keyboard.A     = keyboard[SDL_SCANCODE_A];
-        inputs->keyboard.D     = keyboard[SDL_SCANCODE_D];
+        inputs->keyboard.space = keyboard[SDL_SCANCODE_SPACE];
+        inputs->keyboard.w     = keyboard[SDL_SCANCODE_W];
+        inputs->keyboard.s     = keyboard[SDL_SCANCODE_S];
+        inputs->keyboard.a     = keyboard[SDL_SCANCODE_A];
+        inputs->keyboard.d     = keyboard[SDL_SCANCODE_D];
 
         if (!SDL_GetRelativeMouseMode()) {
                 inputs->mouse.x = mouseX;
@@ -127,14 +127,14 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
         case SDL_KEYDOWN:
                 if (event.key.repeat == 0) {
                         // Detect UI hotkeys
-                        inputs->keyboard.Esc = keyboard[SDL_SCANCODE_ESCAPE];
-                        inputs->keyboard.F1  = keyboard[SDL_SCANCODE_F1];
-                        inputs->keyboard.F2  = keyboard[SDL_SCANCODE_F2];
-                        inputs->keyboard.F3  = keyboard[SDL_SCANCODE_F3];
-                        inputs->keyboard.F4  = keyboard[SDL_SCANCODE_F4];
-                        inputs->keyboard.E   = keyboard[SDL_SCANCODE_E];
-                        inputs->keyboard.T   = keyboard[SDL_SCANCODE_T];
-                        inputs->keyboard.F   = keyboard[SDL_SCANCODE_F];
+                        inputs->keyboard.esc = keyboard[SDL_SCANCODE_ESCAPE];
+                        inputs->keyboard.f1  = keyboard[SDL_SCANCODE_F1];
+                        inputs->keyboard.f2  = keyboard[SDL_SCANCODE_F2];
+                        inputs->keyboard.f3  = keyboard[SDL_SCANCODE_F3];
+                        inputs->keyboard.f4  = keyboard[SDL_SCANCODE_F4];
+                        inputs->keyboard.e   = keyboard[SDL_SCANCODE_E];
+                        inputs->keyboard.t   = keyboard[SDL_SCANCODE_T];
+                        inputs->keyboard.f   = keyboard[SDL_SCANCODE_F];
 
                         inputs->keyboard.num0 = keyboard[SDL_SCANCODE_0];
                         inputs->keyboard.num1 = keyboard[SDL_SCANCODE_1];

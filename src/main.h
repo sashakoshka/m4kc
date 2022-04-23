@@ -7,20 +7,20 @@
  * Stores only key presses. Reset to zero every frame.
  */
 typedef struct {
-        int Space;  // M[32]
-        int W;      // M[119]
-        int S;      // M[115]
-        int A;      // M[97]
-        int D;      // M[100]
-        int E;
-        int T;
-        int F;
+        int space;  // M[32]
+        int w;      // M[119]
+        int s;      // M[115]
+        int a;      // M[97]
+        int d;      // M[100]
+        int e;
+        int t;
+        int f;
 
-        int Esc;    // M[27]
-        int F1;     // M[5]
-        int F2;     // M[6]
-        int F3;     // M[7]
-        int F4;
+        int esc;    // M[27]
+        int f1;     // M[5]
+        int f2;     // M[6]
+        int f3;     // M[7]
+        int f4;
 
         int num0;
         int num1;
