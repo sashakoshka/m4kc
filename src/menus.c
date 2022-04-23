@@ -8,8 +8,8 @@ int state_title (
         SDL_Renderer *renderer, Inputs *inputs,
         int *gameState, int *init
 ) {
-        inputs->mouse_X /= BUFFER_SCALE;
-        inputs->mouse_Y /= BUFFER_SCALE;
+        inputs->mouse.x /= BUFFER_SCALE;
+        inputs->mouse.y /= BUFFER_SCALE;
 
         dirtBg(renderer);
         white(renderer);
@@ -24,8 +24,8 @@ int state_title (
 
         if (button(renderer, "Singleplayer",
                 BUFFER_HALF_W - 64, 42, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gameState = 4;
                 *init = 1;
@@ -33,16 +33,16 @@ int state_title (
 
         if (button(renderer, "Options",
                 BUFFER_HALF_W - 64, 64, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gameState = 8;
         }
 
         if (button(renderer, "Quit Game",
                 BUFFER_HALF_W - 64, 86, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 return 1;
         }
@@ -93,8 +93,8 @@ void state_options (
         SDL_Renderer *renderer, Inputs *inputs,
         int *gameState, int *drawDistance, int *trapMouse
 ) {
-        inputs->mouse_X /= BUFFER_SCALE;
-        inputs->mouse_Y /= BUFFER_SCALE;
+        inputs->mouse.x /= BUFFER_SCALE;
+        inputs->mouse.y /= BUFFER_SCALE;
 
         dirtBg(renderer);
 
@@ -104,8 +104,8 @@ void state_options (
 }
 
 void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
-        inputs->mouse_X /= BUFFER_SCALE;
-        inputs->mouse_Y /= BUFFER_SCALE;
+        inputs->mouse.x /= BUFFER_SCALE;
+        inputs->mouse.y /= BUFFER_SCALE;
 
         dirtBg(renderer);
         white(renderer);
@@ -117,8 +117,8 @@ void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         );
         if (button(renderer, "Ok",
                 BUFFER_HALF_W - 64, BUFFER_HALF_H, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gameState = 0;
         }
@@ -228,8 +228,8 @@ void popup_hud (
                         &player->inventory.hotbar[i],
                         BUFFER_HALF_W - 76 + i * 17,
                         BUFFER_H - 17,
-                        inputs->mouse_X,
-                        inputs->mouse_Y
+                        inputs->mouse.x,
+                        inputs->mouse.y
                 );
         }
 
@@ -242,8 +242,8 @@ void popup_hud (
                         &player->inventory.offhand,
                         1,
                         BUFFER_H - 17,
-                        inputs->mouse_X,
-                        inputs->mouse_Y
+                        inputs->mouse.x,
+                        inputs->mouse.y
                 );
         }
 
@@ -274,10 +274,10 @@ void manageInvSlot (
                 renderer,
                 current,
                 x, y,
-                inputs->mouse_X,
-                inputs->mouse_Y
-        ) && inputs->mouse_Left) {
-                inputs->mouse_Left = 0;
+                inputs->mouse.x,
+                inputs->mouse.y
+        ) && inputs->mouse.left) {
+                inputs->mouse.left = 0;
                 if (*dragging) {
                         // Place down item
                         if (current->blockid == 0) {
@@ -370,8 +370,8 @@ void popup_inventory (
                 drawSlot (
                         renderer,
                         &selected,
-                        inputs->mouse_X - 8,
-                        inputs->mouse_Y - 8,
+                        inputs->mouse.x - 8,
+                        inputs->mouse.y - 8,
                         0, 0
                 );
         }
@@ -456,24 +456,24 @@ void popup_pause (
 ) {
         if (button(renderer, "Back to Game",
                 BUFFER_HALF_W - 64, 20, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gamePopup = 0;
         }
 
         if (button(renderer, "Options...",
                 BUFFER_HALF_W - 64, 42, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gamePopup = 2;
         }
 
         if (button(renderer, "Quit to Title",
                 BUFFER_HALF_W - 64, 64, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gameState = 0;
         }
@@ -492,16 +492,16 @@ void popup_options (
 void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
         if (button(renderer, "Chunk Peek",
                 BUFFER_HALF_W - 64, 20, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gamePopup = 5;
         }
 
         if (button(renderer, "Done",
                 BUFFER_HALF_W - 64, 42, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 *gamePopup = 0;
         }
@@ -544,32 +544,32 @@ void popup_chunkPeek (
                 }
 
                 // Scroll wheel for changing chunk map xray
-                if (inputs->mouse_Wheel != 0) {
-                        chunkPeekRYMax -= inputs->mouse_Wheel;
+                if (inputs->mouse.wheel != 0) {
+                        chunkPeekRYMax -= inputs->mouse.wheel;
                         chunkPeekRYMax = nmod(chunkPeekRYMax, 64);
-                        inputs->mouse_Wheel = 0;
+                        inputs->mouse.wheel = 0;
                 }
 
                 // Mouse for changing chunk map xray
                 if (
-                        inputs->mouse_X > 128 &&
-                        inputs->mouse_Y < 64  &&
-                        inputs->mouse_Left
-                ) chunkPeekRYMax = inputs->mouse_Y;
+                        inputs->mouse.x > 128 &&
+                        inputs->mouse.y < 64  &&
+                        inputs->mouse.left
+                ) chunkPeekRYMax = inputs->mouse.y;
 
                 // Up/Down buttons for changing chunk map xray
                 if (button(renderer, "UP",
                         4, 56, 64,
-                        inputs->mouse_X, inputs->mouse_Y)
-                        && inputs->mouse_Left
+                        inputs->mouse.x, inputs->mouse.y)
+                        && inputs->mouse.left
                 ) {
                         chunkPeekRYMax = nmod(chunkPeekRYMax - 1, 64);
                 }
 
                 if (button(renderer, "DOWN",
                         4, 78, 64,
-                        inputs->mouse_X, inputs->mouse_Y)
-                        && inputs->mouse_Left
+                        inputs->mouse.x, inputs->mouse.y)
+                        && inputs->mouse.left
                 ) {
                         chunkPeekRYMax = nmod(chunkPeekRYMax + 1, 64);
                 }
@@ -633,8 +633,8 @@ void popup_chunkPeek (
 
         if (button(renderer, "Done",
                 4, 100, 64,
-                inputs->mouse_X, inputs->mouse_Y)
-                && inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y)
+                && inputs->mouse.left
         ) {
                 *gamePopup = 4;
         }
@@ -650,8 +650,8 @@ int menu_optionsMain (
 
         if (button(renderer, drawDistanceText,
                 BUFFER_HALF_W - 64, 20, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 switch(*drawDistance) {
                 case 20:
@@ -675,8 +675,8 @@ int menu_optionsMain (
 
         if (button(renderer, trapMouseText,
                 BUFFER_HALF_W - 64, 42, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 if (*trapMouse) {
                         *trapMouse = 0;
@@ -689,8 +689,8 @@ int menu_optionsMain (
 
         if (button(renderer, "Done",
                 BUFFER_HALF_W - 64, 64, 128,
-                inputs->mouse_X, inputs->mouse_Y) &&
-                inputs->mouse_Left
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
         ) {
                 return 1;
         }

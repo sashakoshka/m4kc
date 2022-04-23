@@ -34,18 +34,21 @@ typedef struct {
         int num9;
 } InputKeys;
 
+typedef struct {
+        int right;     // M[0]
+        int left;      // M[1]
+        int x;         // M[2]
+        int y;         // M[3]
+        int wheel;     // M[4]
+} InputMouse;
+
 /* Inputs
  * Stores the state of the different inputs (keyboard/mouse) for
  * the current tick. Updated on each game loop.
  */
 typedef struct {
-        int mouse_Right;     // M[0]
-        int mouse_Left;      // M[1]
-        int mouse_X;         // M[2]
-        int mouse_Y;         // M[3]
-        int mouse_Wheel;     // M[4]
-
-        InputKeys keyboard;
+        InputMouse mouse;
+        InputKeys  keyboard;
 
         // These are specifically for text input fields
         int keyTyped;

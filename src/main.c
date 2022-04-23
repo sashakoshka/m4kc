@@ -94,8 +94,8 @@ int controlLoop (Inputs *inputs, const Uint8 *keyboard) {
         inputs->keyboard.D     = keyboard[SDL_SCANCODE_D];
 
         if (!SDL_GetRelativeMouseMode()) {
-                inputs->mouse_X = mouseX;
-                inputs->mouse_Y = mouseY;
+                inputs->mouse.x = mouseX;
+                inputs->mouse.y = mouseY;
         }
 
         SDL_Event event;
@@ -116,10 +116,10 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
         case SDL_MOUSEBUTTONDOWN:
                 switch (event.button.button) {
                 case SDL_BUTTON_LEFT:
-                        inputs->mouse_Left = 1;
+                        inputs->mouse.left = 1;
                         break;
                 case SDL_BUTTON_RIGHT:
-                        inputs->mouse_Right = 1;
+                        inputs->mouse.right = 1;
                         break;
                 }
                 break;
@@ -152,13 +152,13 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
                 break;
 
         case SDL_MOUSEWHEEL:
-                inputs->mouse_Wheel = event.wheel.y;
+                inputs->mouse.wheel = event.wheel.y;
                 break;
 
         case SDL_MOUSEMOTION:
                 if (SDL_GetRelativeMouseMode()) {
-                        inputs->mouse_X = event.motion.xrel;
-                        inputs->mouse_Y = event.motion.yrel;
+                        inputs->mouse.x = event.motion.xrel;
+                        inputs->mouse.y = event.motion.yrel;
                 }
                 break;
 
