@@ -648,7 +648,7 @@ int gameLoop (
             (pixelY == BUFFER_HALF_H
               && abs(BUFFER_HALF_W - pixelX) < 4)
           )) {
-            finalPixelColor = 16777216 - finalPixelColor;
+            finalPixelColor = 0x1000000 - finalPixelColor;
           }
           
           if (finalPixelColor > 0) {
