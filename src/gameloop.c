@@ -241,13 +241,8 @@ int gameLoop (
             cameraAngle_H += (float)inputs->mouse.x / 64;
             cameraAngle_V -= (float)inputs->mouse.y / 64;
           } else {
-            f16 =
-              (inputs->mouse.x - BUFFER_W * 2) /
-              (float)BUFFER_W * 2.0;
-
-            f17 =
-              (inputs->mouse.y - BUFFER_H * 2) /
-              (float)BUFFER_H * 2.0;
+            f16 = (inputs->mouse.x - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
+            f17 = (inputs->mouse.y - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
           
             float cameraMoveDistance =
               sqrt(f16 * f16 + f17 * f17) - 1.2;
@@ -255,10 +250,8 @@ int gameLoop (
             if (cameraMoveDistance < 0.0)
               cameraMoveDistance = 0.0;
             if (cameraMoveDistance > 0.0) {
-              cameraAngle_H +=
-                f16 * cameraMoveDistance / 400.0;
-              cameraAngle_V -=
-                f17 * cameraMoveDistance / 400.0;
+              cameraAngle_H += f16 * cameraMoveDistance / 400.0;
+              cameraAngle_V -= f17 * cameraMoveDistance / 400.0;
             }
           }
 
@@ -283,15 +276,9 @@ int gameLoop (
         playerMovement.y += 0.003;
         
         for (axis = 0; axis < 3; axis++) {
-          f16 =
-            player.pos.x +
-            playerMovement.x * ((axis + 2) % 3 / 2);
-          f17 =
-            player.pos.y +
-            playerMovement.y * ((axis + 1) % 3 / 2);
-          f19 =
-            player.pos.z +
-            playerMovement.z * ((axis + 3) % 3 / 2);
+          f16 = player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2);
+          f17 = player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2);
+          f19 = player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2);
           
           for (i12 = 0; i12 < 12; i12++) {
             i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
@@ -464,32 +451,24 @@ int gameLoop (
           f26 = 5.0;
           for (blockFace = 0; blockFace < 3; blockFace++) {
             f27 = f24;
-            if (blockFace == 1)
-              f27 = f23; 
-            if (blockFace == 2)
-              f27 = f25; 
+            if (blockFace == 1) f27 = f23; 
+            if (blockFace == 2) f27 = f25; 
             f28 = 1.0 / ((f27 < 0.0) ? -f27 : f27);
             f29 = f24 * f28;
             f30 = f23 * f28;
             f31 = f25 * f28;
             f32 = player.pos.x - (int)player.pos.x;
-            if (blockFace == 1)
-              f32 = player.pos.y - (int)player.pos.y;
-            if (blockFace == 2)
-              f32 = player.pos.z - (int)player.pos.z;
-            if (f27 > 0.0)
-              f32 = 1.0 - f32; 
+            if (blockFace == 1) f32 = player.pos.y - (int)player.pos.y;
+            if (blockFace == 2) f32 = player.pos.z - (int)player.pos.z;
+            if (f27 > 0.0)      f32 = 1.0 - f32; 
             f33 = f28 * f32;
             f34 = player.pos.x + f29 * f32;
             f35 = player.pos.y + f30 * f32;
             f36 = player.pos.z + f31 * f32;
             if (f27 < 0.0) {
-              if (blockFace == 0)
-                f34--; 
-              if (blockFace == 1)
-                f35--; 
-              if (blockFace == 2)
-                f36--; 
+              if (blockFace == 0) f34--; 
+              if (blockFace == 1) f35--; 
+              if (blockFace == 2) f36--; 
             }
             
             /* Whatever's in this loop needs to run *extremely*
