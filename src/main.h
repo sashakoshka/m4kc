@@ -3,6 +3,37 @@
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 
+/* InputKeys
+ * Stores only key presses. Reset to zero every frame.
+ */
+typedef struct {
+        int Space;  // M[32]
+        int W;      // M[119]
+        int S;      // M[115]
+        int A;      // M[97]
+        int D;      // M[100]
+        int E;
+        int T;
+        int F;
+
+        int Esc;    // M[27]
+        int F1;     // M[5]
+        int F2;     // M[6]
+        int F3;     // M[7]
+        int F4;
+
+        int num0;
+        int num1;
+        int num2;
+        int num3;
+        int num4;
+        int num5;
+        int num6;
+        int num7;
+        int num8;
+        int num9;
+} InputKeys;
+
 /* Inputs
  * Stores the state of the different inputs (keyboard/mouse) for
  * the current tick. Updated on each game loop.
@@ -14,34 +45,11 @@ typedef struct {
         int mouse_Y;         // M[3]
         int mouse_Wheel;     // M[4]
 
-        int keyboard_Space;  // M[32]
-        int keyboard_W;      // M[119]
-        int keyboard_S;      // M[115]
-        int keyboard_A;      // M[97]
-        int keyboard_D;      // M[100]
-        int keyboard_E;
-        int keyboard_T;
-        int keyboard_F;
+        InputKeys keyboard;
 
-        int keyboard_Esc;    // M[27]
-        int keyboard_F1;     // M[5]
-        int keyboard_F2;     // M[6]
-        int keyboard_F3;     // M[7]
-        int keyboard_F4;
-
+        // These are specifically for text input fields
         int keyTyped;
         int keySym;
-
-        int keyboard_0;
-        int keyboard_1;
-        int keyboard_2;
-        int keyboard_3;
-        int keyboard_4;
-        int keyboard_5;
-        int keyboard_6;
-        int keyboard_7;
-        int keyboard_8;
-        int keyboard_9;
 } Inputs;
 
 int controlLoop(Inputs *inputs, const u_int8_t *keyboard);

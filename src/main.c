@@ -87,11 +87,11 @@ int controlLoop (Inputs *inputs, const Uint8 *keyboard) {
         SDL_GetMouseState(&mouseX, &mouseY);
 
         // Detect movement controls
-        inputs->keyboard_Space = keyboard[SDL_SCANCODE_SPACE];
-        inputs->keyboard_W     = keyboard[SDL_SCANCODE_W];
-        inputs->keyboard_S     = keyboard[SDL_SCANCODE_S];
-        inputs->keyboard_A     = keyboard[SDL_SCANCODE_A];
-        inputs->keyboard_D     = keyboard[SDL_SCANCODE_D];
+        inputs->keyboard.Space = keyboard[SDL_SCANCODE_SPACE];
+        inputs->keyboard.W     = keyboard[SDL_SCANCODE_W];
+        inputs->keyboard.S     = keyboard[SDL_SCANCODE_S];
+        inputs->keyboard.A     = keyboard[SDL_SCANCODE_A];
+        inputs->keyboard.D     = keyboard[SDL_SCANCODE_D];
 
         if (!SDL_GetRelativeMouseMode()) {
                 inputs->mouse_X = mouseX;
@@ -127,28 +127,27 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
         case SDL_KEYDOWN:
                 if (event.key.repeat == 0) {
                         // Detect UI hotkeys
-                        inputs->keyboard_Esc = keyboard[SDL_SCANCODE_ESCAPE];
-                        inputs->keyboard_F1  = keyboard[SDL_SCANCODE_F1];
-                        inputs->keyboard_F2  = keyboard[SDL_SCANCODE_F2];
-                        inputs->keyboard_F3  = keyboard[SDL_SCANCODE_F3];
-                        inputs->keyboard_F4  = keyboard[SDL_SCANCODE_F4];
-                        inputs->keyboard_E   = keyboard[SDL_SCANCODE_E];
-                        inputs->keyboard_T   = keyboard[SDL_SCANCODE_T];
-                        inputs->keyboard_F   = keyboard[SDL_SCANCODE_F];
+                        inputs->keyboard.Esc = keyboard[SDL_SCANCODE_ESCAPE];
+                        inputs->keyboard.F1  = keyboard[SDL_SCANCODE_F1];
+                        inputs->keyboard.F2  = keyboard[SDL_SCANCODE_F2];
+                        inputs->keyboard.F3  = keyboard[SDL_SCANCODE_F3];
+                        inputs->keyboard.F4  = keyboard[SDL_SCANCODE_F4];
+                        inputs->keyboard.E   = keyboard[SDL_SCANCODE_E];
+                        inputs->keyboard.T   = keyboard[SDL_SCANCODE_T];
+                        inputs->keyboard.F   = keyboard[SDL_SCANCODE_F];
 
-                        inputs->keySym       = event.key.keysym.sym;
-
-                        inputs->keyboard_0   = keyboard[SDL_SCANCODE_0];
-                        inputs->keyboard_1   = keyboard[SDL_SCANCODE_1];
-                        inputs->keyboard_2   = keyboard[SDL_SCANCODE_2];
-                        inputs->keyboard_3   = keyboard[SDL_SCANCODE_3];
-                        inputs->keyboard_4   = keyboard[SDL_SCANCODE_4];
-                        inputs->keyboard_5   = keyboard[SDL_SCANCODE_5];
-                        inputs->keyboard_6   = keyboard[SDL_SCANCODE_6];
-                        inputs->keyboard_7   = keyboard[SDL_SCANCODE_7];
-                        inputs->keyboard_8   = keyboard[SDL_SCANCODE_8];
-                        inputs->keyboard_9   = keyboard[SDL_SCANCODE_9];
+                        inputs->keyboard.num0 = keyboard[SDL_SCANCODE_0];
+                        inputs->keyboard.num1 = keyboard[SDL_SCANCODE_1];
+                        inputs->keyboard.num2 = keyboard[SDL_SCANCODE_2];
+                        inputs->keyboard.num3 = keyboard[SDL_SCANCODE_3];
+                        inputs->keyboard.num4 = keyboard[SDL_SCANCODE_4];
+                        inputs->keyboard.num5 = keyboard[SDL_SCANCODE_5];
+                        inputs->keyboard.num6 = keyboard[SDL_SCANCODE_6];
+                        inputs->keyboard.num7 = keyboard[SDL_SCANCODE_7];
+                        inputs->keyboard.num8 = keyboard[SDL_SCANCODE_8];
+                        inputs->keyboard.num9 = keyboard[SDL_SCANCODE_9];
                 }
+                inputs->keySym = event.key.keysym.sym;
                 break;
 
         case SDL_MOUSEWHEEL:
