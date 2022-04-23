@@ -208,9 +208,9 @@ int gameLoop (
       
       SDL_RenderClear(renderer);
       
-      if (inputs->keyboard_Esc) {
+      if (inputs->keyboard.esc) {
         gamePopup = gamePopup ? 0 : 1;
-        inputs->keyboard_Esc = 0;
+        inputs->keyboard.esc = 0;
       }
       
       fps_count++;
@@ -228,26 +228,21 @@ int gameLoop (
         l += 10L;
         if (!gamePopup) {
           // Scroll wheel
-          if(inputs->mouse_Wheel != 0) {
-            player.inventory.hotbarSelect -= inputs->mouse_Wheel;
+          if(inputs->mouse.wheel != 0) {
+            player.inventory.hotbarSelect -= inputs->mouse.wheel;
             player.inventory.hotbarSelect = nmod (
               player.inventory.hotbarSelect, 9
             );
-            inputs->mouse_Wheel = 0;
+            inputs->mouse.wheel = 0;
           }
           
           // Looking around
           if (trapMouse) {
-            cameraAngle_H += (float)inputs->mouse_X / 64;
-            cameraAngle_V -= (float)inputs->mouse_Y / 64;
+            cameraAngle_H += (float)inputs->mouse.x / 64;
+            cameraAngle_V -= (float)inputs->mouse.y / 64;
           } else {
-            f16 =
-              (inputs->mouse_X - BUFFER_W * 2) /
-              (float)BUFFER_W * 2.0;
-
-            f17 =
-              (inputs->mouse_Y - BUFFER_H * 2) /
-              (float)BUFFER_H * 2.0;
+            f16 = (inputs->mouse.x - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
+            f17 = (inputs->mouse.y - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
           
             float cameraMoveDistance =
               sqrt(f16 * f16 + f17 * f17) - 1.2;
@@ -255,10 +250,8 @@ int gameLoop (
             if (cameraMoveDistance < 0.0)
               cameraMoveDistance = 0.0;
             if (cameraMoveDistance > 0.0) {
-              cameraAngle_H +=
-                f16 * cameraMoveDistance / 400.0;
-              cameraAngle_V -=
-                f17 * cameraMoveDistance / 400.0;
+              cameraAngle_H += f16 * cameraMoveDistance / 400.0;
+              cameraAngle_V -= f17 * cameraMoveDistance / 400.0;
             }
           }
 
@@ -266,8 +259,8 @@ int gameLoop (
           if (cameraAngle_V < -1.57) cameraAngle_V = -1.57;
           if (cameraAngle_V >  1.57) cameraAngle_V =  1.57;
 
-          playerSpeedFB = (inputs->keyboard_W - inputs->keyboard_S) * 0.02;
-          playerSpeedLR = (inputs->keyboard_D - inputs->keyboard_A) * 0.02;
+          playerSpeedFB = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
+          playerSpeedLR = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
         } else {
           playerSpeedFB = 0;
           playerSpeedLR = 0;
@@ -283,15 +276,9 @@ int gameLoop (
         playerMovement.y += 0.003;
         
         for (axis = 0; axis < 3; axis++) {
-          f16 =
-            player.pos.x +
-            playerMovement.x * ((axis + 2) % 3 / 2);
-          f17 =
-            player.pos.y +
-            playerMovement.y * ((axis + 1) % 3 / 2);
-          f19 =
-            player.pos.z +
-            playerMovement.z * ((axis + 3) % 3 / 2);
+          f16 = player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2);
+          f17 = player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2);
+          f19 = player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2);
           
           for (i12 = 0; i12 < 12; i12++) {
             i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
@@ -303,11 +290,11 @@ int gameLoop (
                 goto label208;
               }
               if (
-                inputs->keyboard_Space > 0 &&
+                inputs->keyboard.space > 0 &&
                 (playerMovement.y > 0.0)   &!
                 gamePopup
               ) {
-                inputs->keyboard_Space = 0;
+                inputs->keyboard.space = 0;
                 playerMovement.y = -0.1;
                 goto label208;
               } 
@@ -335,7 +322,7 @@ int gameLoop (
           ];
 
           // Breaking blocks
-          if (inputs->mouse_Left > 0) {
+          if (inputs->mouse.left > 0) {
             InvSlot pickedUp = {
               .blockid = World_getBlock (
                 world,
@@ -362,7 +349,7 @@ int gameLoop (
           blockSelectOffset.z += blockSelect.z;
 
           // Placing blocks
-          if (inputs->mouse_Right > 0) {
+          if (inputs->mouse.right > 0) {
             if (
               // Player cannot be obstructing the block
               (
@@ -389,39 +376,38 @@ int gameLoop (
           }
         }
 
-        inputs->mouse_Left = 0;
-        inputs->mouse_Right = 0;
+        inputs->mouse.left  = 0;
+        inputs->mouse.right = 0;
 
         // Toggle GUI
-        if (inputs->keyboard_F1) {
-          inputs->keyboard_F1 = 0;
+        if (inputs->keyboard.f1) {
+          inputs->keyboard.f1 = 0;
           guiOn ^= 1;
         }
 
         // Toggle debug mode
-        if (inputs->keyboard_F3) {
-          inputs->keyboard_F3 = 0;
+        if (inputs->keyboard.f3) {
+          inputs->keyboard.f3 = 0;
           debugOn = !debugOn;
         }
 
         // Enter chat
-        if (inputs->keyboard_T) {
-          inputs->keyboard_T = 0;
+        if (inputs->keyboard.t) {
+          // reset text input
+          inputs->keyboard.t = 0;
           inputs->keyTyped   = 0;
           gamePopup = 6;
         }
 
         // Enter inventory
-        if (inputs->keyboard_E) {
-          inputs->keyboard_E = 0;
-          inputs->keyTyped   = 0;
+        if (inputs->keyboard.e) {
+          inputs->keyboard.e = 0;
           gamePopup = 3;
         }
 
         // Swap hotbar selection with offhand
-        if (inputs->keyboard_F) {
-          inputs->keyboard_F = 0;
-          inputs->keyTyped   = 0;
+        if (inputs->keyboard.f) {
+          inputs->keyboard.f = 0;
           InvSlot_swap (
             &player.inventory.hotbar[player.inventory.hotbarSelect],
             &player.inventory.offhand
@@ -429,47 +415,20 @@ int gameLoop (
         }
 
         // Select hotbar slots with number keys
-        if (inputs->keyboard_1) {
-                player.inventory.hotbarSelect = 0;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_2) {
-                player.inventory.hotbarSelect = 1;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_3) {
-                player.inventory.hotbarSelect = 2;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_4) {
-                player.inventory.hotbarSelect = 3;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_5) {
-                player.inventory.hotbarSelect = 4;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_6) {
-                player.inventory.hotbarSelect = 5;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_7) {
-                player.inventory.hotbarSelect = 6;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_8) {
-                player.inventory.hotbarSelect = 7;
-                inputs->keyTyped = 0;
-        }
-        if (inputs->keyboard_9) {
-                player.inventory.hotbarSelect = 8;
-                inputs->keyTyped = 0;
-        }
+        if (inputs->keyboard.num1) { player.inventory.hotbarSelect = 0; }
+        if (inputs->keyboard.num2) { player.inventory.hotbarSelect = 1; }
+        if (inputs->keyboard.num3) { player.inventory.hotbarSelect = 2; }
+        if (inputs->keyboard.num4) { player.inventory.hotbarSelect = 3; }
+        if (inputs->keyboard.num5) { player.inventory.hotbarSelect = 4; }
+        if (inputs->keyboard.num6) { player.inventory.hotbarSelect = 5; }
+        if (inputs->keyboard.num7) { player.inventory.hotbarSelect = 6; }
+        if (inputs->keyboard.num8) { player.inventory.hotbarSelect = 7; }
+        if (inputs->keyboard.num9) { player.inventory.hotbarSelect = 8; }
       }
 
       #ifndef small
-      if (inputs->keyboard_F4) {
-        inputs->keyboard_F4 = 0;
+      if (inputs->keyboard.f4) {
+        inputs->keyboard.f4 = 0;
         gamePopup = (gamePopup == 4) ? 0 : 4;
       }
       #endif
@@ -492,32 +451,24 @@ int gameLoop (
           f26 = 5.0;
           for (blockFace = 0; blockFace < 3; blockFace++) {
             f27 = f24;
-            if (blockFace == 1)
-              f27 = f23; 
-            if (blockFace == 2)
-              f27 = f25; 
+            if (blockFace == 1) f27 = f23; 
+            if (blockFace == 2) f27 = f25; 
             f28 = 1.0 / ((f27 < 0.0) ? -f27 : f27);
             f29 = f24 * f28;
             f30 = f23 * f28;
             f31 = f25 * f28;
             f32 = player.pos.x - (int)player.pos.x;
-            if (blockFace == 1)
-              f32 = player.pos.y - (int)player.pos.y;
-            if (blockFace == 2)
-              f32 = player.pos.z - (int)player.pos.z;
-            if (f27 > 0.0)
-              f32 = 1.0 - f32; 
+            if (blockFace == 1) f32 = player.pos.y - (int)player.pos.y;
+            if (blockFace == 2) f32 = player.pos.z - (int)player.pos.z;
+            if (f27 > 0.0)      f32 = 1.0 - f32; 
             f33 = f28 * f32;
             f34 = player.pos.x + f29 * f32;
             f35 = player.pos.y + f30 * f32;
             f36 = player.pos.z + f31 * f32;
             if (f27 < 0.0) {
-              if (blockFace == 0)
-                f34--; 
-              if (blockFace == 1)
-                f35--; 
-              if (blockFace == 2)
-                f36--; 
+              if (blockFace == 0) f34--; 
+              if (blockFace == 1) f35--; 
+              if (blockFace == 2) f36--; 
             }
             
             /* Whatever's in this loop needs to run *extremely*
@@ -632,8 +583,8 @@ int gameLoop (
                   f33 < f26 && (
                     (
                        ! trapMouse
-                      && pixelX == inputs->mouse_X / BUFFER_SCALE
-                      && pixelY == inputs->mouse_Y / BUFFER_SCALE
+                      && pixelX == inputs->mouse.x / BUFFER_SCALE
+                      && pixelY == inputs->mouse.y / BUFFER_SCALE
                     ) || (
                          trapMouse
                       && pixelX == BUFFER_HALF_W
@@ -701,12 +652,12 @@ int gameLoop (
       blockSelected = selectedPass;
       blockSelect   = coordPass;
       
-      inputs->mouse_X /= BUFFER_SCALE;
-      inputs->mouse_Y /= BUFFER_SCALE;
+      inputs->mouse.x /= BUFFER_SCALE;
+      inputs->mouse.y /= BUFFER_SCALE;
       
       // If we need to take a screenshot, do so
-      if (inputs->keyboard_F2) {
-        inputs->keyboard_F2 = 0;
+      if (inputs->keyboard.f2) {
+        inputs->keyboard.f2 = 0;
         screenshot(renderer);
       }
       
@@ -785,8 +736,8 @@ int gameLoop (
   }
 
   if (gameState != 5 || gamePopup) {
-    inputs->mouse_Left  = 0;
-    inputs->mouse_Right = 0;
+    inputs->mouse.left  = 0;
+    inputs->mouse.right = 0;
   }
   
   return 1;
