@@ -377,8 +377,8 @@ void popup_inventory (
         }
         
         // Exit inventory
-        if (inputs->keyboard_E) {
-                inputs->keyboard_E = 0;
+        if (inputs->keyboard.E) {
+                inputs->keyboard.E = 0;
                 inputs->keyTyped   = 0;
                 *gamePopup = 0;
         }

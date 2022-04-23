@@ -147,6 +147,7 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
                         inputs->keyboard.num8 = keyboard[SDL_SCANCODE_8];
                         inputs->keyboard.num9 = keyboard[SDL_SCANCODE_9];
                 }
+                
                 inputs->keySym = event.key.keysym.sym;
                 break;
 
