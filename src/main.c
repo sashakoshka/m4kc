@@ -138,9 +138,16 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
 
                         inputs->keySym       = event.key.keysym.sym;
 
-                        if (event.key.keysym.scancode >= SDL_SCANCODE_1 && event.key.keysym.scancode <= SDL_SCANCODE_0) {
-                                inputs->numPressed = event.key.keysym.scancode - SDL_SCANCODE_1 + 1;
-			}
+                        inputs->keyboard_0   = keyboard[SDL_SCANCODE_0];
+                        inputs->keyboard_1   = keyboard[SDL_SCANCODE_1];
+                        inputs->keyboard_2   = keyboard[SDL_SCANCODE_2];
+                        inputs->keyboard_3   = keyboard[SDL_SCANCODE_3];
+                        inputs->keyboard_4   = keyboard[SDL_SCANCODE_4];
+                        inputs->keyboard_5   = keyboard[SDL_SCANCODE_5];
+                        inputs->keyboard_6   = keyboard[SDL_SCANCODE_6];
+                        inputs->keyboard_7   = keyboard[SDL_SCANCODE_7];
+                        inputs->keyboard_8   = keyboard[SDL_SCANCODE_8];
+                        inputs->keyboard_9   = keyboard[SDL_SCANCODE_9];
                 }
                 break;
 

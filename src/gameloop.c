@@ -428,10 +428,42 @@ int gameLoop (
           );
         }
 
-        if (!gamePopup && inputs->numPressed != 0 && inputs->numPressed != 10) {
-          player.inventory.hotbarSelect = inputs->numPressed - 1;
-
-          inputs->numPressed = 0;
+        // Select hotbar slots with number keys
+        if (inputs->keyboard_1) {
+                player.inventory.hotbarSelect = 0;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_2) {
+                player.inventory.hotbarSelect = 1;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_3) {
+                player.inventory.hotbarSelect = 2;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_4) {
+                player.inventory.hotbarSelect = 3;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_5) {
+                player.inventory.hotbarSelect = 4;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_6) {
+                player.inventory.hotbarSelect = 5;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_7) {
+                player.inventory.hotbarSelect = 6;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_8) {
+                player.inventory.hotbarSelect = 7;
+                inputs->keyTyped = 0;
+        }
+        if (inputs->keyboard_9) {
+                player.inventory.hotbarSelect = 8;
+                inputs->keyTyped = 0;
         }
       }
 

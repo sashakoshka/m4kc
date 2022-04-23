@@ -32,7 +32,16 @@ typedef struct {
         int keyTyped;
         int keySym;
 
-        int numPressed;
+        int keyboard_0;
+        int keyboard_1;
+        int keyboard_2;
+        int keyboard_3;
+        int keyboard_4;
+        int keyboard_5;
+        int keyboard_6;
+        int keyboard_7;
+        int keyboard_8;
+        int keyboard_9;
 } Inputs;
 
 int controlLoop(Inputs *inputs, const u_int8_t *keyboard);
