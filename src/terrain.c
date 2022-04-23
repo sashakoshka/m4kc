@@ -253,9 +253,9 @@ int genChunk (
         int force,
         Coords coords
 ) {
-        xOffset = (xOffset / 64) * 64;
-        yOffset = (yOffset / 64) * 64;
-        zOffset = (zOffset / 64) * 64;
+        xOffset = (xOffset / CHUNK_SIZE) * CHUNK_SIZE;
+        yOffset = (yOffset / CHUNK_SIZE) * CHUNK_SIZE;
+        zOffset = (zOffset / CHUNK_SIZE) * CHUNK_SIZE;
         // To make sure structure generation accross chunks is
         // different, but predictable
         srand(seed * (xOffset * yOffset * zOffset + 1));
@@ -306,7 +306,7 @@ int genChunk (
 
         Block *blocks = chunk->blocks;
 
-        for (int i = 0; i < 262144; i++) {
+        for (int i = 0; i < CHUNK_DATA_SIZE; i++) {
                 blocks[i] = 0;
         }
 
@@ -367,9 +367,9 @@ int genChunk (
 }
 
 void ch_genClassic (Block *blocks) {
-        for (int x = 0;  x < 64; x ++)
-        for (int y = 32; y < 64; y ++)
-        for (int z = 0;  z < 64; z ++) {
+        for (int x = 0;  x < CHUNK_SIZE; x ++)
+        for (int y = 32; y < CHUNK_SIZE; y ++)
+        for (int z = 0;  z < CHUNK_SIZE; z ++) {
                 ch_setBlock(blocks, x, y, z,
                         randm(2) == 0 ? randm(8) : 0);
         }
@@ -385,27 +385,27 @@ void ch_genNew (
 ) {
         // Generate heightmap
         int heightmap[CHUNK_SIZE][CHUNK_SIZE];
-        for (int x = 0; x < 64; x ++)
-        for (int z = 0; z < 64; z ++) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++) {
                 heightmap[x][z] =
                         perlin2d ( // Base noise
                                 seed,
-                                x + xOffset + 16777215,
-                                z + zOffset + 16777215,
+                                x + xOffset + 0xFFFFFF,
+                                z + zOffset + 0xFFFFFF,
                                 0.0625
                         ) * 16 +
                         perlin2d ( // Detail noise
                                 seed,
-                                x + xOffset + 16777215,
-                                z + zOffset + 16777215,
+                                x + xOffset + 0xFFFFFF,
+                                z + zOffset + 0xFFFFFF,
                                 0.0078125
                         ) * 64;
         }
 
         // Make terrain from heightmap
-        for (int x = 0; x < 64; x ++)
-        for (int y = 0; y < 64; y ++)
-        for (int z = 0; z < 64; z ++) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int y = 0; y < CHUNK_SIZE; y ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++) {
                 if (y + yOffset > heightmap[x][z] + 4)
                         ch_setBlock(blocks, x, y, z, 4);
                 else if (y + yOffset > heightmap[x][z])
@@ -417,12 +417,12 @@ void ch_genNew (
         }
 
         // Generate caves
-        for (int x = 0; x < 64; x ++)
-        for (int z = 0; z < 64; z ++) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++) {
                 float noisePoint = perlin2d (
                         seed + yOffset,
-                        x + xOffset + 16777215,
-                        z + zOffset + 16777215,
+                        x + xOffset + 0xFFFFFF,
+                        z + zOffset + 0xFFFFFF,
                         0.0625
                 );
 
@@ -430,15 +430,15 @@ void ch_genNew (
 
                 int elevation = perlin2d (
                         seed + 2 + yOffset,
-                        x + xOffset + 16777215,
-                        z + zOffset + 16777215,
+                        x + xOffset + 0xFFFFFF,
+                        z + zOffset + 0xFFFFFF,
                         0.0625
                 ) * 8;
 
                 int height = perlin2d (
                         seed + 3 + yOffset,
-                        x + xOffset + 16777215,
-                        z + zOffset + 16777215,
+                        x + xOffset + 0xFFFFFF,
+                        z + zOffset + 0xFFFFFF,
                         0.0625
                 ) * 4 + 2 - (randm(1) > 0);
 
@@ -487,8 +487,8 @@ void ch_genNew (
 }
 
 void ch_genStone (Block *blocks) {
-        for (int x = 0; x < 64; x ++)
-        for (int z = 0; z < 64; z ++) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++) {
                 for (int y = 0;  y < 32; y ++) {
                         ch_setBlock(blocks, x, y, z, 4);
                 }
@@ -499,9 +499,9 @@ void ch_genStone (Block *blocks) {
 }
 
 void ch_genFlat (Block *blocks) {
-        for (int x = 0; x < 64; x ++)
-        for (int z = 0; z < 64; z ++)
-        for (int y = 0; y < 64; y ++) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++)
+        for (int y = 0; y < CHUNK_SIZE; y ++) {
                 if (y <  32) { ch_setBlock(blocks, x, y, z, 0); }
                 if (y == 32) { ch_setBlock(blocks, x, y, z, 1); }
                 if (y >  32) { ch_setBlock(blocks, x, y, z, 2); }

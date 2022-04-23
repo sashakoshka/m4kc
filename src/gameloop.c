@@ -57,7 +57,7 @@ int gameLoop (
   
   static long   l, gameTime;
   
-  static int    m,
+  static int    axis,
                 blockSelected = 0,
                 selectedPass,
                 i6,
@@ -282,16 +282,16 @@ int gameLoop (
         playerMovement.z += f10 * playerSpeedFB - f9  * playerSpeedLR;
         playerMovement.y += 0.003;
         
-        for (m = 0; m < 3; m++) {
+        for (axis = 0; axis < 3; axis++) {
           f16 =
             player.pos.x +
-            playerMovement.x * ((m + 2) % 3 / 2);
+            playerMovement.x * ((axis + 2) % 3 / 2);
           f17 =
             player.pos.y +
-            playerMovement.y * ((m + 1) % 3 / 2);
+            playerMovement.y * ((axis + 1) % 3 / 2);
           f19 =
             player.pos.z +
-            playerMovement.z * ((m + 3) % 3 / 2);
+            playerMovement.z * ((axis + 3) % 3 / 2);
           
           for (i12 = 0; i12 < 12; i12++) {
             i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
@@ -299,7 +299,7 @@ int gameLoop (
             i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
             
             if (World_getBlock(world, i13, i14, i15) > 0) {
-              if (m != 1) {
+              if (axis != 1) {
                 goto label208;
               }
               if (
@@ -426,6 +426,12 @@ int gameLoop (
             &player.inventory.hotbar[player.inventory.hotbarSelect],
             &player.inventory.offhand
           );
+        }
+
+        if (!gamePopup && inputs->numPressed != 0 && inputs->numPressed != 10) {
+          player.inventory.hotbarSelect = inputs->numPressed - 1;
+
+          inputs->numPressed = 0;
         }
       }
 
@@ -642,7 +648,7 @@ int gameLoop (
             (pixelY == BUFFER_HALF_H
               && abs(BUFFER_HALF_W - pixelX) < 4)
           )) {
-            finalPixelColor = 16777216 - finalPixelColor;
+            finalPixelColor = 0x1000000 - finalPixelColor;
           }
           
           if (finalPixelColor > 0) {

@@ -31,6 +31,8 @@ typedef struct {
 
         int keyTyped;
         int keySym;
+
+        int numPressed;
 } Inputs;
 
 int controlLoop(Inputs *inputs, const u_int8_t *keyboard);
