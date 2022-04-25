@@ -7,6 +7,7 @@
 #include "gui.h"
 #include "gameloop.h"
 #include "main.h"
+#include "data.h"
 
 /* Minecraft 4k, C edition. Version 0.7
  * 
@@ -56,6 +57,12 @@ int main (/*int argc, char *argv[]*/) {
         }
         SDL_RenderSetScale(renderer, BUFFER_SCALE, BUFFER_SCALE);
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+        //--- initializing modules ---//
+        int dataInitFailed = data_init();
+        if (dataInitFailed) {
+                printf("cannot initialize data module\n");
+        }
 
         //---- generating assets  ----//
 
