@@ -81,3 +81,36 @@ int data_ensureDirectoryExists (const char *path) {
 
         return 0;
 }
+
+/* data_getScreenshotPath
+ * Returns a path for a new screenshot. The name will take the form of:
+ * snip_YYYY-MM-DD_HH:MM:SS.bmp
+ * ... and will be located in the path stored in screenshotsDirectoryName. If
+ * the screenshots directory doesn't exist, this function will create it.
+ */
+char *data_getScreenshotPath () {
+        if (data_ensureDirectoryExists(screenshotsDirectoryName)) {
+                return NULL;
+        }
+
+        time_t unixTime = time(0);
+        struct tm *timeInfo = localtime(&unixTime);
+
+        char *path = calloc(PATH_MAX, sizeof(char));
+        if (path == NULL) {
+                return NULL;
+        }
+        
+        snprintf (
+                path, PATH_MAX,
+                "%s/snip_%04i-%02i-%02i_%02i-%02i-%02i.bmp",
+                screenshotsDirectoryName,
+                timeInfo->tm_year + 1900,
+                timeInfo->tm_mon  + 1,
+                timeInfo->tm_mday,
+                timeInfo->tm_hour,
+                timeInfo->tm_min,
+                timeInfo->tm_sec);
+        return path;
+}
+
