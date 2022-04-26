@@ -1,11 +1,16 @@
 #include "gameloop.h"
+#include "textures.h"
+#include "utility.h"
+#include "menus.h"
+#include "data.h"
+#include "gui.h"
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * WARNING!!!                                                                *
  *                                                                           *
  * This file is where all the decompiled nonsense is. Things are so heavily  *
  * nested and spaghetti-like that its the only place with an indent size of  *
- * two spaces.                                                               *
+ * two spaces (predominantly).                                               *
  *                                                                           *
  * Looking at this code for extended periods of time can cause adverse       *
  * psychological effects.                                                    *
@@ -754,14 +759,20 @@ int screenshot (SDL_Renderer *renderer) {
                 grab->pixels, grab->pitch
         );
 
-        int saved = SDL_SaveBMP(grab, "screenshot.bmp"); 
+        char *path = data_getScreenshotPath();
+        if (path == NULL) {
+                chatAdd("Couldn't save screenshot");
+                return 1;
+        }
+        
+        int saved = SDL_SaveBMP(grab, path); 
         SDL_FreeSurface(grab);
 
         if (saved == 0) {
-                chatAdd("Saved screenshot\n");
+                chatAdd("Saved screenshot");
                 return 0;
         } else {
-                chatAdd("Couldn't save screenshot\n");
+                chatAdd("Couldn't save screenshot");
                 return 1;
         }
 }
