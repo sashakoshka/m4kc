@@ -30,24 +30,15 @@ int data_init () {
         return 0;
 }
 
-/* data_findDirectoryName
- * Concatenates the user's home directory with the specified path. Path must
- * begin with a slash.
+/* data_directoryExists
+ * Test if a directory exists at the specified path. This function does not
+ * create or delete anything.
  */
-char *data_findDirectoryName (const char *path) {
-        // TODO: make this work cross platform
-        if (path[0] != '/') { return NULL; }
+int data_directoryExists (const char *path) {
+        struct stat directoryInfo;
+        return (stat(path, &directoryInfo) == 0 &&
+                S_ISDIR(directoryInfo.st_mode));
         
-        char *homeDirectory = getenv("HOME");
-        if (homeDirectory == NULL) { return NULL; }
-        
-        size_t offset = strlen(homeDirectory);
-        size_t length = offset + sizeof(path);
-
-        char *directory = calloc(length, sizeof(char));
-        sprintf(directory, "%s%s", homeDirectory, path);
-        
-        return directory;
 }
 
 /* data_ensureDirectoryExists
@@ -68,11 +59,7 @@ int data_ensureDirectoryExists (const char *path) {
                         }
                 }
 
-                struct stat directoryInfo;
-                if (
-                        stat(currentDirectory, &directoryInfo) != 0 ||
-                        !S_ISDIR(directoryInfo.st_mode)
-                ) {
+                if (!data_directoryExists(currentDirectory)) {
                         if (mkdir(currentDirectory, 0755) != 0) {
                                 return 1;
                         }
@@ -80,6 +67,26 @@ int data_ensureDirectoryExists (const char *path) {
         }
 
         return 0;
+}
+
+/* data_findDirectoryName
+ * Concatenates the user's home directory with the specified path. Path must
+ * begin with a slash.
+ */
+char *data_findDirectoryName (const char *path) {
+        // TODO: make this work cross platform
+        if (path[0] != '/') { return NULL; }
+        
+        char *homeDirectory = getenv("HOME");
+        if (homeDirectory == NULL) { return NULL; }
+        
+        size_t offset = strlen(homeDirectory);
+        size_t length = offset + sizeof(path);
+
+        char *directory = calloc(length, sizeof(char));
+        sprintf(directory, "%s%s", homeDirectory, path);
+        
+        return directory;
 }
 
 /* data_getScreenshotPath
@@ -114,3 +121,24 @@ char *data_getScreenshotPath () {
         return path;
 }
 
+/* data_getWorldPath
+ * Returns the path to a world, regardless if it exists or not. This function
+ * ensures that the worlds directory exists. If it cannot do this, it returns
+ * NULL.
+ */
+char *data_getWorldPath (const char *worldName) {
+        if (data_ensureDirectoryExists(worldsDirectoryName)) {
+                return NULL;
+        }
+
+        char *path = calloc(PATH_MAX, sizeof(char));
+        if (path == NULL) {
+                return NULL;
+        }
+
+        snprintf (
+                path, PATH_MAX,
+                "%s/%s",
+                worldsDirectoryName,
+                worldName);
+}
