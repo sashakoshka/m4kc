@@ -89,6 +89,7 @@ int gameLoop (
                  * 6: World editing (renaming etc)
                  * 7: Join game
                  * 8: Options
+                 * 9: Error
                  */
                 gameState = 0,
                 
