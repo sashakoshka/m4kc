@@ -766,6 +766,7 @@ int screenshot (SDL_Renderer *renderer) {
         }
         
         int saved = SDL_SaveBMP(grab, path); 
+        free(path);
         SDL_FreeSurface(grab);
 
         if (saved == 0) {
