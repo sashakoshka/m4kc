@@ -6,7 +6,7 @@ int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *);
 
 int state_title (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *gameState, int *init
+        int *gameState
 ) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
@@ -28,7 +28,6 @@ int state_title (
                 inputs->mouse.left
         ) {
                 *gameState = 4;
-                *init = 1;
         }
 
         if (button(renderer, "Options",

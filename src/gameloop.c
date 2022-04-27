@@ -105,7 +105,7 @@ static SDL_Rect backgroundRect;
 Player player = {0};
 Coords playerMovement = {0.0, 0.0, 0.0};
 
-void gameLoop_resetGameState () {
+void gameLoop_resetGame () {
         l = SDL_GetTicks();
         gameTime = 2048;
 
@@ -149,21 +149,18 @@ int gameLoop (
   
   static Chunk *chunk;
   
-  static int requestReset = 0;
-  if (requestReset) {
-    gameLoop_resetGameState();
-    requestReset = 0;
-  }
-  
   switch (gameState) {
     // A main menu
     case 0:
-      if (state_title(renderer, inputs, &gameState, &requestReset)) return 0;
+      if (state_title(renderer, inputs, &gameState)) return 0;
       break;
     
     // Generate a world and present a loading screen
     case 4:
-      if (state_loading(renderer, world, seed, player.pos)) gameState = 5;
+      if (state_loading(renderer, world, seed, player.pos)) {
+        gameLoop_resetGame();
+        gameState = 5;
+      };
       break;
     
     // The actual gameplay
