@@ -53,6 +53,10 @@ static SDL_Rect backgroundRect;
 Player player = { 0 };
 Coords playerMovement = { 0.0, 0.0, 0.0 };
 
+/* gameLoop_resetGame
+ * Resets elements of the game such as time and the player position. Does not
+ * clear or generate chunks, as that should not be done within one function.
+ */
 void gameLoop_resetGame () {
         l = SDL_GetTicks();
         gameTime = 2048;
@@ -473,7 +477,9 @@ int gameLoop (
               
               /* Imitate getBlock so we don't have to launch
               into a function then another function a zillion
-              times per second. */
+              times per second. This MUST BE STATIC because
+              this information needs to carry over between
+              iterations of gameLoop. */
               static IntCoords lookup_ago = {
                 100000000,
                 100000000,
@@ -483,14 +489,15 @@ int gameLoop (
               lookup_now.x = blockRayPosition.x >> 6;
               lookup_now.y = blockRayPosition.y >> 6;
               lookup_now.z = blockRayPosition.z >> 6;
-              
+
               if (
                 lookup_now.x != lookup_ago.x ||
                 lookup_now.y != lookup_ago.y ||
                 lookup_now.z != lookup_ago.z
               ) {
                 lookup_ago = lookup_now;
-                
+
+                // hash coordinates
                 lookup_now.x &= 0b1111111111;
                 lookup_now.y &= 0b1111111111;
                 lookup_now.z &= 0b1111111111;
@@ -498,28 +505,27 @@ int gameLoop (
                 lookup_now.y <<= 10;
                 lookup_now.z <<= 20;
                 
-                int lookup_hash =
-                  lookup_now.x | lookup_now.y | lookup_now.z;
+                int lookup_hash = lookup_now.x | lookup_now.y | lookup_now.z;
                 lookup_hash++;
                 
                 int lookup_first  = 0,
                     lookup_last   = CHUNKARR_SIZE - 1,
                     lookup_middle = (CHUNKARR_SIZE - 1) / 2;
-                
+
+                // Perform binary search
                 while (lookup_first <= lookup_last) {
-                  if (
-                    world->chunk[lookup_middle].coordHash
-                    > lookup_hash
-                  ) lookup_first = lookup_middle + 1;
-                  else if (
-                    world->chunk[lookup_middle].coordHash
-                    == lookup_hash
-                  ) {
+                  if (world->chunk[lookup_middle].coordHash > lookup_hash) {
+                    lookup_first = lookup_middle + 1;
+                    
+                  } else if (world->chunk[lookup_middle].coordHash == lookup_hash) {
                     chunk = &world->chunk[lookup_middle];
                     goto foundChunk;
-                  } else lookup_last = lookup_middle - 1;
-                  lookup_middle =
-                    (lookup_first + lookup_last) / 2;
+                    
+                  } else {
+                    lookup_last = lookup_middle - 1;
+                  }
+                  
+                  lookup_middle = (lookup_first + lookup_last) / 2;
                 }
                 chunk = NULL;
               }
@@ -532,7 +538,7 @@ int gameLoop (
               );
               */
               foundChunk: if (chunk) {
-                i25 = chunk->blocks[
+                i25 = chunk->blocks [
                    nmod(blockRayPosition.x, 64)        +
                   (nmod(blockRayPosition.y, 64) << 6 ) +
                   (nmod(blockRayPosition.z, 64) << 12)
@@ -587,7 +593,8 @@ int gameLoop (
                 ) {
                   selectedPass = 1;
                   coordPass = blockRayPosition;
-                  
+
+                  // TODO: DONT DO THIS
                   /* Treating a coords set as an array and
                   blockFace as an index. */
                   blockSelectOffset.x = 0;
