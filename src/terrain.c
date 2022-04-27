@@ -345,7 +345,7 @@ int genChunk (
         switch (type) {
         case 0:
                 // Classic terrain
-                ch_genClassic(blocks);
+                ch_genClassic(blocks, yOffset);
                 break;
         case 1:
                 // New terrain
@@ -366,10 +366,11 @@ int genChunk (
         return 1;
 }
 
-void ch_genClassic (Block *blocks) {
-        for (int x = 0;  x < CHUNK_SIZE; x ++)
-        for (int y = 32; y < CHUNK_SIZE; y ++)
-        for (int z = 0;  z < CHUNK_SIZE; z ++) {
+void ch_genClassic (Block *blocks, int yOffset) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int y = 0; y < CHUNK_SIZE; y ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++)
+        if (y + yOffset > 32) {
                 ch_setBlock(blocks, x, y, z,
                         randm(2) == 0 ? randm(8) : 0);
         }
