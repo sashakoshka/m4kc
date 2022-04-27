@@ -17,6 +17,65 @@
  * psychological effects.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+long l, gameTime;
+
+int
+        /* 1: Main menu
+         * 2: World select
+         * 3: World creation
+         * 4: Loading
+         * 5: Gameplay
+         * 6: World editing (renaming etc)
+         * 7: Join game
+         * 8: Options
+         * 9: Error
+         */
+        gameState = 0,
+
+        /* 0: Gameplay
+         * 1: Pause menu
+         * 2: In-game options menu
+         * 3: Inventory
+         * 4: Advanced debug menu
+         * 5: Chunk peek
+         * 6: Chat
+         */
+        gamePopup,
+
+        guiOn        = 1,
+        debugOn      = 0,
+        fogLog       = 0,
+        drawDistance = 20,
+        trapMouse    = 0;
+
+static SDL_Rect backgroundRect;
+
+Player player = { 0 };
+Coords playerMovement = { 0.0, 0.0, 0.0 };
+
+/* gameLoop_resetGame
+ * Resets elements of the game such as time and the player position. Does not
+ * clear or generate chunks, as that should not be done within one function.
+ */
+void gameLoop_resetGame () {
+        l = SDL_GetTicks();
+        gameTime = 2048;
+
+        player = (const Player) { 0 };
+        player.pos.x = 96.5;
+        player.pos.y = 65.0;
+        player.pos.z = 96.5;
+
+        gamePopup = 0;
+
+        backgroundRect.x = 0;
+        backgroundRect.y = 0;
+        backgroundRect.w = BUFFER_W;
+        backgroundRect.h = BUFFER_H;
+
+        chatAdd("Game started");
+}
+
 /* gameLoop
  * Does all the raycasting stuff, moves the player around, etc.
  * If by chance the game ends, it returns false - which should
@@ -28,141 +87,69 @@ int gameLoop (
         World *world,
         SDL_Renderer *renderer
 ) {
-  // We dont want to have to pass all of these by reference, so
-  // have all of them as static variables
-  static float  cameraAngle_H = 0.0,
-                cameraAngle_V = 0.0,
-                f9,
-                f10,
-                f11,
-                f12,
-                playerSpeedLR,
-                playerSpeedFB,
-                f16,
-                f17,
-                f18,
-                f19,
-                f20,
-                f21,
-                f22,
-                f23,
-                f24,
-                f25,
-                f26,
-                f27,
-                f28,
-                f29,
-                f30,
-                f31,
-                f32,
-                f33,
-                f34,
-                f35,
-                f36,
-                timeCoef;
-  
-  static long   l, gameTime;
-  
-  static int    axis,
-                blockSelected = 0,
-                selectedPass,
-                i6,
-                i7,
-                pixelX,
-                pixelY,
-                i12,
-                i13,
-                i14,
-                i15,
-                finalPixelColor,
-                pixelMist,
-                pixelShade,
-                blockFace,
-                i25,
-                pixelColor,
-                
-                /* 1: Main menu
-                 * 2: World select
-                 * 3: World creation
-                 * 4: Loading
-                 * 5: Gameplay
-                 * 6: World editing (renaming etc)
-                 * 7: Join game
-                 * 8: Options
-                 * 9: Error
-                 */
-                gameState = 0,
-                
-                /* 0: Gameplay
-                 * 1: Pause menu
-                 * 2: In-game options menu
-                 * 3: Inventory
-                 * 4: Advanced debug menu
-                 * 5: Chunk peek
-                 * 6: Chat
-                 */
-                gamePopup,
-                
-                guiOn        = 1,
-                debugOn      = 0,
-                fogLog       = 0,
-                drawDistance = 20,
-                trapMouse    = 0;
+  static float
+        f9,
+        f10,
+        f11,
+        f12,
+        f16,
+        f17,
+        f18,
+        f19,
+        f20,
+        f21,
+        f22,
+        f23,
+        f24,
+        f25,
+        f26,
+        f27,
+        f28,
+        f29,
+        f30,
+        f31,
+        f32,
+        f33,
+        f34,
+        f35,
+        f36;
+
+  static double d;
+
+  static int
+        blockSelected = 0,
+        selectedPass,
+        i6,
+        i7,
+        i12,
+        i13,
+        i14,
+        i15,
+        i25;
 
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
                    fps_now      = 0;
   
-  static double d;
-  
-  static SDL_Rect backgroundRect;
-
-  static Player player = {0};
-  
-  static IntCoords blockSelect       = {0};
-  static IntCoords blockSelectOffset = {0};
-  static IntCoords coordPass         = {0};
-  static IntCoords blockRayPosition  = {0};
-
-  static Coords playerMovement = {0.0, 0.0, 0.0};
+  static IntCoords blockSelect       = { 0 };
+  static IntCoords blockSelectOffset = { 0 };
+  static IntCoords coordPass         = { 0 };
+  static IntCoords blockRayPosition  = { 0 };
   
   static Chunk *chunk;
-  
-  static int init = 0;
-  
-  if (init) {
-    l = SDL_GetTicks();
-    gameTime = 2048;
-
-    player = (const Player) { 0 };
-    player.pos.x = 96.5;
-    player.pos.y = 65.0;
-    player.pos.z = 96.5;
-    
-    cameraAngle_H = 0.0;
-    cameraAngle_V = 0.0;
-    
-    gamePopup = 0;
-    
-    backgroundRect.x = 0;
-    backgroundRect.y = 0;
-    backgroundRect.w = BUFFER_W;
-    backgroundRect.h = BUFFER_H;
-    
-    chatAdd("Game started");
-    
-    init = 0;
-  }
   
   switch (gameState) {
     // A main menu
     case 0:
-      if (state_title(renderer, inputs, &gameState, &init)) return 0;
+      if (state_title(renderer, inputs, &gameState)) return 0;
       break;
     
     // Generate a world and present a loading screen
     case 4:
-      if (state_loading(renderer, world, seed, player.pos)) gameState = 5;
+      if (state_loading(renderer, world, seed, player.pos)) {
+        gameLoop_resetGame();
+        gameState = 5;
+      };
       break;
     
     // The actual gameplay
@@ -194,12 +181,13 @@ int gameLoop (
       }
       */
 
-      f9  = sin(cameraAngle_H),
-      f10 = cos(cameraAngle_H),
-      f11 = sin(cameraAngle_V),
-      f12 = cos(cameraAngle_V);
+      f9  = sin(player.hRot),
+      f10 = cos(player.hRot),
+      f11 = sin(player.vRot),
+      f12 = cos(player.vRot);
       
       // Skybox, basically
+      float timeCoef;
       timeCoef  = (float)(gameTime % 102944) / 16384;
       timeCoef  = sin(timeCoef);
       timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
@@ -245,8 +233,8 @@ int gameLoop (
           
           // Looking around
           if (trapMouse) {
-            cameraAngle_H += (float)inputs->mouse.x / 64;
-            cameraAngle_V -= (float)inputs->mouse.y / 64;
+            player.hRot += (float)inputs->mouse.x / 64;
+            player.vRot -= (float)inputs->mouse.y / 64;
           } else {
             f16 = (inputs->mouse.x - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
             f17 = (inputs->mouse.y - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
@@ -257,20 +245,20 @@ int gameLoop (
             if (cameraMoveDistance < 0.0)
               cameraMoveDistance = 0.0;
             if (cameraMoveDistance > 0.0) {
-              cameraAngle_H += f16 * cameraMoveDistance / 400.0;
-              cameraAngle_V -= f17 * cameraMoveDistance / 400.0;
+              player.hRot += f16 * cameraMoveDistance / 400.0;
+              player.vRot -= f17 * cameraMoveDistance / 400.0;
             }
           }
 
           // Restrict camera vertical position
-          if (cameraAngle_V < -1.57) cameraAngle_V = -1.57;
-          if (cameraAngle_V >  1.57) cameraAngle_V =  1.57;
+          if (player.vRot < -1.57) player.vRot = -1.57;
+          if (player.vRot >  1.57) player.vRot =  1.57;
 
-          playerSpeedFB = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
-          playerSpeedLR = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
+          player.FBVelocity = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
+          player.LRVelocity = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
         } else {
-          playerSpeedFB = 0;
-          playerSpeedLR = 0;
+          player.FBVelocity = 0;
+          player.LRVelocity = 0;
         }
         
         // Moving around
@@ -278,11 +266,11 @@ int gameLoop (
         playerMovement.y *= 0.99;
         playerMovement.z *= 0.5;
 
-        playerMovement.x += f9  * playerSpeedFB + f10 * playerSpeedLR;
-        playerMovement.z += f10 * playerSpeedFB - f9  * playerSpeedLR;
+        playerMovement.x += f9  * player.FBVelocity + f10 * player.LRVelocity;
+        playerMovement.z += f10 * player.FBVelocity - f9  * player.LRVelocity;
         playerMovement.y += 0.003;
         
-        for (axis = 0; axis < 3; axis++) {
+        for (int axis = 0; axis < 3; axis++) {
           f16 = player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2);
           f17 = player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2);
           f19 = player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2);
@@ -443,20 +431,22 @@ int gameLoop (
       /* Cast rays. selectedPass passes wether or not a block is
       selected to the blockSelected variable */
       selectedPass = 0;
-      for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
+      for (int pixelX = 0; pixelX < BUFFER_W; pixelX++) {
         f18 = (pixelX - 107) / 90.0;
-        for (pixelY = 0; pixelY < BUFFER_H; pixelY++) {
+        for (int pixelY = 0; pixelY < BUFFER_H; pixelY++) {
+          int finalPixelColor = 0;
+          int pixelMist = 255;
+          int pixelShade;
+          
           f20 = (pixelY - 60) / 90.0;
           f21 = 1.0;
           f22 = f21 * f12 + f20 * f11;
           f23 = f20 * f12 - f21 * f11;
           f24 = f18 * f10 + f22 * f9;
           f25 = f22 * f10 - f18 * f9;
-          finalPixelColor = 0;
-          pixelMist = 255;
           d = drawDistance;
           f26 = 5.0;
-          for (blockFace = 0; blockFace < 3; blockFace++) {
+          for (int blockFace = 0; blockFace < 3; blockFace++) {
             f27 = f24;
             if (blockFace == 1) f27 = f23; 
             if (blockFace == 2) f27 = f25; 
@@ -487,7 +477,9 @@ int gameLoop (
               
               /* Imitate getBlock so we don't have to launch
               into a function then another function a zillion
-              times per second. */
+              times per second. This MUST BE STATIC because
+              this information needs to carry over between
+              iterations of gameLoop. */
               static IntCoords lookup_ago = {
                 100000000,
                 100000000,
@@ -497,14 +489,15 @@ int gameLoop (
               lookup_now.x = blockRayPosition.x >> 6;
               lookup_now.y = blockRayPosition.y >> 6;
               lookup_now.z = blockRayPosition.z >> 6;
-              
+
               if (
                 lookup_now.x != lookup_ago.x ||
                 lookup_now.y != lookup_ago.y ||
                 lookup_now.z != lookup_ago.z
               ) {
                 lookup_ago = lookup_now;
-                
+
+                // hash coordinates
                 lookup_now.x &= 0b1111111111;
                 lookup_now.y &= 0b1111111111;
                 lookup_now.z &= 0b1111111111;
@@ -512,28 +505,27 @@ int gameLoop (
                 lookup_now.y <<= 10;
                 lookup_now.z <<= 20;
                 
-                int lookup_hash =
-                  lookup_now.x | lookup_now.y | lookup_now.z;
+                int lookup_hash = lookup_now.x | lookup_now.y | lookup_now.z;
                 lookup_hash++;
                 
                 int lookup_first  = 0,
                     lookup_last   = CHUNKARR_SIZE - 1,
                     lookup_middle = (CHUNKARR_SIZE - 1) / 2;
-                
+
+                // Perform binary search
                 while (lookup_first <= lookup_last) {
-                  if (
-                    world->chunk[lookup_middle].coordHash
-                    > lookup_hash
-                  ) lookup_first = lookup_middle + 1;
-                  else if (
-                    world->chunk[lookup_middle].coordHash
-                    == lookup_hash
-                  ) {
+                  if (world->chunk[lookup_middle].coordHash > lookup_hash) {
+                    lookup_first = lookup_middle + 1;
+                    
+                  } else if (world->chunk[lookup_middle].coordHash == lookup_hash) {
                     chunk = &world->chunk[lookup_middle];
                     goto foundChunk;
-                  } else lookup_last = lookup_middle - 1;
-                  lookup_middle =
-                    (lookup_first + lookup_last) / 2;
+                    
+                  } else {
+                    lookup_last = lookup_middle - 1;
+                  }
+                  
+                  lookup_middle = (lookup_first + lookup_last) / 2;
                 }
                 chunk = NULL;
               }
@@ -546,7 +538,7 @@ int gameLoop (
               );
               */
               foundChunk: if (chunk) {
-                i25 = chunk->blocks[
+                i25 = chunk->blocks [
                    nmod(blockRayPosition.x, 64)        +
                   (nmod(blockRayPosition.y, 64) << 6 ) +
                   (nmod(blockRayPosition.z, 64) << 12)
@@ -567,7 +559,7 @@ int gameLoop (
                 }
                 
                 // Block outline color
-                pixelColor = 0xFFFFFF;
+                int pixelColor = 0xFFFFFF;
                 if (
                   (
                     !blockSelected                      ||
@@ -601,7 +593,8 @@ int gameLoop (
                 ) {
                   selectedPass = 1;
                   coordPass = blockRayPosition;
-                  
+
+                  // TODO: DONT DO THIS
                   /* Treating a coords set as an array and
                   blockFace as an index. */
                   blockSelectOffset.x = 0;
@@ -615,11 +608,8 @@ int gameLoop (
                 
                 if (pixelColor > 0) {
                   finalPixelColor = pixelColor;
-                  pixelMist =
-                    255 - (int)
-                    (f33 / (float)drawDistance * 255.0F);
-                  pixelShade =
-                    255 - (blockFace + 2) % 3 * 50;
+                  pixelMist = 255 - (int)(f33 / (float)drawDistance * 255.0F);
+                  pixelShade = 255 - (blockFace + 2) % 3 * 50;
                   d = f33;
                 } 
               }

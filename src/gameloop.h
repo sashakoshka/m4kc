@@ -11,4 +11,6 @@ int gameLoop (
         SDL_Renderer *renderer
 );
 
+void gameLoop_resetGame ();
+
 int screenshot ();

@@ -48,6 +48,9 @@ struct _Player {
         float hRot;
         float vRot;
 
+        float FBVelocity;
+        float LRVelocity;
+
         unsigned int health;
         unsigned int xp;
 };
