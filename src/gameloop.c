@@ -22,8 +22,6 @@ float
         f10,
         f11,
         f12,
-        playerSpeedLR,
-        playerSpeedFB,
         f16,
         f17,
         f18,
@@ -260,11 +258,11 @@ int gameLoop (
           if (player.vRot < -1.57) player.vRot = -1.57;
           if (player.vRot >  1.57) player.vRot =  1.57;
 
-          playerSpeedFB = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
-          playerSpeedLR = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
+          player.FBVelocity = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
+          player.LRVelocity = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
         } else {
-          playerSpeedFB = 0;
-          playerSpeedLR = 0;
+          player.FBVelocity = 0;
+          player.LRVelocity = 0;
         }
         
         // Moving around
@@ -272,8 +270,8 @@ int gameLoop (
         playerMovement.y *= 0.99;
         playerMovement.z *= 0.5;
 
-        playerMovement.x += f9  * playerSpeedFB + f10 * playerSpeedLR;
-        playerMovement.z += f10 * playerSpeedFB - f9  * playerSpeedLR;
+        playerMovement.x += f9  * player.FBVelocity + f10 * player.LRVelocity;
+        playerMovement.z += f10 * player.FBVelocity - f9  * player.LRVelocity;
         playerMovement.y += 0.003;
         
         for (axis = 0; axis < 3; axis++) {
