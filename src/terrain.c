@@ -371,8 +371,9 @@ void ch_genClassic (Block *blocks, int yOffset) {
         for (int y = 0; y < CHUNK_SIZE; y ++)
         for (int z = 0; z < CHUNK_SIZE; z ++)
         if (y + yOffset > 32) {
-                ch_setBlock(blocks, x, y, z,
-                        randm(2) == 0 ? randm(8) : 0);
+                Block block = randm(2) == 0 ? randm(9) : 0;
+                if (block == 3 || block == 6) { block = 2; }
+                ch_setBlock(blocks, x, y, z, block);
         }
 }
 
