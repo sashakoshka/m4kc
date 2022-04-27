@@ -61,7 +61,11 @@ int main (/*int argc, char *argv[]*/) {
         //--- initializing modules ---//
         int dataInitFailed = data_init();
         if (dataInitFailed) {
-                printf("cannot initialize data module\n");
+                printf (
+                        "cannot initialize data module, code %i\n",
+                        dataInitFailed);
+                // TODO: display onscreen error before doing this
+                return 1;
         }
 
         //---- generating assets  ----//

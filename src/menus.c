@@ -124,6 +124,27 @@ void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         }
 }
 
+void state_err (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
+        inputs->mouse.x /= BUFFER_SCALE;
+        inputs->mouse.y /= BUFFER_SCALE;
+
+        dirtBg(renderer);
+        white(renderer);
+        centerStr (
+                renderer,
+                "An error has occured.",
+                BUFFER_HALF_W,
+                BUFFER_HALF_H - 16
+        );
+        if (button(renderer, "Ok",
+                BUFFER_HALF_W - 64, BUFFER_HALF_H, 128,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *gameState = 0;
+        }
+}
+
 /* === INGAME POPUPS === */
 
 void popup_hud (

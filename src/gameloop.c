@@ -1,3 +1,4 @@
+#include <limits.h>
 #include "gameloop.h"
 #include "textures.h"
 #include "utility.h"
@@ -88,6 +89,7 @@ int gameLoop (
                  * 6: World editing (renaming etc)
                  * 7: Join game
                  * 8: Options
+                 * 9: Error
                  */
                 gameState = 0,
                 
@@ -759,13 +761,15 @@ int screenshot (SDL_Renderer *renderer) {
                 grab->pixels, grab->pitch
         );
 
-        char *path = data_getScreenshotPath();
-        if (path == NULL) {
+        char path [PATH_MAX];
+        int err = data_getScreenshotPath(path);
+        printf("%s\t%i\n", path, err);
+        if (err) {
                 chatAdd("Couldn't save screenshot");
                 return 1;
         }
         
-        int saved = SDL_SaveBMP(grab, path); 
+        int saved = SDL_SaveBMP(grab, path);
         SDL_FreeSurface(grab);
 
         if (saved == 0) {

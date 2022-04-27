@@ -6,48 +6,42 @@
 #include <string.h>
 #include <sys/stat.h>
 
-char *directoryName = NULL;
-char *settingsFileName = NULL;
-char *worldsDirectoryName = NULL;
-char *screenshotsDirectoryName = NULL;
+char directoryName            [PATH_MAX] = { 0 };
+char settingsFileName         [PATH_MAX] = { 0 };
+char worldsDirectoryName      [PATH_MAX] = { 0 };
+char screenshotsDirectoryName [PATH_MAX] = { 0 };
 
 /* data_init
- * Initializes the data module. Returns 1 on failure, 0 on success.
+ * Initializes the data module. Returns zero on success, nonzero on failure.
  */
 int data_init () {
-        directoryName = data_findDirectoryName("/.m4kc");
-        if (directoryName == NULL) { return 1; }
+        int err = 0;
+
+        err = data_findDirectoryName(directoryName, "/.m4kc");
+        if (err) { return err; }
         
-        settingsFileName = data_findDirectoryName("/.m4kc/m4kc.conf");
-        if (settingsFileName == NULL) { return 1; }
+        err = data_findDirectoryName(settingsFileName, "/.m4kc/m4kc.conf");
+        if (err) { return err; }
         
-        worldsDirectoryName = data_findDirectoryName("/.m4kc/worlds");
-        if (worldsDirectoryName == NULL) { return 1; }
+        err = data_findDirectoryName(worldsDirectoryName, "/.m4kc/worlds");
+        if (err) { return err; }
         
-        screenshotsDirectoryName = data_findDirectoryName("/.m4kc/screenshots");
-        if (screenshotsDirectoryName == NULL) { return 1; }
+        err = data_findDirectoryName (
+                screenshotsDirectoryName, "/.m4kc/screenshots");
+        if (err) { return err; }
         
         return 0;
 }
 
-/* data_findDirectoryName
- * Concatenates the user's home directory with the specified path. Path must
- * begin with a slash.
+/* data_directoryExists
+ * Test if a directory exists at the specified path. This function does not
+ * create or delete anything.
  */
-char *data_findDirectoryName (const char *path) {
-        // TODO: make this work cross platform
-        if (path[0] != '/') { return NULL; }
+int data_directoryExists (const char *path) {
+        struct stat directoryInfo;
+        return (stat(path, &directoryInfo) == 0 &&
+                S_ISDIR(directoryInfo.st_mode));
         
-        char *homeDirectory = getenv("HOME");
-        if (homeDirectory == NULL) { return NULL; }
-        
-        size_t offset = strlen(homeDirectory);
-        size_t length = offset + sizeof(path);
-
-        char *directory = calloc(length, sizeof(char));
-        sprintf(directory, "%s%s", homeDirectory, path);
-        
-        return directory;
 }
 
 /* data_ensureDirectoryExists
@@ -68,11 +62,7 @@ int data_ensureDirectoryExists (const char *path) {
                         }
                 }
 
-                struct stat directoryInfo;
-                if (
-                        stat(currentDirectory, &directoryInfo) != 0 ||
-                        !S_ISDIR(directoryInfo.st_mode)
-                ) {
+                if (!data_directoryExists(currentDirectory)) {
                         if (mkdir(currentDirectory, 0755) != 0) {
                                 return 1;
                         }
@@ -82,24 +72,32 @@ int data_ensureDirectoryExists (const char *path) {
         return 0;
 }
 
+/* data_findDirectoryName
+ * Concatenates the user's home directory with the specified path. subDirectory
+ * must begin with a '/'.
+ */
+int data_findDirectoryName (char *path, const char *subDirectory) {
+        if (subDirectory[0] != '/') { return 2; }
+        
+        // TODO: make this work cross platform
+        char *homeDirectory = getenv("HOME");
+        if (homeDirectory == NULL) { return 3; }
+
+        snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);
+        return 0;
+}
+
 /* data_getScreenshotPath
- * Returns a path for a new screenshot. The name will take the form of:
- * snip_YYYY-MM-DD_HH:MM:SS.bmp
+ * Writes into path the path for a new screenshot. The name will take the form
+ * of: snip_YYYY-MM-DD_HH:MM:SS.bmp
  * ... and will be located in the path stored in screenshotsDirectoryName. If
  * the screenshots directory doesn't exist, this function will create it.
  */
-char *data_getScreenshotPath () {
-        if (data_ensureDirectoryExists(screenshotsDirectoryName)) {
-                return NULL;
-        }
+int data_getScreenshotPath (char *path) {
+        if (data_ensureDirectoryExists(screenshotsDirectoryName)) { return 1; }
 
         time_t unixTime = time(0);
         struct tm *timeInfo = localtime(&unixTime);
-
-        char *path = calloc(PATH_MAX, sizeof(char));
-        if (path == NULL) {
-                return NULL;
-        }
         
         snprintf (
                 path, PATH_MAX,
@@ -111,6 +109,16 @@ char *data_getScreenshotPath () {
                 timeInfo->tm_hour,
                 timeInfo->tm_min,
                 timeInfo->tm_sec);
-        return path;
+        return 0;
 }
 
+/* data_getWorldPath
+ * Returns the path to a world, regardless if it exists or not. This function
+ * ensures that the worlds directory exists. If it cannot do this, it returns 1.
+ */
+int data_getWorldPath (char *path, const char *worldName) {
+        if (data_ensureDirectoryExists(worldsDirectoryName)) { return 1; }
+
+        snprintf(path, PATH_MAX, "%s/%s", worldsDirectoryName, worldName);
+        return 0;
+}
