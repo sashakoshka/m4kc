@@ -18,8 +18,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 float
-        cameraAngle_H = 0.0,
-        cameraAngle_V = 0.0,
         f9,
         f10,
         f11,
@@ -93,9 +91,6 @@ void gameLoop_resetGame () {
         player.pos.x = 96.5;
         player.pos.y = 65.0;
         player.pos.z = 96.5;
-
-        cameraAngle_H = 0.0;
-        cameraAngle_V = 0.0;
 
         gamePopup = 0;
 
@@ -193,10 +188,10 @@ int gameLoop (
       }
       */
 
-      f9  = sin(cameraAngle_H),
-      f10 = cos(cameraAngle_H),
-      f11 = sin(cameraAngle_V),
-      f12 = cos(cameraAngle_V);
+      f9  = sin(player.hRot),
+      f10 = cos(player.hRot),
+      f11 = sin(player.vRot),
+      f12 = cos(player.vRot);
       
       // Skybox, basically
       timeCoef  = (float)(gameTime % 102944) / 16384;
@@ -244,8 +239,8 @@ int gameLoop (
           
           // Looking around
           if (trapMouse) {
-            cameraAngle_H += (float)inputs->mouse.x / 64;
-            cameraAngle_V -= (float)inputs->mouse.y / 64;
+            player.hRot += (float)inputs->mouse.x / 64;
+            player.vRot -= (float)inputs->mouse.y / 64;
           } else {
             f16 = (inputs->mouse.x - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
             f17 = (inputs->mouse.y - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
@@ -256,14 +251,14 @@ int gameLoop (
             if (cameraMoveDistance < 0.0)
               cameraMoveDistance = 0.0;
             if (cameraMoveDistance > 0.0) {
-              cameraAngle_H += f16 * cameraMoveDistance / 400.0;
-              cameraAngle_V -= f17 * cameraMoveDistance / 400.0;
+              player.hRot += f16 * cameraMoveDistance / 400.0;
+              player.vRot -= f17 * cameraMoveDistance / 400.0;
             }
           }
 
           // Restrict camera vertical position
-          if (cameraAngle_V < -1.57) cameraAngle_V = -1.57;
-          if (cameraAngle_V >  1.57) cameraAngle_V =  1.57;
+          if (player.vRot < -1.57) player.vRot = -1.57;
+          if (player.vRot >  1.57) player.vRot =  1.57;
 
           playerSpeedFB = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
           playerSpeedLR = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
