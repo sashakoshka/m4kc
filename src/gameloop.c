@@ -49,29 +49,9 @@ float
         f36,
         timeCoef;
 
-double d;
-
 long l, gameTime;
 
 int
-        axis,
-        blockSelected = 0,
-        selectedPass,
-        i6,
-        i7,
-        pixelX,
-        pixelY,
-        i12,
-        i13,
-        i14,
-        i15,
-        finalPixelColor,
-        pixelMist,
-        pixelShade,
-        blockFace,
-        i25,
-        pixelColor,
-
         /* 1: Main menu
          * 2: World select
          * 3: World creation
@@ -138,6 +118,27 @@ int gameLoop (
         World *world,
         SDL_Renderer *renderer
 ) {
+  static double d;
+
+  static int
+        axis,
+        blockSelected = 0,
+        selectedPass,
+        i6,
+        i7,
+        pixelX,
+        pixelY,
+        i12,
+        i13,
+        i14,
+        i15,
+        finalPixelColor,
+        pixelMist,
+        pixelShade,
+        blockFace,
+        i25,
+        pixelColor;
+
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
                    fps_now      = 0;
