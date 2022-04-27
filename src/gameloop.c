@@ -50,8 +50,8 @@ int
 
 static SDL_Rect backgroundRect;
 
-Player player = {0};
-Coords playerMovement = {0.0, 0.0, 0.0};
+Player player = { 0 };
+Coords playerMovement = { 0.0, 0.0, 0.0 };
 
 void gameLoop_resetGame () {
         l = SDL_GetTicks();
@@ -108,38 +108,29 @@ int gameLoop (
         f33,
         f34,
         f35,
-        f36,
-        timeCoef;
+        f36;
 
   static double d;
 
   static int
-        axis,
         blockSelected = 0,
         selectedPass,
         i6,
         i7,
-        pixelX,
-        pixelY,
         i12,
         i13,
         i14,
         i15,
-        finalPixelColor,
-        pixelMist,
-        pixelShade,
-        blockFace,
-        i25,
-        pixelColor;
+        i25;
 
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
                    fps_now      = 0;
   
-  static IntCoords blockSelect       = {0};
-  static IntCoords blockSelectOffset = {0};
-  static IntCoords coordPass         = {0};
-  static IntCoords blockRayPosition  = {0};
+  static IntCoords blockSelect       = { 0 };
+  static IntCoords blockSelectOffset = { 0 };
+  static IntCoords coordPass         = { 0 };
+  static IntCoords blockRayPosition  = { 0 };
   
   static Chunk *chunk;
   
@@ -192,6 +183,7 @@ int gameLoop (
       f12 = cos(player.vRot);
       
       // Skybox, basically
+      float timeCoef;
       timeCoef  = (float)(gameTime % 102944) / 16384;
       timeCoef  = sin(timeCoef);
       timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
@@ -274,7 +266,7 @@ int gameLoop (
         playerMovement.z += f10 * player.FBVelocity - f9  * player.LRVelocity;
         playerMovement.y += 0.003;
         
-        for (axis = 0; axis < 3; axis++) {
+        for (int axis = 0; axis < 3; axis++) {
           f16 = player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2);
           f17 = player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2);
           f19 = player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2);
@@ -435,20 +427,22 @@ int gameLoop (
       /* Cast rays. selectedPass passes wether or not a block is
       selected to the blockSelected variable */
       selectedPass = 0;
-      for (pixelX = 0; pixelX < BUFFER_W; pixelX++) {
+      for (int pixelX = 0; pixelX < BUFFER_W; pixelX++) {
         f18 = (pixelX - 107) / 90.0;
-        for (pixelY = 0; pixelY < BUFFER_H; pixelY++) {
+        for (int pixelY = 0; pixelY < BUFFER_H; pixelY++) {
+          int finalPixelColor = 0;
+          int pixelMist = 255;
+          int pixelShade;
+          
           f20 = (pixelY - 60) / 90.0;
           f21 = 1.0;
           f22 = f21 * f12 + f20 * f11;
           f23 = f20 * f12 - f21 * f11;
           f24 = f18 * f10 + f22 * f9;
           f25 = f22 * f10 - f18 * f9;
-          finalPixelColor = 0;
-          pixelMist = 255;
           d = drawDistance;
           f26 = 5.0;
-          for (blockFace = 0; blockFace < 3; blockFace++) {
+          for (int blockFace = 0; blockFace < 3; blockFace++) {
             f27 = f24;
             if (blockFace == 1) f27 = f23; 
             if (blockFace == 2) f27 = f25; 
@@ -559,7 +553,7 @@ int gameLoop (
                 }
                 
                 // Block outline color
-                pixelColor = 0xFFFFFF;
+                int pixelColor = 0xFFFFFF;
                 if (
                   (
                     !blockSelected                      ||
@@ -607,11 +601,8 @@ int gameLoop (
                 
                 if (pixelColor > 0) {
                   finalPixelColor = pixelColor;
-                  pixelMist =
-                    255 - (int)
-                    (f33 / (float)drawDistance * 255.0F);
-                  pixelShade =
-                    255 - (blockFace + 2) % 3 * 50;
+                  pixelMist = 255 - (int)(f33 / (float)drawDistance * 255.0F);
+                  pixelShade = 255 - (blockFace + 2) % 3 * 50;
                   d = f33;
                 } 
               }
