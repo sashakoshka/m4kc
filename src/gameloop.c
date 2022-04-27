@@ -17,6 +17,116 @@
  * psychological effects.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+float
+        cameraAngle_H = 0.0,
+        cameraAngle_V = 0.0,
+        f9,
+        f10,
+        f11,
+        f12,
+        playerSpeedLR,
+        playerSpeedFB,
+        f16,
+        f17,
+        f18,
+        f19,
+        f20,
+        f21,
+        f22,
+        f23,
+        f24,
+        f25,
+        f26,
+        f27,
+        f28,
+        f29,
+        f30,
+        f31,
+        f32,
+        f33,
+        f34,
+        f35,
+        f36,
+        timeCoef;
+
+double d;
+
+long l, gameTime;
+
+int
+        axis,
+        blockSelected = 0,
+        selectedPass,
+        i6,
+        i7,
+        pixelX,
+        pixelY,
+        i12,
+        i13,
+        i14,
+        i15,
+        finalPixelColor,
+        pixelMist,
+        pixelShade,
+        blockFace,
+        i25,
+        pixelColor,
+
+        /* 1: Main menu
+         * 2: World select
+         * 3: World creation
+         * 4: Loading
+         * 5: Gameplay
+         * 6: World editing (renaming etc)
+         * 7: Join game
+         * 8: Options
+         * 9: Error
+         */
+        gameState = 0,
+
+        /* 0: Gameplay
+         * 1: Pause menu
+         * 2: In-game options menu
+         * 3: Inventory
+         * 4: Advanced debug menu
+         * 5: Chunk peek
+         * 6: Chat
+         */
+        gamePopup,
+
+        guiOn        = 1,
+        debugOn      = 0,
+        fogLog       = 0,
+        drawDistance = 20,
+        trapMouse    = 0;
+
+static SDL_Rect backgroundRect;
+
+Player player = {0};
+Coords playerMovement = {0.0, 0.0, 0.0};
+
+void gameLoop_resetGameState () {
+        l = SDL_GetTicks();
+        gameTime = 2048;
+
+        player = (const Player) { 0 };
+        player.pos.x = 96.5;
+        player.pos.y = 65.0;
+        player.pos.z = 96.5;
+
+        cameraAngle_H = 0.0;
+        cameraAngle_V = 0.0;
+
+        gamePopup = 0;
+
+        backgroundRect.x = 0;
+        backgroundRect.y = 0;
+        backgroundRect.w = BUFFER_W;
+        backgroundRect.h = BUFFER_H;
+
+        chatAdd("Game started");
+}
+
 /* gameLoop
  * Does all the raycasting stuff, moves the player around, etc.
  * If by chance the game ends, it returns false - which should
@@ -28,136 +138,27 @@ int gameLoop (
         World *world,
         SDL_Renderer *renderer
 ) {
-  // We dont want to have to pass all of these by reference, so
-  // have all of them as static variables
-  static float  cameraAngle_H = 0.0,
-                cameraAngle_V = 0.0,
-                f9,
-                f10,
-                f11,
-                f12,
-                playerSpeedLR,
-                playerSpeedFB,
-                f16,
-                f17,
-                f18,
-                f19,
-                f20,
-                f21,
-                f22,
-                f23,
-                f24,
-                f25,
-                f26,
-                f27,
-                f28,
-                f29,
-                f30,
-                f31,
-                f32,
-                f33,
-                f34,
-                f35,
-                f36,
-                timeCoef;
-  
-  static long   l, gameTime;
-  
-  static int    axis,
-                blockSelected = 0,
-                selectedPass,
-                i6,
-                i7,
-                pixelX,
-                pixelY,
-                i12,
-                i13,
-                i14,
-                i15,
-                finalPixelColor,
-                pixelMist,
-                pixelShade,
-                blockFace,
-                i25,
-                pixelColor,
-                
-                /* 1: Main menu
-                 * 2: World select
-                 * 3: World creation
-                 * 4: Loading
-                 * 5: Gameplay
-                 * 6: World editing (renaming etc)
-                 * 7: Join game
-                 * 8: Options
-                 * 9: Error
-                 */
-                gameState = 0,
-                
-                /* 0: Gameplay
-                 * 1: Pause menu
-                 * 2: In-game options menu
-                 * 3: Inventory
-                 * 4: Advanced debug menu
-                 * 5: Chunk peek
-                 * 6: Chat
-                 */
-                gamePopup,
-                
-                guiOn        = 1,
-                debugOn      = 0,
-                fogLog       = 0,
-                drawDistance = 20,
-                trapMouse    = 0;
-
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
                    fps_now      = 0;
-  
-  static double d;
-  
-  static SDL_Rect backgroundRect;
-
-  static Player player = {0};
   
   static IntCoords blockSelect       = {0};
   static IntCoords blockSelectOffset = {0};
   static IntCoords coordPass         = {0};
   static IntCoords blockRayPosition  = {0};
-
-  static Coords playerMovement = {0.0, 0.0, 0.0};
   
   static Chunk *chunk;
   
-  static int init = 0;
-  
-  if (init) {
-    l = SDL_GetTicks();
-    gameTime = 2048;
-
-    player = (const Player) { 0 };
-    player.pos.x = 96.5;
-    player.pos.y = 65.0;
-    player.pos.z = 96.5;
-    
-    cameraAngle_H = 0.0;
-    cameraAngle_V = 0.0;
-    
-    gamePopup = 0;
-    
-    backgroundRect.x = 0;
-    backgroundRect.y = 0;
-    backgroundRect.w = BUFFER_W;
-    backgroundRect.h = BUFFER_H;
-    
-    chatAdd("Game started");
-    
-    init = 0;
+  static int requestReset = 0;
+  if (requestReset) {
+    gameLoop_resetGameState();
+    requestReset = 0;
   }
   
   switch (gameState) {
     // A main menu
     case 0:
-      if (state_title(renderer, inputs, &gameState, &init)) return 0;
+      if (state_title(renderer, inputs, &gameState, &requestReset)) return 0;
       break;
     
     // Generate a world and present a loading screen
