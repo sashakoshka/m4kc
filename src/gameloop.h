@@ -5,9 +5,6 @@
 #include "main.h"
 #include "player.h"
 
-#define MAX_FPS 60
-#define MIN_FRAME_MILLISECONDS 1000 / MAX_FPS
-
 int gameLoop (
         unsigned int seed,
         Inputs *inputs,

@@ -128,8 +128,6 @@ int gameLoop (
   static IntCoords blockRayPosition  = { 0 };
   
   static Chunk *chunk;
-
-  u_int32_t frameStartTime = SDL_GetTicks();
   
   switch (gameState) {
     // A main menu
@@ -652,12 +650,6 @@ int gameLoop (
   if (gameState != 5 || gamePopup) {
     inputs->mouse.left  = 0;
     inputs->mouse.right = 0;
-  }
-
-  // Limit FPS
-  u_int32_t frameDuration = SDL_GetTicks() - frameStartTime;
-  if (frameDuration < MIN_FRAME_MILLISECONDS) {
-    SDL_Delay(MIN_FRAME_MILLISECONDS - frameDuration);
   }
   
   return 1;

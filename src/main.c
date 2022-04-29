@@ -24,6 +24,9 @@
  * If you distribute a modified copy of this, just include this
  * notice.
  */
+ 
+#define MAX_FPS 60
+#define MIN_FRAME_MILLISECONDS 1000 / MAX_FPS
 
 int main (/*int argc, char *argv[]*/) {
         //----  initializing SDL  ----//
@@ -79,11 +82,19 @@ int main (/*int argc, char *argv[]*/) {
         Inputs inputs = {0};
         int running = 1;
         while (running) {
+                u_int32_t frameStartTime = SDL_GetTicks();
+                
                 running &= controlLoop(&inputs, keyboard);
                 running &= gameLoop(seed, &inputs, renderer);
                 
                 SDL_RenderPresent(renderer);
                 SDL_UpdateWindowSurface(window);
+
+                // Limit FPS
+                u_int32_t frameDuration = SDL_GetTicks() - frameStartTime;
+                if (frameDuration < MIN_FRAME_MILLISECONDS) {
+                        SDL_Delay(MIN_FRAME_MILLISECONDS - frameDuration);
+                }
         }
 
         exit:
