@@ -39,7 +39,7 @@ int main (/*int argc, char *argv[]*/) {
 
         window = SDL_CreateWindow ("M4KC",
                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
+                WINDOW_W, WINDOW_H,
                 SDL_WINDOW_SHOWN
         );
         if (window == NULL) {

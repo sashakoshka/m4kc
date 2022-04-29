@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include "terrain.h"
 #include "main.h"
+#include "player.h"
 
 int gameLoop (
         unsigned int seed,
@@ -10,7 +11,6 @@ int gameLoop (
         World *world,
         SDL_Renderer *renderer
 );
-
-void gameLoop_resetGame ();
-
+void gameLoop_processMovement (Inputs *, World *, Player *);
+void gameLoop_resetGame       ();
 int screenshot ();
