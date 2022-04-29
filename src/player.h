@@ -48,6 +48,9 @@ struct _Player {
         float hRot;
         float vRot;
 
+        Vector2D vectorH;
+        Vector2D vectorV;
+
         float FBVelocity;
         float LRVelocity;
 

@@ -50,10 +50,6 @@ int
         drawDistance = 20,
         trapMouse    = 0;
 
-float
-        f9,
-        f10;
-
 static SDL_Rect backgroundRect;
 
 Player player = { 0 };
@@ -93,8 +89,6 @@ int gameLoop (
         SDL_Renderer *renderer
 ) {
   static float
-        f11,
-        f12,
         f18,
         f20,
         f21,
@@ -177,10 +171,10 @@ int gameLoop (
       }
       */
 
-      f9  = sin(player.hRot),
-      f10 = cos(player.hRot),
-      f11 = sin(player.vRot),
-      f12 = cos(player.vRot);
+      player.vectorH.x = sin(player.hRot);
+      player.vectorH.y = cos(player.hRot);
+      player.vectorV.x = sin(player.vRot);
+      player.vectorV.y = cos(player.vRot);
       
       // Skybox, basically
       float timeCoef;
@@ -364,10 +358,10 @@ int gameLoop (
           
           f20 = (pixelY - 60) / 90.0;
           f21 = 1.0;
-          f22 = f21 * f12 + f20 * f11;
-          f23 = f20 * f12 - f21 * f11;
-          f24 = f18 * f10 + f22 * f9;
-          f25 = f22 * f10 - f18 * f9;
+          f22 = f21 * player.vectorV.y + f20 * player.vectorV.x;
+          f23 = f20 * player.vectorV.y - f21 * player.vectorV.x;
+          f24 = f18 * player.vectorH.y + f22 * player.vectorH.x;
+          f25 = f22 * player.vectorH.y - f18 * player.vectorH.x;
           d = drawDistance;
           f26 = 5.0;
           for (int blockFace = 0; blockFace < 3; blockFace++) {
@@ -700,8 +694,8 @@ void gameLoop_processMovement (Inputs *inputs, World *world, Player *player) {
         playerMovement.y *= 0.99;
         playerMovement.z *= 0.5;
 
-        playerMovement.x += f9  * player->FBVelocity + f10 * player->LRVelocity;
-        playerMovement.z += f10 * player->FBVelocity - f9  * player->LRVelocity;
+        playerMovement.x += player->vectorH.x * player->FBVelocity + player->vectorH.y * player->LRVelocity;
+        playerMovement.z += player->vectorH.y * player->FBVelocity - player->vectorH.x * player->LRVelocity;
         playerMovement.y += 0.003;
 
         // detect collisions
