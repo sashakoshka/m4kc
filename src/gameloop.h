@@ -8,7 +8,6 @@
 int gameLoop (
         unsigned int seed,
         Inputs *inputs,
-        World *world,
         SDL_Renderer *renderer
 );
 void gameLoop_processMovement (Inputs *, World *, Player *);

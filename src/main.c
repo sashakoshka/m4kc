@@ -73,15 +73,13 @@ int main (/*int argc, char *argv[]*/) {
         //unsigned int seed = 18295169;
         unsigned int seed = 45390874;
         genTextures(seed);
-        World world;
-        World_init(&world);
 
         //----   main game loop   ----//
 
         Inputs inputs = {0};
         while (
                 controlLoop(&inputs, keyboard) &&
-                gameLoop(seed, &inputs, &world, renderer)
+                gameLoop(seed, &inputs, renderer)
         ) {
                 SDL_RenderPresent(renderer);
                 SDL_UpdateWindowSurface(window);

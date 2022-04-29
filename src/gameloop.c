@@ -19,6 +19,8 @@
 
 long l, gameTime;
 
+World world = { 0 };
+
 int
         /* 1: Main menu
          * 2: World select
@@ -58,8 +60,8 @@ Player player = { 0 };
 Coords playerMovement = { 0.0, 0.0, 0.0 };
 
 /* gameLoop_resetGame
- * Resets elements of the game such as time and the player position. Does not
- * clear or generate chunks, as that should not be done within one function.
+ * Resets elements of the game such as time and the player position. This will
+ * also reset the world.
  */
 void gameLoop_resetGame () {
         l = SDL_GetTicks();
@@ -76,7 +78,7 @@ void gameLoop_resetGame () {
         backgroundRect.y = 0;
         backgroundRect.w = BUFFER_W;
         backgroundRect.h = BUFFER_H;
-
+        
         chatAdd("Game started");
 }
 
@@ -88,7 +90,6 @@ void gameLoop_resetGame () {
 int gameLoop (
         unsigned int seed,
         Inputs *inputs,
-        World *world,
         SDL_Renderer *renderer
 ) {
   static float
@@ -141,7 +142,7 @@ int gameLoop (
     
     // Generate a world and present a loading screen
     case 4:
-      if (state_loading(renderer, world, seed, player.pos)) {
+      if (state_loading(renderer, &world, seed, player.pos)) {
         gameLoop_resetGame();
         gameState = 5;
       };
@@ -217,7 +218,7 @@ int gameLoop (
         gameTime++;
         l += 10L;
         if (!gamePopup) {
-          gameLoop_processMovement(inputs, world, &player);
+          gameLoop_processMovement(inputs, &world, &player);
         }
       }
       
@@ -235,7 +236,7 @@ int gameLoop (
           if (inputs->mouse.left > 0) {
             InvSlot pickedUp = {
               .blockid = World_getBlock (
-                world,
+                &world,
                 blockSelect.x,
                 blockSelect.y,
                 blockSelect.z
@@ -247,7 +248,7 @@ int gameLoop (
             Inventory_transferIn(&player.inventory, &pickedUp);
             
             World_setBlock (
-              world,
+              &world,
               blockSelect.x,
               blockSelect.y,
               blockSelect.z, 0, 1
@@ -271,7 +272,7 @@ int gameLoop (
               activeSlot->amount > 0
             ) {
               int blockSet = World_setBlock (
-                world,
+                &world,
                 blockSelectOffset.x,
                 blockSelectOffset.y,
                 blockSelectOffset.z,
@@ -437,11 +438,11 @@ int gameLoop (
 
                 // Perform binary search
                 while (lookup_first <= lookup_last) {
-                  if (world->chunk[lookup_middle].coordHash > lookup_hash) {
+                  if (world.chunk[lookup_middle].coordHash > lookup_hash) {
                     lookup_first = lookup_middle + 1;
                     
-                  } else if (world->chunk[lookup_middle].coordHash == lookup_hash) {
-                    chunk = &world->chunk[lookup_middle];
+                  } else if (world.chunk[lookup_middle].coordHash == lookup_hash) {
+                    chunk = &world.chunk[lookup_middle];
                     goto foundChunk;
                     
                   } else {
@@ -592,7 +593,7 @@ int gameLoop (
         case 0:
           if (trapMouse) SDL_SetRelativeMouseMode(1);
           if (guiOn) popup_hud (
-            renderer, inputs, world,
+            renderer, inputs, &world,
             &debugOn, &fps_now, &player
           );
           break;
@@ -631,7 +632,7 @@ int gameLoop (
         case 5:
           tblack(renderer);
           SDL_RenderFillRect(renderer, &backgroundRect);
-          popup_chunkPeek(renderer, inputs, world, &gamePopup, &player);
+          popup_chunkPeek(renderer, inputs, &world, &gamePopup, &player);
           break;
         #endif
         

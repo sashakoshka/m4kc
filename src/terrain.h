@@ -16,12 +16,9 @@ typedef u_int8_t      Block;
 typedef struct _Chunk Chunk;
 typedef struct _World World;
 
-void  World_init     (World *);
 void  World_sort     (World *);
 int   World_setBlock (World *, int, int, int, Block, int);
 Block World_getBlock (World *, int, int, int);
-
-void Chunk_init (Chunk *);
 
 Chunk *chunkLookup  (World *, int, int, int);
 int    setCube      (World *, int, int, int, int, int, int, Block, int);

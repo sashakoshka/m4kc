@@ -507,18 +507,3 @@ void ch_genFlat (Block *blocks) {
                 if (y >  32) { ch_setBlock(blocks, x, y, z, 2); }
         }
 }
-
-void World_init (World *world) {  
-        for (int i = 0; i < CHUNKARR_SIZE; i ++) {
-                Chunk_init(&world->chunk[i]);
-        }
-}
-
-void Chunk_init (Chunk *chunk) {
-        chunk->center.x  = 0;
-        chunk->center.y  = 0;
-        chunk->center.z  = 0;
-        chunk->coordHash = 0;
-        chunk->loaded    = 0;
-        chunk->blocks    = NULL;
-}
