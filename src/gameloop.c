@@ -111,10 +111,12 @@ int gameLoop (
   static double d;
 
   static int
-        blockSelected = 0,
-        selectedPass,
         i6,
         i7;
+
+  static int
+        blockSelected = 0,
+        selectedPass;
 
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
@@ -126,6 +128,8 @@ int gameLoop (
   static IntCoords blockRayPosition  = { 0 };
   
   static Chunk *chunk;
+
+  u_int32_t frameStartTime = SDL_GetTicks();
   
   switch (gameState) {
     // A main menu
@@ -204,6 +208,8 @@ int gameLoop (
         fps_now     = fps_count;
         fps_count   = 0;
       }
+
+      
       
       /* Things that should run at a constant speed, regardless
       of CPU power. If the rendering takes a long time, this
@@ -211,9 +217,7 @@ int gameLoop (
       while (SDL_GetTicks() - l > 10L) {
         gameTime++;
         l += 10L;
-        if (!gamePopup) {
-          gameLoop_processMovement(inputs, &world, &player);
-        }
+        gameLoop_processMovement(inputs);
       }
       
       if (!gamePopup) {
@@ -395,6 +399,7 @@ int gameLoop (
               times per second. This MUST BE STATIC because
               this information needs to carry over between
               iterations of gameLoop. */
+              // TODO: make this an inline function
               static IntCoords lookup_ago = {
                 100000000,
                 100000000,
@@ -458,6 +463,8 @@ int gameLoop (
               }
               
               if (intersectedBlock > 0) {
+                // I'm guessing this eldritch horror figures out what pixel of
+                // the block we hit
                 i6 = (int)((f34 + f36) * 16.0) & 0xF;
                 i7 = ((int)(f35 * 16.0) & 0xF) + 16;
                 if (blockFace == 1) {
@@ -646,62 +653,79 @@ int gameLoop (
     inputs->mouse.left  = 0;
     inputs->mouse.right = 0;
   }
+
+  // Limit FPS
+  u_int32_t frameDuration = SDL_GetTicks() - frameStartTime;
+  if (frameDuration < MIN_FRAME_MILLISECONDS) {
+    SDL_Delay(MIN_FRAME_MILLISECONDS - frameDuration);
+  }
   
   return 1;
 }
 
-void gameLoop_processMovement (Inputs *inputs, World *world, Player *player) {
-        // Looking around
-        if (trapMouse) {
-                player->hRot += (float)inputs->mouse.x / 64;
-                player->vRot -= (float)inputs->mouse.y / 64;
-        } else {
-                float cameraMoveX =
-                        (inputs->mouse.x - BUFFER_W * 2) / (float)BUFFER_W * 2.0;
-                float cameraMoveY =
-                        (inputs->mouse.y - BUFFER_H * 2) / (float)BUFFER_H * 2.0;
+void gameLoop_processMovement (Inputs *inputs) {
+        // Only process movement controls if there are no active popup
+        if (gamePopup == 0) {
+                // Looking around
+                if (trapMouse) {
+                        player.hRot += (float)inputs->mouse.x / 64;
+                        player.vRot -= (float)inputs->mouse.y / 64;
+                } else {
+                        float cameraMoveX =
+                                (inputs->mouse.x - BUFFER_W * 2) /
+                                (float)BUFFER_W * 2.0;
+                        float cameraMoveY =
+                                (inputs->mouse.y - BUFFER_H * 2) /
+                                (float)BUFFER_H * 2.0;
 
-                float cameraMoveDistance = sqrt (
-                cameraMoveX * cameraMoveX +
-                cameraMoveY * cameraMoveY) - 1.2;
+                        float cameraMoveDistance = sqrt (
+                        cameraMoveX * cameraMoveX +
+                        cameraMoveY * cameraMoveY) - 1.2;
 
-                if (cameraMoveDistance < 0.0) {
-                        cameraMoveDistance = 0.0;
-                }
-                if (cameraMoveDistance > 0.0) {
-                        player->hRot += cameraMoveX * cameraMoveDistance / 400.0;
-                        player->vRot -= cameraMoveY * cameraMoveDistance / 400.0;
+                        if (cameraMoveDistance < 0.0) {
+                                cameraMoveDistance = 0.0;
+                        }
+                        if (cameraMoveDistance > 0.0) {
+                                player.hRot += cameraMoveX *
+                                        cameraMoveDistance / 400.0;
+                                player.vRot -= cameraMoveY *
+                                        cameraMoveDistance / 400.0;
+                        }
                 }
         }
 
         // Restrict camera vertical position
-        if (player->vRot < -1.57) player->vRot = -1.57;
-        if (player->vRot >  1.57) player->vRot =  1.57;
+        if (player.vRot < -1.57) player.vRot = -1.57;
+        if (player.vRot >  1.57) player.vRot =  1.57;
 
-        player->FBVelocity = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
-        player->LRVelocity = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
+        player.FBVelocity = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
+        player.LRVelocity = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
 
         // Moving around
         playerMovement.x *= 0.5;
         playerMovement.y *= 0.99;
         playerMovement.z *= 0.5;
 
-        playerMovement.x += player->vectorH.x * player->FBVelocity + player->vectorH.y * player->LRVelocity;
-        playerMovement.z += player->vectorH.y * player->FBVelocity - player->vectorH.x * player->LRVelocity;
+        playerMovement.x +=
+                player.vectorH.x * player.FBVelocity +
+                player.vectorH.y * player.LRVelocity;
+        playerMovement.z +=
+                player.vectorH.y * player.FBVelocity -
+                player.vectorH.x * player.LRVelocity;
         playerMovement.y += 0.003;
 
         // detect collisions
         for (int axis = 0; axis < 3; axis++) {
-                float f16 = player->pos.x + playerMovement.x * ((axis + 2) % 3 / 2);
-                float f17 = player->pos.y + playerMovement.y * ((axis + 1) % 3 / 2);
-                float f19 = player->pos.z + playerMovement.z * ((axis + 3) % 3 / 2);
+                float f16 = player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2);
+                float f17 = player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2);
+                float f19 = player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2);
 
                 for (int i12 = 0; i12 < 12; i12++) {
                         int i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
                         int i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
                         int i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
 
-                        if (World_getBlock(world, i13, i14, i15) > 0) {
+                        if (World_getBlock(&world, i13, i14, i15) > 0) {
                                 if (axis != 1) {
                                         goto label208;
                                 }
@@ -719,9 +743,9 @@ void gameLoop_processMovement (Inputs *inputs, World *world, Player *player) {
                         }
                 }
 
-                player->pos.x = f16;
-                player->pos.y = f17;
-                player->pos.z = f19;
+                player.pos.x = f16;
+                player.pos.y = f17;
+                player.pos.z = f19;
 
                 label208:;
         }

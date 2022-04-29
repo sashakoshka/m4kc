@@ -49,7 +49,7 @@ int main (/*int argc, char *argv[]*/) {
 
         renderer = SDL_CreateRenderer (
                 window,
-                -1, 0
+                -1, SDL_RENDERER_ACCELERATED
         );
         if (renderer == NULL) {
                 printf("%s\n", SDL_GetError());
@@ -77,10 +77,11 @@ int main (/*int argc, char *argv[]*/) {
         //----   main game loop   ----//
 
         Inputs inputs = {0};
-        while (
-                controlLoop(&inputs, keyboard) &&
-                gameLoop(seed, &inputs, renderer)
-        ) {
+        int running = 1;
+        while (running) {
+                running &= controlLoop(&inputs, keyboard);
+                running &= gameLoop(seed, &inputs, renderer);
+                
                 SDL_RenderPresent(renderer);
                 SDL_UpdateWindowSurface(window);
         }
