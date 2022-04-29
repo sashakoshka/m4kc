@@ -114,8 +114,7 @@ int gameLoop (
         blockSelected = 0,
         selectedPass,
         i6,
-        i7,
-        i25;
+        i7;
 
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
@@ -171,6 +170,7 @@ int gameLoop (
       }
       */
 
+      // Update directional vectors
       player.vectorH.x = sin(player.hRot);
       player.vectorH.y = cos(player.hRot);
       player.vectorV.x = sin(player.vRot);
@@ -215,9 +215,6 @@ int gameLoop (
           gameLoop_processMovement(inputs, &world, &player);
         }
       }
-      
-      i6 = 0;
-      i7 = 0;
       
       if (!gamePopup) {
 
@@ -447,26 +444,20 @@ int gameLoop (
                 }
                 chunk = NULL;
               }
-              /*
-              chunk = chunkLookup(
-                world,
-                blockRayPosition.x,
-                blockRayPosition.y,
-                blockRayPosition.z
-              );
-              */
+              
+              Block intersectedBlock;
               foundChunk: if (chunk) {
-                i25 = chunk->blocks [
+                intersectedBlock = chunk->blocks [
                    nmod(blockRayPosition.x, 64)        +
                   (nmod(blockRayPosition.y, 64) << 6 ) +
                   (nmod(blockRayPosition.z, 64) << 12)
                 ];
               } else {
-                i25 = 0;
+                intersectedBlock = 0;
                 goto chunkNull;
               }
               
-              if (i25 > 0) {
+              if (intersectedBlock > 0) {
                 i6 = (int)((f34 + f36) * 16.0) & 0xF;
                 i7 = ((int)(f35 * 16.0) & 0xF) + 16;
                 if (blockFace == 1) {
@@ -491,7 +482,8 @@ int gameLoop (
                     && i7 % 16 < 15
                   ) || !guiOn || gamePopup
                 ) {
-                  pixelColor = textures[i6 + (i7 << 4) + i25 * 256 * 3];
+                  pixelColor = textures [
+                        i6 + (i7 << 4) + intersectedBlock * 256 * 3];
                 }
                 
                 /* See if the block is selected. There must be a
