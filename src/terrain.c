@@ -146,14 +146,13 @@ int ch_setBlock (
         int x, int y, int z,
         Block block
 ) {
-        int b;
-        b = blocks [
+        int notAir = blocks [
                 nmod(x, CHUNK_SIZE) +
                 (nmod(y, CHUNK_SIZE) * CHUNK_SIZE) +
                 (nmod(z, CHUNK_SIZE) * CHUNK_SIZE * CHUNK_SIZE)
         ] > 0;
         blocks[x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE)] = block;
-        return b;
+        return notAir;
 }
 
 /* ch_getBlock
@@ -180,14 +179,14 @@ int setCube (
         Block block,
         int force
 ) {
-        static int xx, yy, zz, b;
-        x--; y--; z--; b = 0;
+        static int xx, yy, zz, blockPlaced;
+        x --; y --; z --; blockPlaced = 0;
         for(xx = w + x; xx > x; xx--)
         for(yy = h + y; yy > y; yy--)
         for(zz = l + z; zz > z; zz--) {
-                b |= World_setBlock(world, xx, yy, zz, block, force);
+                blockPlaced |= World_setBlock(world, xx, yy, zz, block, force);
         }
-        return b;
+        return blockPlaced;
 }
 
 /* genStructure
@@ -199,8 +198,6 @@ void genStructure (
         int x, int y, int z,
         int type
 ) {
-        static int i, b;
-
         /* Structure ideas
          * 
          * - obelisks
@@ -212,10 +209,10 @@ void genStructure (
          * - bridges
          * - fortresses
          */
-        switch(type) {
+        switch (type) {
         case 0: // tree
-                for (i = randm(2) + 4; i > 0; i--) {
-                        World_setBlock(world, x, y--, z, 7, 1);
+                for (int trunk = randm(2) + 4; trunk > 0; trunk --) {
+                        World_setBlock(world, x, y --, z, 7, 1);
                 }
                 setCube(world, x - 2, y + 1, z - 2, 5, 2, 5, 8, 0);
                 setCube(world, x - 1, y - 1, z - 1, 3, 2, 3, 8, 0);
@@ -223,14 +220,14 @@ void genStructure (
 
         case 1: // pyramid
                 y -= 5 + randm(2);
-                b = 1;
-                for (i = 1; b > 0 && i < 64; i+= 2) {
-                        b &= setCube(
+                int cubePlaced = 1;
+                for (int step = 1; cubePlaced > 0 && step < 64; step += 2) {
+                        cubePlaced &= setCube(
                                 world,
-                                x - i / 2,
-                                y++,
-                                z - i / 2,
-                                i, 1, i,
+                                x - step / 2,
+                                y ++,
+                                z - step / 2,
+                                step, 1, step,
                                 5, 1
                         );
                 }
@@ -345,7 +342,7 @@ int genChunk (
         switch (type) {
         case 0:
                 // Classic terrain
-                ch_genClassic(blocks);
+                ch_genClassic(blocks, yOffset);
                 break;
         case 1:
                 // New terrain
@@ -366,12 +363,14 @@ int genChunk (
         return 1;
 }
 
-void ch_genClassic (Block *blocks) {
-        for (int x = 0;  x < CHUNK_SIZE; x ++)
-        for (int y = 32; y < CHUNK_SIZE; y ++)
-        for (int z = 0;  z < CHUNK_SIZE; z ++) {
-                ch_setBlock(blocks, x, y, z,
-                        randm(2) == 0 ? randm(8) : 0);
+void ch_genClassic (Block *blocks, int yOffset) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int y = 0; y < CHUNK_SIZE; y ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++)
+        if (y + yOffset > 32) {
+                Block block = randm(2) == 0 ? randm(9) : 0;
+                if (block == 3 || block == 6) { block = 2; }
+                ch_setBlock(blocks, x, y, z, block);
         }
 }
 
@@ -461,12 +460,12 @@ void ch_genNew (
                 }
         }
         
-        // Generate structures
+        // Generate trees
         for (int i = randm(16) + 64; i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
 
-                genStructure( 
+                genStructure ( 
                         world,
                         x + xOffset, heightmap[x][z] - 1, z + zOffset,
                         0
@@ -474,11 +473,12 @@ void ch_genNew (
 
         }
 
+        // Generate pyramids
         for (int i = randm(2); i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
 
-                genStructure(
+                genStructure (
                         world,
                         x + xOffset, heightmap[x][z] + 1, z + zOffset,
                         1

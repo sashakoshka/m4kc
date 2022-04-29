@@ -30,7 +30,7 @@ int    genChunk     (World *, unsigned int, int, int, int, int, int, Coords);
 void   genAround    (World *, Coords);
 
 int  ch_setBlock   (Block *, int, int, int, Block);
-void ch_genClassic (Block *);
+void ch_genClassic (Block *, int);
 void ch_genNew     (Block *, World *, unsigned int, int, int, int);
 void ch_genStone   (Block *);
 void ch_genFlat    (Block *);
