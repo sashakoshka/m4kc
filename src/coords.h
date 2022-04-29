@@ -17,3 +17,11 @@ typedef struct {
         int y;
         int z;
 } IntCoords;
+
+/* Vector2D
+ * Two dimensional floating point vector
+ */
+typedef struct {
+        float x;
+        float y;
+} Vector2D;

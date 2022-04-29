@@ -28,6 +28,8 @@ extern const int BUFFER_H;
 extern const int BUFFER_SCALE;
 extern const int BUFFER_HALF_W;
 extern const int BUFFER_HALF_H;
+extern const int WINDOW_W;
+extern const int WINDOW_H;
 
 extern char chatHistory      [11][64];
 extern int  chatHistoryFade  [11];

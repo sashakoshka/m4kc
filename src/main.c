@@ -24,6 +24,9 @@
  * If you distribute a modified copy of this, just include this
  * notice.
  */
+ 
+#define MAX_FPS 60
+#define MIN_FRAME_MILLISECONDS 1000 / MAX_FPS
 
 int main (/*int argc, char *argv[]*/) {
         //----  initializing SDL  ----//
@@ -39,7 +42,7 @@ int main (/*int argc, char *argv[]*/) {
 
         window = SDL_CreateWindow ("M4KC",
                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
+                WINDOW_W, WINDOW_H,
                 SDL_WINDOW_SHOWN
         );
         if (window == NULL) {
@@ -49,7 +52,7 @@ int main (/*int argc, char *argv[]*/) {
 
         renderer = SDL_CreateRenderer (
                 window,
-                -1, 0
+                -1, SDL_RENDERER_ACCELERATED
         );
         if (renderer == NULL) {
                 printf("%s\n", SDL_GetError());
@@ -73,18 +76,25 @@ int main (/*int argc, char *argv[]*/) {
         //unsigned int seed = 18295169;
         unsigned int seed = 45390874;
         genTextures(seed);
-        World world;
-        World_init(&world);
 
         //----   main game loop   ----//
 
         Inputs inputs = {0};
-        while (
-                controlLoop(&inputs, keyboard) &&
-                gameLoop(seed, &inputs, &world, renderer)
-        ) {
+        int running = 1;
+        while (running) {
+                u_int32_t frameStartTime = SDL_GetTicks();
+                
+                running &= controlLoop(&inputs, keyboard);
+                running &= gameLoop(seed, &inputs, renderer);
+                
                 SDL_RenderPresent(renderer);
                 SDL_UpdateWindowSurface(window);
+
+                // Limit FPS
+                u_int32_t frameDuration = SDL_GetTicks() - frameStartTime;
+                if (frameDuration < MIN_FRAME_MILLISECONDS) {
+                        SDL_Delay(MIN_FRAME_MILLISECONDS - frameDuration);
+                }
         }
 
         exit:
