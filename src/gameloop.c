@@ -684,14 +684,16 @@ void gameLoop_processMovement (Inputs *inputs) {
                                         cameraMoveDistance / 400.0;
                         }
                 }
+
+                // Restrict camera vertical position
+                if (player.vRot < -1.57) player.vRot = -1.57;
+                if (player.vRot >  1.57) player.vRot =  1.57;
+
+                player.FBVelocity =
+                        (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
+                player.LRVelocity =
+                        (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
         }
-
-        // Restrict camera vertical position
-        if (player.vRot < -1.57) player.vRot = -1.57;
-        if (player.vRot >  1.57) player.vRot =  1.57;
-
-        player.FBVelocity = (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
-        player.LRVelocity = (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
 
         // Moving around
         playerMovement.x *= 0.5;
