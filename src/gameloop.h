@@ -5,11 +5,7 @@
 #include "main.h"
 #include "player.h"
 
-int gameLoop (
-        unsigned int seed,
-        Inputs *inputs,
-        SDL_Renderer *renderer
-);
+int  gameLoop                 (Inputs *inputs, SDL_Renderer *renderer);
 void gameLoop_processMovement (Inputs *);
 void gameLoop_resetGame       ();
 int screenshot ();

@@ -57,7 +57,8 @@ void state_newWorld (
         SDL_Renderer *renderer,
         Inputs *inputs,
         int *gameState,
-        int *type
+        int *type,
+        int *seed
 ) {
         static int typeSelect = 1;
         static char seedBuffer[16];
@@ -100,6 +101,13 @@ void state_newWorld (
         ) {
                 *type = typeSelect;
                 *gameState = 4;
+
+                // Get numeric seed
+                *seed = 0;
+                for (int index = 0; seedBuffer[index]; index ++) {
+                        *seed *= 10;
+                        *seed += seedBuffer[index] - '0';
+                }
         }
 }
 

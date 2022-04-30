@@ -84,7 +84,6 @@ void gameLoop_resetGame () {
  * terminate the main while loop and end the program.
  */
 int gameLoop (
-        unsigned int seed,
         Inputs *inputs,
         SDL_Renderer *renderer
 ) {
@@ -137,12 +136,12 @@ int gameLoop (
     
     // World creation menu
     case 3:
-      state_newWorld(renderer, inputs, &gameState, &world.type);
+      state_newWorld(renderer, inputs, &gameState, &world.type, &world.seed);
       break;
     
     // Generate a world and present a loading screen
     case 4:
-      if (state_loading(renderer, &world, seed, player.pos)) {
+      if (state_loading(renderer, &world, world.seed, player.pos)) {
         gameLoop_resetGame();
         gameState = 5;
       };

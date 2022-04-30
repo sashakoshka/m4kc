@@ -73,9 +73,7 @@ int main (/*int argc, char *argv[]*/) {
 
         //---- generating assets  ----//
 
-        //unsigned int seed = 18295169;
-        unsigned int seed = 45390874;
-        genTextures(seed);
+        genTextures(45390874);
 
         //----   main game loop   ----//
 
@@ -85,7 +83,7 @@ int main (/*int argc, char *argv[]*/) {
                 u_int32_t frameStartTime = SDL_GetTicks();
                 
                 running &= controlLoop(&inputs, keyboard);
-                running &= gameLoop(seed, &inputs, renderer);
+                running &= gameLoop(&inputs, renderer);
                 
                 SDL_RenderPresent(renderer);
                 SDL_UpdateWindowSurface(window);
