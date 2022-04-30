@@ -249,25 +249,30 @@ int gameLoop (
 
           // Breaking blocks
           if (inputs->mouse.left > 0) {
-            InvSlot pickedUp = {
-              .blockid = World_getBlock (
-                &world,
-                blockSelect.x,
-                blockSelect.y,
-                blockSelect.z
-              ),
-              .amount     = 1,
-              .durability = 1
-            };
-
-            Inventory_transferIn(&player.inventory, &pickedUp);
-            
-            World_setBlock (
+            Block blockid = World_getBlock (
               &world,
               blockSelect.x,
               blockSelect.y,
-              blockSelect.z, 0, 1
+              blockSelect.z
             );
+
+            // Can't break other players
+            if (blockid != 14 && blockid != 15) {
+              InvSlot pickedUp = {
+                .blockid    = blockid,
+                .amount     = 1,
+                .durability = 1
+              };
+
+              Inventory_transferIn(&player.inventory, &pickedUp);
+              
+              World_setBlock (
+                &world,
+                blockSelect.x,
+                blockSelect.y,
+                blockSelect.z, 0, 1
+              );
+            }
           }
           
           blockSelectOffset.x += blockSelect.x;

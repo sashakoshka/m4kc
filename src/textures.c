@@ -73,6 +73,7 @@ void genTexture (int blockId) {
                         k = k * 2 / 3;
                 }
 
+
                 // logs
                 if (blockId == 7) {
                         baseColor = 6771249;
@@ -105,6 +106,35 @@ void genTexture (int blockId) {
                 if (blockId == 9) {
                         baseColor = 0x999999;
                         k -= ((cobbleCracks[y & 0xF] >> x) & 0b1) * 128;
+                }
+
+                // Character head
+                if (blockId == 14) {
+                        k = 255;
+                        if (
+                                dist2d(x, 8, y % 16, 8) > 6.2 ||
+                                (y / 16) % 3 == 2
+                        ) {
+                                baseColor = 0x000000;
+                        } else {
+                                baseColor = 0xFFFFFF;
+                                k -= dist2d(x, 8, y % 16, 2) * 8;
+                        }
+                }
+                
+                // Character body
+                if (blockId == 15) {    
+                        k = 255;
+                        if (
+                                (dist2d(x, 8, y % 16, 16) > 12.2 ||
+                                (y / 16) % 3 != 1) &&
+                                (y / 16) % 3 != 2
+                        ) {
+                                baseColor = 0x000000;
+                        } else {
+                                baseColor = 0xFFFFFF;
+                                k -= dist2d(x, 8, y % 16, 2) * 8;
+                        }
                 }
 
                 int i2 = k;

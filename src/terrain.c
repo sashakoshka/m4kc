@@ -340,6 +340,10 @@ int genChunk (
         );
         
         switch (type) {
+        case -1:
+                // Test terrain
+                ch_genDev(blocks, xOffset, yOffset, zOffset);
+                break;
         case 0:
                 // Classic terrain
                 ch_genClassic(blocks, yOffset);
@@ -349,11 +353,11 @@ int genChunk (
                 ch_genNew(blocks, world, seed, xOffset, yOffset, zOffset);
                 break;
         case 2:
-                // Debug stone
+                // Flat stone
                 ch_genStone(blocks, yOffset);
                 break;
         case 3:
-                // Flat
+                // Flat grass
                 ch_genFlat(blocks, yOffset);
                 break;
         }
@@ -504,5 +508,19 @@ void ch_genFlat (Block *blocks, int yOffset) {
                 if (y + yOffset  <  32) { ch_setBlock(blocks, x, y, z, 0); }
                 if (y + yOffset  == 32) { ch_setBlock(blocks, x, y, z, 1); }
                 if (y + yOffset  >  32) { ch_setBlock(blocks, x, y, z, 2); }
+        }
+}
+
+void ch_genDev (Block *blocks, int xOffset, int yOffset, int zOffset) {
+        (void)(xOffset);
+        (void)(yOffset);
+        (void)(zOffset);
+
+        if (yOffset != 0) { return; }
+
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++) {
+                ch_setBlock(blocks, x, 3, z, 14);
+                ch_setBlock(blocks, x, 4, z, 15);
         }
 }

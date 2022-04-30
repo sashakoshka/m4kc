@@ -126,6 +126,11 @@ void state_newWorld (
                 if (*seed == 0) {
                         *seed = time(0) % 999999999999999;
                 }
+
+                // Secret world for testing nonsense. Type "dev"
+                if (*seed == 5800) {
+                        *type = -1;
+                }
         }
 }
 
