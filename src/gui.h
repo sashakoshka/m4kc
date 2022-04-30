@@ -26,7 +26,13 @@ void chatAdd         (const char*);
 void white           (SDL_Renderer *);
 void tblack          (SDL_Renderer *);
 
-int manageInputBuffer (Inputs *, char *, int *, int);
+typedef struct {
+        char   *buffer;
+        size_t len;
+        size_t cursor;
+} InputBuffer;
+
+int manageInputBuffer (InputBuffer *, Inputs *);
 
 extern const int BUFFER_W;
 extern const int BUFFER_H;

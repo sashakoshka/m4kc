@@ -1,7 +1,7 @@
 #include <time.h>
 #include "menus.h"
 
-int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *, char *, int *);
+int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *, InputBuffer *);
 
 /* === GAME STATES === */
 
@@ -62,9 +62,13 @@ void state_newWorld (
         int *seed
 ) {
         static int typeSelect = 1;
-        static char seedBuffer[16];
-        static int seedBufferCursor = 0;
-        
+        static char buffer[16];
+        static InputBuffer seedInput = {
+                .buffer = buffer,
+                .len    = 16,
+                .cursor = 0
+        };
+                
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
 
@@ -78,8 +82,8 @@ void state_newWorld (
                 typeSelect = (typeSelect + 1) % 4;
         }
 
-        manageInputBuffer(inputs, seedBuffer, &seedBufferCursor, 16);
-        if (input(renderer, "Seed", seedBuffer,
+        manageInputBuffer(&seedInput, inputs);
+        if (input(renderer, "Seed", seedInput.buffer,
                 BUFFER_HALF_W - 64, 42, 128,
                 inputs->mouse.x, inputs->mouse.y, 1) &&
                 inputs->mouse.left
@@ -105,9 +109,9 @@ void state_newWorld (
 
                 // Get numeric seed
                 *seed = 0;
-                for (int index = 0; seedBuffer[index]; index ++) {
+                for (int index = 0; seedInput.buffer[index]; index ++) {
                         *seed *= 10;
-                        *seed += seedBuffer[index] - '0';
+                        *seed += seedInput.buffer[index] - '0';
                 }
 
                 // "Randomize" seed if it was not set
@@ -158,7 +162,7 @@ int state_loading (
 
 void state_options (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *gameState, int *drawDistance, int *trapMouse, char *username, int *usernameCursor
+        int *gameState, int *drawDistance, int *trapMouse, InputBuffer *username
 ) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
@@ -167,7 +171,7 @@ void state_options (
 
         if (
                 menu_optionsMain (renderer, inputs, drawDistance, trapMouse,
-                        username, usernameCursor)
+                        username)
         ) {
                 *gameState = 0;
         }
@@ -479,8 +483,13 @@ void popup_inventory (
 }
 
 void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
-        static int  chatBoxCursor = 0;
-        static char chatBox [64]  = {0};
+        static char buffer[64] = { 0 };
+        static InputBuffer chatBox = {
+                .buffer = buffer,
+                .len    = 64,
+                .cursor = 0
+        };
+        
         static SDL_Rect chatBoxRect = {0, 0, 0, 9};
         chatBoxRect.y = BUFFER_H - 9;
         chatBoxRect.w = BUFFER_W;
@@ -495,18 +504,18 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         }
 
         // Get keyboard input
-        if (manageInputBuffer(inputs, chatBox, &chatBoxCursor, 64)) {
+        if (manageInputBuffer(&chatBox, inputs)) {
                 // Add input to chat
-                chatAdd(chatBox);
+                chatAdd(chatBox.buffer);
                 // Clear input box
-                chatBoxCursor = 0;
-                chatBox[0] = 0;
+                chatBox.cursor = 0;
+                chatBox.buffer[0] = 0;
         }
 
         // Chat input box
         // If char limit is reached, give some visual
         // feedback.
-        if (chatBoxCursor == 63) {
+        if (chatBox.cursor == 63) {
                 SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
         } else {
                 tblack(renderer);
@@ -519,7 +528,7 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
                 renderer,
                 95 + 32 * ((*gameTime >> 6) % 2),
                 drawStr (
-                        renderer, chatBox,
+                        renderer, chatBox.buffer,
                         0, BUFFER_H - 8
                 ),
                 BUFFER_H - 8
@@ -557,11 +566,11 @@ void popup_pause (
 
 void popup_options (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *gamePopup, int *drawDistance, int *trapMouse, char * username, int *usernameCursor
+        int *gamePopup, int *drawDistance, int *trapMouse, InputBuffer *username
 ) {
         if (
                 menu_optionsMain (renderer, inputs, drawDistance, trapMouse,
-                        username, usernameCursor)
+                        username)
         ) {
                 *gamePopup = 1;
         }
@@ -722,10 +731,10 @@ void popup_chunkPeek (
 
 int menu_optionsMain (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *drawDistance, int *trapMouse, char *username, int *usernameCursor
+        int *drawDistance, int *trapMouse, InputBuffer *username
 ) {
-        manageInputBuffer(inputs, username, usernameCursor, 8);
-        input (renderer, "Username", username,
+        manageInputBuffer(username, inputs);
+        input (renderer, "Username", username->buffer,
                 BUFFER_HALF_W - 64, 20, 128,
                 inputs->mouse.x, inputs->mouse.y, 1);
 

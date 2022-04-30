@@ -52,8 +52,12 @@ int
 
 float fov = 90;
 
-char username[8] = "guest";
-int  usernameCursor = 5;
+char usernameBuffer[8] = "guest";
+InputBuffer username = {
+        .buffer = usernameBuffer,
+        .len    = 8,
+        .cursor = 0
+};
 
 static SDL_Rect backgroundRect;
 
@@ -611,7 +615,7 @@ int gameLoop (
           tblack(renderer);
           SDL_RenderFillRect(renderer, &backgroundRect);
           popup_options (renderer, inputs, &gamePopup, &drawDistance,
-            &trapMouse, username, &usernameCursor);
+            &trapMouse, &username);
           break;
         
         // Inventory
@@ -644,7 +648,7 @@ int gameLoop (
 
     case 8:
       state_options (renderer, inputs, &gameState, &drawDistance, &trapMouse,
-        username, &usernameCursor);
+        &username);
       break;
     
     default:
