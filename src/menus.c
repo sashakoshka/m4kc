@@ -59,17 +59,19 @@ void state_newWorld (
         int *gameState,
         int *type
 ) {
+        static int typeSelect = 1;
+        
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
 
         dirtBg(renderer);
         
-        if (button(renderer, terrainNames[*type],
+        if (button(renderer, terrainNames[typeSelect],
                 BUFFER_HALF_W - 64, 20, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *type = (*type + 1) % 4;
+                typeSelect = (typeSelect + 1) % 4;
         }
 
         if (button(renderer, "Cancel",
@@ -85,6 +87,7 @@ void state_newWorld (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
+                *type = typeSelect;
                 *gameState = 4;
         }
 }
