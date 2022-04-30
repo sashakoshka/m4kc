@@ -30,7 +30,6 @@ int
          * 6: World editing (renaming etc)
          * 7: Join game
          * 8: Options
-         * 9: Error
          */
         gameState = 0,
 
@@ -52,6 +51,7 @@ int
 
 float fov = 90;
 
+char *errorMessage = NULL;
 char usernameBuffer[8] = "guest";
 InputBuffer username = {
         .buffer = usernameBuffer,
@@ -63,6 +63,8 @@ static SDL_Rect backgroundRect;
 
 Player player = { 0 };
 Coords playerMovement = { 0.0, 0.0, 0.0 };
+
+int screenshot ();
 
 /* gameLoop_resetGame
  * Resets elements of the game such as time and the player position. This will
@@ -132,6 +134,15 @@ int gameLoop (
   static IntCoords blockRayPosition  = { 0 };
   
   static Chunk *chunk;
+
+  // If there is an error, show it and stop
+  if (errorMessage) {
+    if (state_err(renderer, inputs, errorMessage)) {
+      errorMessage = NULL;
+      // TODO: add capability to recover from error:
+      return 1;
+    }
+  }
   
   switch (gameState) {
     // A main menu
@@ -783,4 +794,8 @@ int screenshot (SDL_Renderer *renderer) {
                 chatAdd("Couldn't save screenshot");
                 return 1;
         }
+}
+
+void gameLoop_error (char *message) {
+        errorMessage = message;
 }
