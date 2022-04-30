@@ -224,15 +224,22 @@ int state_err (SDL_Renderer *renderer, Inputs *inputs, char *message) {
         inputs->mouse.y /= BUFFER_SCALE;
 
         dirtBg(renderer);
+        SDL_SetRenderDrawColor(renderer, 255, 128, 128, 255);
+        centerStr (
+                renderer,
+                "Error:",
+                BUFFER_HALF_W,
+                BUFFER_HALF_H - 20
+        );
         white(renderer);
         centerStr (
                 renderer,
                 message,
                 BUFFER_HALF_W,
-                BUFFER_HALF_H - 16
+                BUFFER_HALF_H - 4
         );
         if (button(renderer, "Ok",
-                BUFFER_HALF_W - 64, BUFFER_HALF_H, 128,
+                BUFFER_HALF_W - 64, BUFFER_HALF_H + 16, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {

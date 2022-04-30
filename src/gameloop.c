@@ -140,6 +140,8 @@ int gameLoop (
     if (state_err(renderer, inputs, errorMessage)) {
       errorMessage = NULL;
       // TODO: add capability to recover from error:
+      return 0;
+    } else {
       return 1;
     }
   }

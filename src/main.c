@@ -64,7 +64,7 @@ int main (/*int argc, char *argv[]*/) {
         //--- initializing modules ---//
         int dataInitFailed = data_init();
         if (dataInitFailed) {
-                gameLoop_error("cannot initialize data module");
+                gameLoop_error("Cannot initialize data module.");
         }
 
         //---- generating assets  ----//
@@ -139,6 +139,17 @@ int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
                         break;
                 case SDL_BUTTON_RIGHT:
                         inputs->mouse.right = 1;
+                        break;
+                }
+                break;
+          
+        case SDL_MOUSEBUTTONUP:
+                switch (event.button.button) {
+                case SDL_BUTTON_LEFT:
+                        inputs->mouse.left = 0;
+                        break;
+                case SDL_BUTTON_RIGHT:
+                        inputs->mouse.right = 0;
                         break;
                 }
                 break;
