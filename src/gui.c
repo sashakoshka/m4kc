@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "blocks.h"
 
 const int BUFFER_W     = 214;
 const int BUFFER_H     = 120;
@@ -348,7 +349,7 @@ void dirtBg (SDL_Renderer *renderer) {
                         color = textures [
                                 (x & 0xF) +
                                 (y & 0xF) * 16 +
-                                2 * 256 * 3
+                                BLOCK_DIRT * 256 * 3
                         ];
                         
                         SDL_SetRenderDrawColor(

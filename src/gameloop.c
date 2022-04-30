@@ -2,6 +2,7 @@
 #include "gameloop.h"
 #include "textures.h"
 #include "utility.h"
+#include "blocks.h"
 #include "menus.h"
 #include "data.h"
 #include "gui.h"
@@ -257,7 +258,7 @@ int gameLoop (
             );
 
             // Can't break other players
-            if (blockid != 14 && blockid != 15) {
+            if (blockid != BLOCK_PLAYER_BODY && blockid != BLOCK_PLAYER_HEAD) {
               InvSlot pickedUp = {
                 .blockid    = blockid,
                 .amount     = 1,
@@ -492,7 +493,7 @@ int gameLoop (
                 goto chunkNull;
               }
               
-              if (intersectedBlock > 0) {
+              if (intersectedBlock != BLOCK_AIR) {
                 // I'm guessing this eldritch horror figures out what pixel of
                 // the block we hit
                 i6 = (int)((f34 + f36) * 16.0) & 0xF;

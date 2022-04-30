@@ -1,4 +1,5 @@
 #include "terrain.h"
+#include "blocks.h"
 
 /* World_sort
  * Sorts all chunks in a world by hash
@@ -96,7 +97,7 @@ int World_setBlock (
 ) {
         static int   b;
         static Chunk *chunk;
-        b = World_getBlock(world, x, y, z) < 1;
+        b = World_getBlock(world, x, y, z) == BLOCK_AIR;
 
         if (force || b) { // If the block was air or we don't care
                 chunk = chunkLookup(world, x, y, z);
@@ -150,7 +151,7 @@ int ch_setBlock (
                 nmod(x, CHUNK_SIZE) +
                 (nmod(y, CHUNK_SIZE) * CHUNK_SIZE) +
                 (nmod(z, CHUNK_SIZE) * CHUNK_SIZE * CHUNK_SIZE)
-        ] > 0;
+        ] != BLOCK_AIR;
         blocks[x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE)] = block;
         return notAir;
 }
@@ -212,10 +213,10 @@ void genStructure (
         switch (type) {
         case 0: // tree
                 for (int trunk = randm(2) + 4; trunk > 0; trunk --) {
-                        World_setBlock(world, x, y --, z, 7, 1);
+                        World_setBlock(world, x, y --, z, BLOCK_WOOD, 1);
                 }
-                setCube(world, x - 2, y + 1, z - 2, 5, 2, 5, 8, 0);
-                setCube(world, x - 1, y - 1, z - 1, 3, 2, 3, 8, 0);
+                setCube(world, x - 2, y + 1, z - 2, 5, 2, 5, BLOCK_LEAVES, 0);
+                setCube(world, x - 1, y - 1, z - 1, 3, 2, 3, BLOCK_LEAVES, 0);
                 break;
 
         case 1: // pyramid
@@ -228,7 +229,7 @@ void genStructure (
                                 y ++,
                                 z - step / 2,
                                 step, 1, step,
-                                5, 1
+                                BLOCK_BRICKS, 1
                         );
                 }
                 break;
@@ -272,7 +273,7 @@ int genChunk (
                         distMax  = 0;
                         distMaxI = 0;
                         for (i = 0; i < CHUNKARR_SIZE; i ++) {
-                                int dist = sqrt(
+                                int dist = sqrt (
                                         pow(coords.x - world->chunk[i].center.x, 2) +
                                         pow(coords.y - world->chunk[i].center.y, 2) +
                                         pow(coords.z - world->chunk[i].center.z, 2)
@@ -373,7 +374,10 @@ void ch_genClassic (Block *blocks, int yOffset) {
         for (int z = 0; z < CHUNK_SIZE; z ++)
         if (y + yOffset > 32) {
                 Block block = randm(2) == 0 ? randm(9) : 0;
-                if (block == 3 || block == 6) { block = 2; }
+                if (
+                        block == BLOCK_SAND ||
+                        block == BLOCK_GRAVEL
+                ) { block = BLOCK_DIRT; }
                 ch_setBlock(blocks, x, y, z, block);
         }
 }
@@ -410,13 +414,13 @@ void ch_genNew (
         for (int y = 0; y < CHUNK_SIZE; y ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
                 if (y + yOffset > heightmap[x][z] + 4)
-                        ch_setBlock(blocks, x, y, z, 4);
+                        ch_setBlock(blocks, x, y, z, BLOCK_STONE);
                 else if (y + yOffset > heightmap[x][z])
-                        ch_setBlock(blocks, x, y, z, 2);
+                        ch_setBlock(blocks, x, y, z, BLOCK_DIRT);
                 else if (y + yOffset == heightmap[x][z])
-                        ch_setBlock(blocks, x, y, z, 1);
+                        ch_setBlock(blocks, x, y, z, BLOCK_GRASS);
                 else
-                        ch_setBlock(blocks, x, y, z, 0);
+                        ch_setBlock(blocks, x, y, z, BLOCK_AIR);
         }
 
         // Generate caves
@@ -450,16 +454,21 @@ void ch_genNew (
                 int highPoint = 64 - elevation - height;
 
                 for (int y = highPoint; y < lowPoint; y ++) {
-                        ch_setBlock(blocks, x, y, z, 0);
+                        ch_setBlock(blocks, x, y, z, BLOCK_AIR);
                 }
 
                 // Don't have bare dirt on the bottom
                 if (ch_getBlock(blocks, x, lowPoint, z) == 2) {
                         // What block we place down depends on the block above
-                        if (ch_getBlock(blocks, x, highPoint - 1, z) == 0) {
-                                ch_setBlock(blocks, x, lowPoint, z, 1);
+                        if (
+                                ch_getBlock(blocks, x, highPoint - 1, z) ==
+                                BLOCK_AIR
+                        ) {
+                                ch_setBlock (blocks, x, lowPoint, z,
+                                        BLOCK_GRASS);
                         } else {
-                                ch_setBlock(blocks, x, lowPoint, z, 6);
+                                ch_setBlock (blocks, x, lowPoint, z,
+                                        BLOCK_GRAVEL);
                         }
                 }
         }
@@ -495,9 +504,9 @@ void ch_genStone (Block *blocks, int yOffset) {
         for (int y = 0; y < CHUNK_SIZE; y ++)
         for (int z = 0; z < CHUNK_SIZE; z ++)
         if (y + yOffset > 32) {
-                ch_setBlock(blocks, x, y, z, 4);
+                ch_setBlock(blocks, x, y, z, BLOCK_STONE);
         } else {
-                ch_setBlock(blocks, x, y, z, 0);
+                ch_setBlock(blocks, x, y, z, BLOCK_AIR);
         }
 }
 
@@ -505,9 +514,15 @@ void ch_genFlat (Block *blocks, int yOffset) {
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++)
         for (int y = 0; y < CHUNK_SIZE; y ++) {
-                if (y + yOffset  <  32) { ch_setBlock(blocks, x, y, z, 0); }
-                if (y + yOffset  == 32) { ch_setBlock(blocks, x, y, z, 1); }
-                if (y + yOffset  >  32) { ch_setBlock(blocks, x, y, z, 2); }
+                if (y + yOffset <  32) {
+                        ch_setBlock(blocks, x, y, z, BLOCK_AIR);
+                }
+                if (y + yOffset == 32) {
+                        ch_setBlock(blocks, x, y, z, BLOCK_GRASS);
+                }
+                if (y + yOffset >  32) {
+                        ch_setBlock(blocks, x, y, z, BLOCK_DIRT);
+                }
         }
 }
 
@@ -520,7 +535,7 @@ void ch_genDev (Block *blocks, int xOffset, int yOffset, int zOffset) {
 
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
-                ch_setBlock(blocks, x, 3, z, 14);
-                ch_setBlock(blocks, x, 4, z, 15);
+                ch_setBlock(blocks, x, 3, z, BLOCK_PLAYER_BODY);
+                ch_setBlock(blocks, x, 4, z, BLOCK_PLAYER_HEAD);
         }
 }

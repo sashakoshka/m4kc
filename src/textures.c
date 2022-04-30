@@ -1,4 +1,5 @@
 #include "textures.h"
+#include "blocks.h"
 
 int textures[12288] = {0};
 const u_int16_t cobbleCracks[16] = {
@@ -40,42 +41,36 @@ void genTexture (int blockId) {
                 int noiseFloor = 255;
                 int noiseScale = 96;
 
-                // sand
-                if (blockId == 3) {
+                if (blockId == BLOCK_SAND) {
                         baseColor = 0xd8ce9b;
                         noiseScale = 48;
                 }
 
-                // stone
-                if (blockId == 4)
+                if (blockId == BLOCK_STONE)
                         baseColor = 8355711;
 
-                // gravel
-                if (blockId == 6) {
+                if (blockId == BLOCK_GRAVEL) {
                         baseColor = 0xAAAAAA;
                         noiseScale = 140;
                 }
 
-                // add noise
-                if (blockId != 4 || randm(3) == 0)
+                if (blockId != BLOCK_STONE || randm(3) == 0)
                         k = noiseFloor - randm(noiseScale);
 
-                // grass
                 if (
-                        blockId == 1 &&
+                        blockId == BLOCK_GRASS &&
                         y < (x * x * (3 + x) * 81 >> 2 & 0x3) + 18
                 ) {
                         baseColor = 6990400;
                 } else if (
-                        blockId == 1 &&
+                        blockId == BLOCK_GRASS &&
                         y < (x * x * (3 + x) * 81 >> 2 & 0x3) + 19
                 ) {
                         k = k * 2 / 3;
                 }
 
 
-                // logs
-                if (blockId == 7) {
+                if (blockId == BLOCK_WOOD) {
                         baseColor = 6771249;
                         if (
                                 x > 0 && x < 15 &&
@@ -95,21 +90,19 @@ void genTexture (int blockId) {
                         }
                 }
 
-                // bricks
-                if (blockId == 5) {
+                switch (blockId) {
+                case BLOCK_BRICKS:
                         baseColor = 11876885;
                         if ((x + y / 4 * 4) % 8 == 0 || y % 4 == 0)
                         baseColor = 12365733; 
-                }
-
-                // cobblestone
-                if (blockId == 9) {
+                        break;
+                        
+                case BLOCK_COBBLESTONE:
                         baseColor = 0x999999;
                         k -= ((cobbleCracks[y & 0xF] >> x) & 0b1) * 128;
-                }
-
-                // Character head
-                if (blockId == 14) {
+                        break;
+                        
+                case BLOCK_PLAYER_HEAD:
                         k = 255;
                         if (
                                 dist2d(x, 8, y % 16, 8) > 6.2 ||
@@ -120,10 +113,9 @@ void genTexture (int blockId) {
                                 baseColor = 0xFFFFFF;
                                 k -= dist2d(x, 8, y % 16, 2) * 8;
                         }
-                }
-                
-                // Character body
-                if (blockId == 15) {    
+                        break;
+                        
+                case BLOCK_PLAYER_BODY:
                         k = 255;
                         if (
                                 (dist2d(x, 8, y % 16, 16) > 12.2 ||
@@ -135,12 +127,13 @@ void genTexture (int blockId) {
                                 baseColor = 0xFFFFFF;
                                 k -= dist2d(x, 8, y % 16, 2) * 8;
                         }
+                        break;
                 }
 
                 int i2 = k;
                 if (y >= 32)
                 i2 /= 2; 
-                if (blockId == 8) {
+                if (blockId == BLOCK_LEAVES) {
                         baseColor = 5298487;
                         if (randm(2) == 0) {
                                 baseColor = 0;
