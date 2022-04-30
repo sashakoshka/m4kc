@@ -1,3 +1,4 @@
+#include <time.h>
 #include "menus.h"
 
 int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *);
@@ -107,6 +108,11 @@ void state_newWorld (
                 for (int index = 0; seedBuffer[index]; index ++) {
                         *seed *= 10;
                         *seed += seedBuffer[index] - '0';
+                }
+
+                // "Randomize" seed if it was not set
+                if (*seed == 0) {
+                        *seed = time(0);
                 }
         }
 }
