@@ -218,6 +218,8 @@ int input (
         int mouseX, int mouseY,
         int active
 ) {
+        static int flash = 0;
+
         int hover = mouseX >= x      &&
                     mouseY >= y      &&
                     mouseX <  x + w  &&
@@ -239,13 +241,22 @@ int input (
         }
         SDL_RenderDrawRect(renderer, &rect);
 
-        if (buffer[0]) {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-                drawStr(renderer, buffer, x + 4, y + 4);
+        int textX = x + 4;
+        if (buffer[0] != 0) {
+                white(renderer);
+                textX = drawStr(renderer, buffer, x + 4, y + 4);
         } else {
                 SDL_SetRenderDrawColor(renderer, 63, 63, 63, 255);
                 drawStr(renderer, placeholder, x + 4, y + 4);
         }
+
+        if (flash < 32) {
+                white(renderer);
+                drawChar(renderer, '_', textX, y + 4);
+        }
+
+        flash ++;
+        flash %= 64;
 
         return hover;
 }
