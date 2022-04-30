@@ -5,6 +5,10 @@ int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *, InputBuffer *);
 
 /* === GAME STATES === */
 
+/* state_title
+ * Presents a title screen with basic options. Is capable of changing the game
+ * state.
+ */
 int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
@@ -54,6 +58,10 @@ const char *terrainNames[16] = {
         "Flat grass"
 };
 
+/* state_newWorld
+ * Shows a menu with editable parameters for creating a new world. Capable of
+ * editing world prarameters and changing the game state.
+ */
 void state_newWorld (
         SDL_Renderer *renderer,
         Inputs *inputs,
@@ -121,6 +129,10 @@ void state_newWorld (
         }
 }
 
+/* state_loading
+ * Shows a loading screen and progressively loads in chunks. Returns 1 when
+ * finished.
+ */
 int state_loading (
         SDL_Renderer *renderer,
         World *world,
@@ -160,6 +172,9 @@ int state_loading (
         }
 }
 
+/* state_options
+ * Shows an options screen. Capable of changing settings and the game state.
+ */
 void state_options (
         SDL_Renderer *renderer, Inputs *inputs,
         int *gameState, int *drawDistance, int *trapMouse, InputBuffer *username
@@ -177,6 +192,9 @@ void state_options (
         }
 }
 
+/* state_egg
+ * This lacks description. Capable of changing the game state.
+ */
 void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
@@ -198,7 +216,10 @@ void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         }
 }
 
-void state_err (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
+/* state_err
+ * Shows an error message on screen. Returns 1 when the "Ok" button is pressed.
+ */
+int state_err (SDL_Renderer *renderer, Inputs *inputs, char *message) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
 
@@ -206,7 +227,7 @@ void state_err (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         white(renderer);
         centerStr (
                 renderer,
-                "An error has occured.",
+                message,
                 BUFFER_HALF_W,
                 BUFFER_HALF_H - 16
         );
@@ -215,12 +236,17 @@ void state_err (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = 0;
+                return 1;
         }
+        return 0;
 }
 
 /* === INGAME POPUPS === */
 
+/* popup_hud
+ * Draws the heads up display, including the hotbar, offhand, crosshair, health,
+ * hunger, chat history, and the debug menu if activated.
+ */
 void popup_hud (
         SDL_Renderer *renderer, Inputs *inputs, World *world,
         int *debugOn, u_int32_t *fps_now,
@@ -360,6 +386,10 @@ void popup_hud (
         }
 }
 
+/* manageInvSlot
+ * Draws and performs the input logic of a single inventory slot. Capable of
+ * changing which slot is currently being dragged.
+ */
 void manageInvSlot (
         SDL_Renderer *renderer,
         Inputs  *inputs,
@@ -398,6 +428,10 @@ void manageInvSlot (
         }
 }
 
+/* popup_inventory
+ * Allows the user to manage their inventory, rearranging the items inside of
+ * it. Capable of closing itself.
+ */
 void popup_inventory (
         SDL_Renderer *renderer,
         Inputs *inputs,
@@ -482,6 +516,10 @@ void popup_inventory (
         }
 }
 
+/* popup_chat
+ * Allows the user to type in chat, and view farther back in the message
+ * history. Capable of closing itself.
+ */
 void popup_chat (
         SDL_Renderer *renderer, Inputs *inputs,
         long *gameTime, char *username
@@ -546,6 +584,10 @@ void popup_chat (
         );
 }
 
+/* popup_pause
+ * Displays a pause menu. Capable of activating submenus or changing the game
+ * state.
+ */
 void popup_pause (
         SDL_Renderer *renderer, Inputs *inputs,
         int *gamePopup, int *gameState
@@ -575,6 +617,9 @@ void popup_pause (
         }
 }
 
+/* popup_options
+ * Shows an options screen. Capable of changing settings and closing itself.
+ */
 void popup_options (
         SDL_Renderer *renderer, Inputs *inputs,
         int *gamePopup, int *drawDistance, int *trapMouse, InputBuffer *username
@@ -588,6 +633,10 @@ void popup_options (
 }
 
 #ifndef small
+/* popup_debugTools
+ * Shows a menu listing advanced debug tools. These are only included in debug
+ * builds and are not included in compressed executables.
+ */
 void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
         if (button(renderer, "Chunk Peek",
                 BUFFER_HALF_W - 64, 20, 128,
@@ -606,6 +655,10 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
         }
 }
 
+/* popup_chunkPeek
+ * Shows a 3D map of the current chunk, with the ability to view a cross-section
+ * of it. This feature is only included in debug builds.
+ */
 void popup_chunkPeek (
         SDL_Renderer *renderer, Inputs *inputs, World *world,
         int *gamePopup,
@@ -740,6 +793,12 @@ void popup_chunkPeek (
 }
 #endif
 
+/* menu_optionsMain
+ * This function presents the options menu. It's purpose is to be included in
+ * other functions that draw a suitable background and then call this one.
+ * Returns 1 when the user pressed the "Done" button. Capable of changing
+ * settings.
+ */
 int menu_optionsMain (
         SDL_Renderer *renderer, Inputs *inputs,
         int *drawDistance, int *trapMouse, InputBuffer *username

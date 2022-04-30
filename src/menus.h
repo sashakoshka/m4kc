@@ -12,7 +12,7 @@ void state_options (
         int *, int *, int *, InputBuffer *
 );
 void state_egg        (SDL_Renderer *, Inputs *, int *);
-void state_err        (SDL_Renderer *, Inputs *, int *);
+int  state_err        (SDL_Renderer *, Inputs *, char *);
 
 void popup_hud (
         SDL_Renderer *, Inputs *, World *world,
