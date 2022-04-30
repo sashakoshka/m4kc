@@ -4,10 +4,7 @@ int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *);
 
 /* === GAME STATES === */
 
-int state_title (
-        SDL_Renderer *renderer, Inputs *inputs,
-        int *gameState
-) {
+int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
 
@@ -27,7 +24,7 @@ int state_title (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = 4;
+                *gameState = 3;
         }
 
         if (button(renderer, "Options",
@@ -47,6 +44,49 @@ int state_title (
         }
 
         return 0;
+}
+
+const char *terrainNames[16] = {
+        "Classic terrain",
+        "New terrain",
+        "Flat stone",
+        "Flat grass"
+};
+
+void state_newWorld (
+        SDL_Renderer *renderer,
+        Inputs *inputs,
+        int *gameState,
+        int *type
+) {
+        inputs->mouse.x /= BUFFER_SCALE;
+        inputs->mouse.y /= BUFFER_SCALE;
+
+        dirtBg(renderer);
+        
+        if (button(renderer, terrainNames[*type],
+                BUFFER_HALF_W - 64, 20, 128,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *type = (*type + 1) % 4;
+        }
+
+        if (button(renderer, "Cancel",
+                BUFFER_HALF_W - 64, 64, 61,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *gameState = 0;
+        }
+
+        if (button(renderer, "Generate",
+                BUFFER_HALF_W + 3, 64, 61,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *gameState = 4;
+        }
 }
 
 int state_loading (
@@ -72,7 +112,7 @@ int state_loading (
                         world, seed,
                         chunkLoadCoords.x,
                         chunkLoadCoords.y,
-                        chunkLoadCoords.z, 1, 1,
+                        chunkLoadCoords.z, world->type, 1,
                         center
                 );
                 loadScreen (

@@ -22,7 +22,7 @@ long l, gameTime;
 World world = { 0 };
 
 int
-        /* 1: Main menu
+        /* 0: Main menu
          * 2: World select
          * 3: World creation
          * 4: Loading
@@ -133,6 +133,11 @@ int gameLoop (
     // A main menu
     case 0:
       if (state_title(renderer, inputs, &gameState)) return 0;
+      break;
+    
+    // World creation menu
+    case 3:
+      state_newWorld(renderer, inputs, &gameState, &world.type);
       break;
     
     // Generate a world and present a loading screen

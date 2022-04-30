@@ -43,7 +43,7 @@ int drawChar (SDL_Renderer *renderer,int c, int x, int y) {
  * specified x and y coordinates, and then returns the x position
  * it left off on.
  */
-int drawStr (SDL_Renderer *renderer,char *str, int x, int y) {
+int drawStr (SDL_Renderer *renderer, const char *str, int x, int y) {
         while (*str > 0) {
                 x += drawChar(renderer, *(str++), x, y);
         }
@@ -53,7 +53,7 @@ int drawStr (SDL_Renderer *renderer,char *str, int x, int y) {
 /* shadowStr
  * Identical to drawStr, but draws white text with a grey shadow.
  */
-int shadowStr (SDL_Renderer *renderer, char *str, int x, int y) {
+int shadowStr (SDL_Renderer *renderer, const char *str, int x, int y) {
         SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
         drawStr(renderer, str, x + 1, y + 1);
         white(renderer);
@@ -63,18 +63,17 @@ int shadowStr (SDL_Renderer *renderer, char *str, int x, int y) {
 /* centerStr
  * Identical to drawStr, but centers the text
  */
-int centerStr (SDL_Renderer *renderer, char *str, int x, int y) {
+int centerStr (SDL_Renderer *renderer, const char *str, int x, int y) {
         x *= 2;
-        char *strsave = str;
-        while (*str > 0) {
-                x -= font[(int)*(str++)][8];
+        int i = 0;
+        while (str[i] > 0) {
+                x -= font[(int)str[i++]][8];
         }
 
-        str = strsave;
         x /= 2;
-
-        while(*str > 0) {
-                x += drawChar(renderer, *(str++), x, y);
+        i = 0;
+        while(str[i] > 0) {
+                x += drawChar(renderer, str[i++], x, y);
         }
 
         return x;
@@ -83,7 +82,7 @@ int centerStr (SDL_Renderer *renderer, char *str, int x, int y) {
 /* shadowStr
  * Identical to centerStr, but draws white text with a grey shadow.
  */
-int shadowCenterStr (SDL_Renderer *renderer, char *str, int x, int y) {
+int shadowCenterStr (SDL_Renderer *renderer, const char *str, int x, int y) {
         SDL_SetRenderDrawColor(renderer, 77, 77, 77, 255);
         centerStr(renderer, str, x + 1, y + 1);
         white(renderer);
@@ -93,15 +92,14 @@ int shadowCenterStr (SDL_Renderer *renderer, char *str, int x, int y) {
 /* drawBig
  * Draws centered text at a large scale
  */
-int drawBig (SDL_Renderer *renderer, char *str, int x, int y) {
-        char *strsave = str;
-        while (*str > 0)
-        x -= font[(int)*(str++)][8];
+int drawBig (SDL_Renderer *renderer, const char *str, int x, int y) {
+        int i = 0;
+        while (str[i] > 0)
+                x -= font[(int)str[i++]][8];
 
-        str = strsave;
-
-        while (*str > 0) {
-                int c = *(str++);
+        i = 0;
+        while (str[i] > 0) {
+                int c = str[i++];
                 for (int yy = 0; yy < 16; yy++) {
                         for (int xx = 0; xx < 16; xx++) {
                                 if ((font[c][yy / 2] >> (7 - xx / 2)) & 0x1) {
@@ -126,16 +124,15 @@ int drawBig (SDL_Renderer *renderer, char *str, int x, int y) {
  */
 int drawBGStr (
         SDL_Renderer *renderer,
-        char *str, int x, int y
+        const char *str, int x, int y
 ) {
         static int len;
         static SDL_Rect bg = {0, 0, 0, 9};
-        static char *strBak;
 
-        strBak = str;
+        int i = 0;
         len = 0;
-        while(*str > 0) {
-                len += font[(int)*(str++)][8];
+        while(str[i] > 0) {
+                len += font[(int)str[i++]][8];
         }
         
         bg.x = x;
@@ -146,7 +143,7 @@ int drawBGStr (
         SDL_RenderFillRect(renderer, &bg);
 
         white(renderer);
-        return drawStr(renderer, strBak, ++x, ++y);
+        return drawStr(renderer, str, ++x, ++y);
 }
 
 /* button
@@ -156,7 +153,7 @@ int drawBGStr (
  */
 int button (
         SDL_Renderer *renderer,
-        char *str,
+        const char *str,
         int x, int y, int w,
         int mouseX, int mouseY
 ) {
@@ -288,7 +285,7 @@ void dirtBg (SDL_Renderer *renderer) {
  */
 void loadScreen (
         SDL_Renderer *renderer,
-        char *str,
+        const char *str,
         float prog, float max
 ) {
         dirtBg(renderer);
@@ -317,7 +314,7 @@ void loadScreen (
 /* chatAdd
  * Adds a message to chat
  */
-void chatAdd (char *str) {
+void chatAdd (const char *str) {
         chatHistoryFade[chatHistoryIndex] = 480;
         memcpy (
                 chatHistory[(chatHistoryIndex)++],

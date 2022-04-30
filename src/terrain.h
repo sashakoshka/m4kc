@@ -52,5 +52,6 @@ struct _Chunk {
  * Stores chunks.
  */
 struct _World {
+        int type;
         Chunk chunk[CHUNKARR_SIZE];
 };
