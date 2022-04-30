@@ -112,7 +112,7 @@ void state_newWorld (
 
                 // "Randomize" seed if it was not set
                 if (*seed == 0) {
-                        *seed = time(0);
+                        *seed = time(0) % 999999999999999;
                 }
         }
 }
@@ -242,32 +242,36 @@ void popup_hud (
 
         // Debug screen
         if (*debugOn) {
-                static char debugText [][16] = {
+                static char debugText [][32] = {
                         "M4KC 0.7",
+                        "Seed: ",
                         "X: ",
                         "Y: ",
                         "Z: ",
                         "FPS: ",
                         "ChunkX: ",
                         "ChunkY: ",
-                        "ChunkZ: ",
+                        "ChunkZ: "
                 };
 
+                // Seed
+                strnum(debugText[1], 6, world->seed);
+
                 // Coordinates
-                strnum(debugText[1], 3, (int)player->pos.x - 64);
-                strnum(debugText[2], 3, (int)player->pos.y - 64);
-                strnum(debugText[3], 3, (int)player->pos.z - 64);
+                strnum(debugText[2], 3, (int)player->pos.x - 64);
+                strnum(debugText[3], 3, (int)player->pos.y - 64);
+                strnum(debugText[4], 3, (int)player->pos.z - 64);
 
                 // FPS
-                strnum(debugText[4], 5, *fps_now);
+                strnum(debugText[5], 5, *fps_now);
 
                 // Chunk coordinates
-                strnum(debugText[5], 8, ((int)player->pos.x - 64) >> 6);
-                strnum(debugText[6], 8, ((int)player->pos.y - 64) >> 6);
-                strnum(debugText[7], 8, ((int)player->pos.z - 64) >> 6);
+                strnum(debugText[6], 8, ((int)player->pos.x - 64) >> 6);
+                strnum(debugText[7], 8, ((int)player->pos.y - 64) >> 6);
+                strnum(debugText[8], 8, ((int)player->pos.z - 64) >> 6);
 
                 // Text
-                for (i = 0; i < 8; i++) { drawBGStr(renderer, debugText[i], 0, i * 9); }
+                for (i = 0; i < 9; i++) { drawBGStr(renderer, debugText[i], 0, i * 9); }
 
                 // Chunk monitor
                 #ifndef small
