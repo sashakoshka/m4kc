@@ -29,8 +29,8 @@ void   genAround    (World *, Coords);
 int  ch_setBlock   (Block *, int, int, int, Block);
 void ch_genClassic (Block *, int);
 void ch_genNew     (Block *, World *, unsigned int, int, int, int);
-void ch_genStone   (Block *);
-void ch_genFlat    (Block *);
+void ch_genStone   (Block *, int);
+void ch_genFlat    (Block *, int);
 
 /* _Chunk
  * Stores blocks in a chunk, a hash to make it easier to look up,

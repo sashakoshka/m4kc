@@ -350,11 +350,11 @@ int genChunk (
                 break;
         case 2:
                 // Debug stone
-                ch_genStone(blocks);
+                ch_genStone(blocks, yOffset);
                 break;
         case 3:
                 // Flat
-                ch_genFlat(blocks);
+                ch_genFlat(blocks, yOffset);
                 break;
         }
 
@@ -486,24 +486,23 @@ void ch_genNew (
         }
 }
 
-void ch_genStone (Block *blocks) {
+void ch_genStone (Block *blocks, int yOffset) {
         for (int x = 0; x < CHUNK_SIZE; x ++)
-        for (int z = 0; z < CHUNK_SIZE; z ++) {
-                for (int y = 0;  y < 32; y ++) {
-                        ch_setBlock(blocks, x, y, z, 4);
-                }
-                for (int y = 32; y < 64; y ++) {
-                        ch_setBlock(blocks, x, y, z, 5);
-                }
+        for (int y = 0; y < CHUNK_SIZE; y ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++)
+        if (y + yOffset > 32) {
+                ch_setBlock(blocks, x, y, z, 4);
+        } else {
+                ch_setBlock(blocks, x, y, z, 0);
         }
 }
 
-void ch_genFlat (Block *blocks) {
+void ch_genFlat (Block *blocks, int yOffset) {
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++)
         for (int y = 0; y < CHUNK_SIZE; y ++) {
-                if (y <  32) { ch_setBlock(blocks, x, y, z, 0); }
-                if (y == 32) { ch_setBlock(blocks, x, y, z, 1); }
-                if (y >  32) { ch_setBlock(blocks, x, y, z, 2); }
+                if (y + yOffset  <  32) { ch_setBlock(blocks, x, y, z, 0); }
+                if (y + yOffset  == 32) { ch_setBlock(blocks, x, y, z, 1); }
+                if (y + yOffset  >  32) { ch_setBlock(blocks, x, y, z, 2); }
         }
 }
