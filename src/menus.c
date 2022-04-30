@@ -53,8 +53,6 @@ const char *terrainNames[16] = {
         "Flat grass"
 };
 
-const char seedBuffer[32];
-
 void state_newWorld (
         SDL_Renderer *renderer,
         Inputs *inputs,
@@ -62,6 +60,8 @@ void state_newWorld (
         int *type
 ) {
         static int typeSelect = 1;
+        static char seedBuffer[16];
+        static int seedBufferCursor = 0;
         
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
@@ -76,6 +76,7 @@ void state_newWorld (
                 typeSelect = (typeSelect + 1) % 4;
         }
 
+        manageInputBuffer(inputs, seedBuffer, &seedBufferCursor, 15);
         if (input(renderer, "Seed", seedBuffer,
                 BUFFER_HALF_W - 64, 42, 128,
                 inputs->mouse.x, inputs->mouse.y, 1) &&
@@ -473,7 +474,7 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         }
 
         // Get keyboard input
-        if (manageInputBuffer(inputs, chatBox, &chatBoxCursor, 64)) {
+        if (manageInputBuffer(inputs, chatBox, &chatBoxCursor, 63)) {
                 // Add input to chat
                 chatAdd(chatBox);
                 // Clear input box
@@ -484,7 +485,7 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         // Chat input box
         // If char limit is reached, give some visual
         // feedback.
-        if (chatBoxCursor == 64) {
+        if (chatBoxCursor == 63) {
                 SDL_SetRenderDrawColor(renderer, 128, 0, 0, 128);
         } else {
                 tblack(renderer);

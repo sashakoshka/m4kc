@@ -90,6 +90,10 @@ int main (/*int argc, char *argv[]*/) {
                 SDL_RenderPresent(renderer);
                 SDL_UpdateWindowSurface(window);
 
+                // Clean up input struct
+                inputs.keyTyped = 0;
+                inputs.keySym   = 0;
+
                 // Limit FPS
                 u_int32_t frameDuration = SDL_GetTicks() - frameStartTime;
                 if (frameDuration < MIN_FRAME_MILLISECONDS) {

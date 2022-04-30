@@ -637,10 +637,6 @@ int gameLoop (
           popup_chat(renderer, inputs, &gameTime);
           break;
       }
-
-      // Clean up input struct
-      inputs->keyTyped = 0;
-      inputs->keySym   = 0;
       break;
 
     case 8:
