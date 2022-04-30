@@ -56,7 +56,7 @@ char usernameBuffer[8] = "guest";
 InputBuffer username = {
         .buffer = usernameBuffer,
         .len    = 8,
-        .cursor = 0
+        .cursor = 5
 };
 
 static SDL_Rect backgroundRect;
@@ -641,7 +641,7 @@ int gameLoop (
         
         // Chat
         case 6:
-          popup_chat(renderer, inputs, &gameTime);
+          popup_chat(renderer, inputs, &gameTime, username.buffer);
           break;
       }
       break;

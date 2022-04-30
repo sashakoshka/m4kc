@@ -482,7 +482,10 @@ void popup_inventory (
         }
 }
 
-void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
+void popup_chat (
+        SDL_Renderer *renderer, Inputs *inputs,
+        long *gameTime, char *username
+) {
         static char buffer[64] = { 0 };
         static InputBuffer chatBox = {
                 .buffer = buffer,
@@ -505,8 +508,16 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
 
         // Get keyboard input
         if (manageInputBuffer(&chatBox, inputs)) {
+                // 63: max chat box length
+                // 7:  max username length
+                // 2:  ": " chars
+                // 1:  null
+                static char chatNameConcat[63 + 7 + 2 + 1];
+                snprintf (chatNameConcat,  63 + 7 + 2, "%s: %s",
+                        username, chatBox.buffer);
+                
                 // Add input to chat
-                chatAdd(chatBox.buffer);
+                chatAdd(chatNameConcat);
                 // Clear input box
                 chatBox.cursor = 0;
                 chatBox.buffer[0] = 0;
