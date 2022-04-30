@@ -74,6 +74,14 @@ void state_newWorld (
                 typeSelect = (typeSelect + 1) % 4;
         }
 
+        if (input(renderer, "", "Seed",
+                BUFFER_HALF_W - 64, 42, 128,
+                inputs->mouse.x, inputs->mouse.y, 0) &&
+                inputs->mouse.left
+        ) {
+                
+        }
+
         if (button(renderer, "Cancel",
                 BUFFER_HALF_W - 64, 64, 61,
                 inputs->mouse.x, inputs->mouse.y) &&

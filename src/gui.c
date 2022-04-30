@@ -188,19 +188,64 @@ int button (
         x--;
         y--;
 
-        if(hover) {
+        if (hover) {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 160, 255);
         } else {
                 white(renderer);
         }
         centerStr(renderer, str, x, y);
 
-        if(hover) {
+        if (hover) {
                 white(renderer);
         } else {
                 SDL_SetRenderDrawColor(renderer, 0,   0,   0,   255);
         }
         SDL_RenderDrawRect(renderer, &rect);
+
+        return hover;
+}
+
+/* input
+ * Draws a simple text input. Draws the string in buffer. If buffer is empty,
+ * the placeholder text is drawn instead (but in a darker color). Returns
+ * whether or not the mouse is inside of the input.
+ */
+int input (
+        SDL_Renderer *renderer,
+        const char *placeholder,
+        const char *buffer,
+        int x, int y, int w,
+        int mouseX, int mouseY,
+        int active
+) {
+        int hover = mouseX >= x      &&
+                    mouseY >= y      &&
+                    mouseX <  x + w  &&
+                    mouseY <  y + 16 ;
+
+        SDL_Rect rect;
+        rect.x = x;
+        rect.y = y;
+        rect.w = w;
+        rect.h = 16;
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &rect);
+        
+        if (hover || active) {
+                white(renderer);
+        } else {
+                SDL_SetRenderDrawColor(renderer, 139, 139, 139, 255);
+        }
+        SDL_RenderDrawRect(renderer, &rect);
+
+        if (buffer[0]) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                drawStr(renderer, buffer, x + 4, y + 4);
+        } else {
+                SDL_SetRenderDrawColor(renderer, 63, 63, 63, 255);
+                drawStr(renderer, placeholder, x + 4, y + 4);
+        }
 
         return hover;
 }
