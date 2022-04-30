@@ -6,6 +6,7 @@
 #include "player.h"
 #include "minecraftfont.h"
 #include "textures.h"
+#include "main.h"
 
 void strnum          (char *, int, int);
 int  drawChar        (SDL_Renderer *, int, int, int);
@@ -24,6 +25,8 @@ void loadScreen      (SDL_Renderer *, const char *, float, float);
 void chatAdd         (const char*);
 void white           (SDL_Renderer *);
 void tblack          (SDL_Renderer *);
+
+int manageInputBuffer (Inputs *, char *, int *, int);
 
 extern const int BUFFER_W;
 extern const int BUFFER_H;

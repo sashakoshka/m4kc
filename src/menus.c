@@ -53,6 +53,8 @@ const char *terrainNames[16] = {
         "Flat grass"
 };
 
+const char seedBuffer[32];
+
 void state_newWorld (
         SDL_Renderer *renderer,
         Inputs *inputs,
@@ -74,7 +76,7 @@ void state_newWorld (
                 typeSelect = (typeSelect + 1) % 4;
         }
 
-        if (input(renderer, "Seed", "",
+        if (input(renderer, "Seed", seedBuffer,
                 BUFFER_HALF_W - 64, 42, 128,
                 inputs->mouse.x, inputs->mouse.y, 1) &&
                 inputs->mouse.left
@@ -471,30 +473,12 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         }
 
         // Get keyboard input
-        if (inputs->keyTyped || inputs->keySym) {
-                if (inputs->keySym == SDLK_BACKSPACE) {
-                        // Delete last char and decrement cursor
-                        // position
-                        if (chatBoxCursor > 0) {
-                                chatBox[--chatBoxCursor] = 0;
-                        }
-                } else if (
-                        inputs->keySym == SDLK_RETURN &&
-                        chatBoxCursor > 0
-                ) {
-                        // Add input to chat
-                        chatAdd(chatBox);
-                        // Clear input box
-                        chatBoxCursor = 0;
-                        chatBox[0] = 0;
-                } else if (
-                        inputs->keyTyped > 31 &&
-                        inputs->keyTyped < 127 &&
-                        chatBoxCursor < 64
-                ) {
-                        chatBox[chatBoxCursor++] = inputs->keyTyped;
-                        chatBox[chatBoxCursor]   = 0;
-                }
+        if (manageInputBuffer(inputs, chatBox, &chatBoxCursor, 64)) {
+                // Add input to chat
+                chatAdd(chatBox);
+                // Clear input box
+                chatBoxCursor = 0;
+                chatBox[0] = 0;
         }
 
         // Chat input box

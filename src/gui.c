@@ -261,6 +261,34 @@ int input (
         return hover;
 }
 
+/* manageInputBuffer
+ * Applies keyboard input to a text input buffer. Returns 1 if the enter key was
+ * pressed (there must be content in buffer)
+ */
+int manageInputBuffer (Inputs *inputs, char *buffer, int *cursor, int len) {
+        if (inputs->keyTyped || inputs->keySym) {
+                if (inputs->keySym == SDLK_BACKSPACE) {
+                        // Delete last char and decrement cursor
+                        // position
+                        if (*cursor > 0) {
+                                buffer[-- *cursor] = 0;
+                        }
+                } else if (inputs->keySym == SDLK_RETURN && *cursor > 0) {
+                        return 1;
+                } else if (
+                        inputs->keyTyped > 31 &&
+                        inputs->keyTyped < 127 &&
+                        *cursor < len
+                ) {
+                        buffer[*cursor] = inputs->keyTyped;
+                        *cursor += 1;
+                        buffer[*cursor] = 0;
+                }
+        }
+
+        return 0;
+}
+
 /* drawSlot
  * Takes in a pointer to a renderer, an InvSlot, draws the item
  * with the specified x and y coordinates and width, and then 
