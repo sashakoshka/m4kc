@@ -278,7 +278,7 @@ int manageInputBuffer (Inputs *inputs, char *buffer, int *cursor, int len) {
                 } else if (
                         inputs->keyTyped > 31 &&
                         inputs->keyTyped < 127 &&
-                        *cursor < len
+                        *cursor < len - 1
                 ) {
                         buffer[*cursor] = inputs->keyTyped;
                         *cursor += 1;

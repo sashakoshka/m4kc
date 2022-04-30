@@ -1,7 +1,7 @@
 #include <time.h>
 #include "menus.h"
 
-int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *);
+int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *, char *, int *);
 
 /* === GAME STATES === */
 
@@ -49,7 +49,7 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
 
 const char *terrainNames[16] = {
         "Classic terrain",
-        "New terrain",
+        "Natural terrain",
         "Flat stone",
         "Flat grass"
 };
@@ -78,7 +78,7 @@ void state_newWorld (
                 typeSelect = (typeSelect + 1) % 4;
         }
 
-        manageInputBuffer(inputs, seedBuffer, &seedBufferCursor, 15);
+        manageInputBuffer(inputs, seedBuffer, &seedBufferCursor, 16);
         if (input(renderer, "Seed", seedBuffer,
                 BUFFER_HALF_W - 64, 42, 128,
                 inputs->mouse.x, inputs->mouse.y, 1) &&
@@ -158,14 +158,17 @@ int state_loading (
 
 void state_options (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *gameState, int *drawDistance, int *trapMouse
+        int *gameState, int *drawDistance, int *trapMouse, char *username, int *usernameCursor
 ) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
 
         dirtBg(renderer);
 
-        if(menu_optionsMain(renderer, inputs, drawDistance, trapMouse)) {
+        if (
+                menu_optionsMain (renderer, inputs, drawDistance, trapMouse,
+                        username, usernameCursor)
+        ) {
                 *gameState = 0;
         }
 }
@@ -492,7 +495,7 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         }
 
         // Get keyboard input
-        if (manageInputBuffer(inputs, chatBox, &chatBoxCursor, 63)) {
+        if (manageInputBuffer(inputs, chatBox, &chatBoxCursor, 64)) {
                 // Add input to chat
                 chatAdd(chatBox);
                 // Clear input box
@@ -554,9 +557,12 @@ void popup_pause (
 
 void popup_options (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *gamePopup, int *drawDistance, int *trapMouse
+        int *gamePopup, int *drawDistance, int *trapMouse, char * username, int *usernameCursor
 ) {
-        if (menu_optionsMain(renderer, inputs, drawDistance, trapMouse)) {
+        if (
+                menu_optionsMain (renderer, inputs, drawDistance, trapMouse,
+                        username, usernameCursor)
+        ) {
                 *gamePopup = 1;
         }
 }
@@ -594,8 +600,8 @@ void popup_chunkPeek (
         
         Chunk *debugChunk;
         char chunkPeekText[][32] = {
-        "coordHash: ",
-        "loaded: "
+                "coordHash: ",
+                "loaded: "
         };
 
         debugChunk = chunkLookup (
@@ -716,13 +722,18 @@ void popup_chunkPeek (
 
 int menu_optionsMain (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *drawDistance, int *trapMouse
+        int *drawDistance, int *trapMouse, char *username, int *usernameCursor
 ) {
+        manageInputBuffer(inputs, username, usernameCursor, 8);
+        input (renderer, "Username", username,
+                BUFFER_HALF_W - 64, 20, 128,
+                inputs->mouse.x, inputs->mouse.y, 1);
+
         static char drawDistanceText [] = "Draw distance: 20\0";
         static char trapMouseText    [] = "Capture mouse: OFF";
 
         if (button(renderer, drawDistanceText,
-                BUFFER_HALF_W - 64, 20, 128,
+                BUFFER_HALF_W - 64, 42, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -747,7 +758,7 @@ int menu_optionsMain (
         }
 
         if (button(renderer, trapMouseText,
-                BUFFER_HALF_W - 64, 42, 128,
+                BUFFER_HALF_W - 64, 64, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -761,7 +772,7 @@ int menu_optionsMain (
         }
 
         if (button(renderer, "Done",
-                BUFFER_HALF_W - 64, 64, 128,
+                BUFFER_HALF_W - 64, 86, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {

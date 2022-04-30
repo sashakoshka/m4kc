@@ -50,6 +50,11 @@ int
         drawDistance = 20,
         trapMouse    = 0;
 
+float fov = 90;
+
+char username[8] = "guest";
+int  usernameCursor = 5;
+
 static SDL_Rect backgroundRect;
 
 Player player = { 0 };
@@ -88,8 +93,6 @@ int gameLoop (
         SDL_Renderer *renderer
 ) {
   static float
-        f18,
-        f20,
         f21,
         f22,
         f23,
@@ -106,8 +109,6 @@ int gameLoop (
         f34,
         f35,
         f36;
-
-  static double d;
 
   static int
         i6,
@@ -353,25 +354,30 @@ int gameLoop (
       selected to the blockSelected variable */
       selectedPass = 0;
       for (int pixelX = 0; pixelX < BUFFER_W; pixelX++) {
-        f18 = (pixelX - 107) / 90.0;
+        float rayOffsetX = (pixelX - BUFFER_HALF_W) / fov;
         for (int pixelY = 0; pixelY < BUFFER_H; pixelY++) {
           int finalPixelColor = 0;
           int pixelMist = 255;
           int pixelShade;
           
-          f20 = (pixelY - 60) / 90.0;
+          float rayOffsetY = (pixelY - BUFFER_HALF_H) / fov;
+
+          // Ray offset Z?
           f21 = 1.0;
-          f22 = f21 * player.vectorV.y + f20 * player.vectorV.x;
-          f23 = f20 * player.vectorV.y - f21 * player.vectorV.x;
-          f24 = f18 * player.vectorH.y + f22 * player.vectorH.x;
-          f25 = f22 * player.vectorH.y - f18 * player.vectorH.x;
-          d = drawDistance;
+          
+          f22 = f21        * player.vectorV.y + rayOffsetY * player.vectorV.x;
+          f23 = rayOffsetY * player.vectorV.y - f21        * player.vectorV.x;
+          f24 = rayOffsetX * player.vectorH.y + f22        * player.vectorH.x;
+          f25 = f22        * player.vectorH.y - rayOffsetX * player.vectorH.x;
+
+          double rayDistanceLimit = drawDistance;
+          
           f26 = 5.0;
           for (int blockFace = 0; blockFace < 3; blockFace++) {
             f27 = f24;
-            if (blockFace == 1) f27 = f23; 
-            if (blockFace == 2) f27 = f25; 
-            f28 = 1.0 / ((f27 < 0.0) ? -f27 : f27);
+            if (blockFace == 1) f27 = f23;
+            if (blockFace == 2) f27 = f25;
+            f28 = 1.0 / ((f27 < 0.0) ? (-1 * f27) : f27);
             f29 = f24 * f28;
             f30 = f23 * f28;
             f31 = f25 * f28;
@@ -391,7 +397,7 @@ int gameLoop (
             
             /* Whatever's in this loop needs to run *extremely*
             fast */
-            while (f33 < d) {
+            while (f33 < rayDistanceLimit) {
               blockRayPosition.x = (int)f34 - 64;
               blockRayPosition.y = (int)f35 - 64;
               blockRayPosition.z = (int)f36 - 64;
@@ -529,7 +535,7 @@ int gameLoop (
                   finalPixelColor = pixelColor;
                   pixelMist = 255 - (int)(f33 / (float)drawDistance * 255.0F);
                   pixelShade = 255 - (blockFace + 2) % 3 * 50;
-                  d = f33;
+                  rayDistanceLimit = f33;
                 } 
               }
               chunkNull:
@@ -604,10 +610,8 @@ int gameLoop (
         case 2:
           tblack(renderer);
           SDL_RenderFillRect(renderer, &backgroundRect);
-          popup_options (
-            renderer, inputs,
-            &gamePopup, &drawDistance, &trapMouse
-          );
+          popup_options (renderer, inputs, &gamePopup, &drawDistance,
+            &trapMouse, username, &usernameCursor);
           break;
         
         // Inventory
@@ -639,7 +643,8 @@ int gameLoop (
       break;
 
     case 8:
-      state_options(renderer, inputs, &gameState, &drawDistance, &trapMouse);
+      state_options (renderer, inputs, &gameState, &drawDistance, &trapMouse,
+        username, &usernameCursor);
       break;
     
     default:
