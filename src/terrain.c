@@ -140,18 +140,22 @@ Block World_getBlock (
 /* ch_setBlock
  * Takes in a blocks array, xyz coordinates, and a block id.
  * Sets the block. For usage in terrain generation. Returns false
- * if the block was previously air.
+ * if the block was previously air. If force is false, only air will be set.
  */
 int ch_setBlock (
         Block *blocks,
         int x, int y, int z,
-        Block block
+        Block block,
+        int force
 ) {
+        if (x < 0           || y < 0           || z < 0          ) { return 0; }
+        if (x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) { return 0; }
         int notAir = blocks [
-                nmod(x, CHUNK_SIZE) +
-                (nmod(y, CHUNK_SIZE) * CHUNK_SIZE) +
-                (nmod(z, CHUNK_SIZE) * CHUNK_SIZE * CHUNK_SIZE)
+                x +
+                (y * CHUNK_SIZE) +
+                (z * CHUNK_SIZE * CHUNK_SIZE)
         ] != BLOCK_AIR;
+        if (!force && notAir) { return notAir; }
         blocks[x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE)] = block;
         return notAir;
 }
@@ -164,17 +168,23 @@ Block ch_getBlock (
         Block *blocks,
         int x, int y, int z
 ) {
+        if (x < 0           || y < 0           || z < 0          ) {
+                return BLOCK_AIR;
+        }
+        if (x >= CHUNK_SIZE || y >= CHUNK_SIZE || z >= CHUNK_SIZE) {
+                return BLOCK_AIR;
+        }
         return blocks[x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE)];
 }
 
-/* setCube
- * Takes in a world array, xyz coordinates, dimensions, and fills
+/* ch_setCube
+ * Takes in a block array, xyz coordinates, dimensions, and fills
  * in a cube with the specified block. If force is true, blocks
  * other than air will be filled. If no blocks were previously
  * air, returns false.
  */
-int setCube (
-        World *world,
+int ch_setCube (
+        Block *blocks,
         int x, int y, int z,
         int w, int h, int l,
         Block block,
@@ -185,17 +195,17 @@ int setCube (
         for(xx = w + x; xx > x; xx--)
         for(yy = h + y; yy > y; yy--)
         for(zz = l + z; zz > z; zz--) {
-                blockPlaced |= World_setBlock(world, xx, yy, zz, block, force);
+                blockPlaced |= ch_setBlock(blocks, xx, yy, zz, block, force);
         }
         return blockPlaced;
 }
 
 /* genStructure
- * Takes in a world array, xyz coordinates, and generates the
+ * Takes in a block array, xyz coordinates, and generates the
  * specified structure.
  */
 void genStructure (
-        World *world,
+        Block *blocks,
         int x, int y, int z,
         int type
 ) {
@@ -213,18 +223,20 @@ void genStructure (
         switch (type) {
         case 0: // tree
                 for (int trunk = randm(2) + 4; trunk > 0; trunk --) {
-                        World_setBlock(world, x, y --, z, BLOCK_WOOD, 1);
+                        ch_setBlock(blocks, x, y --, z, BLOCK_WOOD, 1);
                 }
-                setCube(world, x - 2, y + 1, z - 2, 5, 2, 5, BLOCK_LEAVES, 0);
-                setCube(world, x - 1, y - 1, z - 1, 3, 2, 3, BLOCK_LEAVES, 0);
+                ch_setCube (blocks, x - 2, y + 1, z - 2, 5, 2, 5,
+                        BLOCK_LEAVES, 0);
+                ch_setCube (blocks, x - 1, y - 1, z - 1, 3, 2, 3,
+                        BLOCK_LEAVES, 0);
                 break;
 
         case 1: // pyramid
                 y -= 5 + randm(2);
                 int cubePlaced = 1;
                 for (int step = 1; cubePlaced > 0 && step < 64; step += 2) {
-                        cubePlaced &= setCube(
-                                world,
+                        cubePlaced &= ch_setCube (
+                                blocks,
                                 x - step / 2,
                                 y ++,
                                 z - step / 2,
@@ -351,7 +363,7 @@ int genChunk (
                 break;
         case 1:
                 // New terrain
-                ch_genNew(blocks, world, seed, xOffset, yOffset, zOffset);
+                ch_genNew(blocks, seed, xOffset, yOffset, zOffset);
                 break;
         case 2:
                 // Flat stone
@@ -378,13 +390,12 @@ void ch_genClassic (Block *blocks, int yOffset) {
                         block == BLOCK_SAND ||
                         block == BLOCK_GRAVEL
                 ) { block = BLOCK_DIRT; }
-                ch_setBlock(blocks, x, y, z, block);
+                ch_setBlock(blocks, x, y, z, block, 1);
         }
 }
 
 void ch_genNew (
         Block *blocks,
-        World *world,
         unsigned int seed,
         int xOffset,
         int yOffset,
@@ -413,14 +424,21 @@ void ch_genNew (
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int y = 0; y < CHUNK_SIZE; y ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
-                if (y + yOffset > heightmap[x][z] + 4)
-                        ch_setBlock(blocks, x, y, z, BLOCK_STONE);
-                else if (y + yOffset > heightmap[x][z])
-                        ch_setBlock(blocks, x, y, z, BLOCK_DIRT);
-                else if (y + yOffset == heightmap[x][z])
-                        ch_setBlock(blocks, x, y, z, BLOCK_GRASS);
-                else
-                        ch_setBlock(blocks, x, y, z, BLOCK_AIR);
+                if (y + yOffset > heightmap[x][z] + 4) {
+                        ch_setBlock(blocks, x, y, z, BLOCK_STONE, 1);
+                } else if (y + yOffset > heightmap[x][z]) {
+                        ch_setBlock(blocks, x, y, z, BLOCK_DIRT, 1);
+                } else if (y + yOffset == heightmap[x][z]) {
+                        if (y + yOffset < 44) {
+                                ch_setBlock(blocks, x, y, z, BLOCK_GRASS, 1);
+                        } else {
+                                ch_setBlock(blocks, x, y, z, BLOCK_SAND, 1);
+                        }
+                } else if (y + yOffset < 45) {
+                        ch_setBlock(blocks, x, y, z, BLOCK_AIR, 1);
+                } else {
+                        ch_setBlock(blocks, x, y, z, BLOCK_WATER, 1);
+                }
         }
 
         // Generate caves
@@ -449,12 +467,11 @@ void ch_genNew (
                         0.0625
                 ) * 4 + 2 - (randm(1) > 0);
 
-                // Cave starts at lowPoint and 
                 int lowPoint  = 64 - elevation;
                 int highPoint = 64 - elevation - height;
 
                 for (int y = highPoint; y < lowPoint; y ++) {
-                        ch_setBlock(blocks, x, y, z, BLOCK_AIR);
+                        ch_setBlock(blocks, x, y, z, BLOCK_AIR, 1);
                 }
 
                 // Don't have bare dirt on the bottom
@@ -465,25 +482,12 @@ void ch_genNew (
                                 BLOCK_AIR
                         ) {
                                 ch_setBlock (blocks, x, lowPoint, z,
-                                        BLOCK_GRASS);
+                                        BLOCK_GRASS, 1);
                         } else {
                                 ch_setBlock (blocks, x, lowPoint, z,
-                                        BLOCK_GRAVEL);
+                                        BLOCK_GRAVEL, 1);
                         }
                 }
-        }
-        
-        // Generate trees
-        for (int i = randm(16) + 64; i > 0; i --) {
-                int x = randm(64);
-                int z = randm(64);
-
-                genStructure ( 
-                        world,
-                        x + xOffset, heightmap[x][z] - 1, z + zOffset,
-                        0
-                );
-
         }
 
         // Generate pyramids
@@ -492,10 +496,27 @@ void ch_genNew (
                 int z = randm(64);
 
                 genStructure (
-                        world,
-                        x + xOffset, heightmap[x][z] + 1, z + zOffset,
+                        blocks,
+                        x, heightmap[x][z] + 1, z,
                         1
                 );
+        }
+        
+        // Generate trees
+        for (int i = randm(16) + 64; i > 0; i --) {
+                int x = randm(64);
+                int z = randm(64);
+
+                if (ch_getBlock(blocks, x, heightmap[x][z], z) != BLOCK_GRASS) {
+                        continue;
+                }
+
+                genStructure (
+                        blocks,
+                        x, heightmap[x][z] - 1, z,
+                        0
+                );
+
         }
 }
 
@@ -504,9 +525,9 @@ void ch_genStone (Block *blocks, int yOffset) {
         for (int y = 0; y < CHUNK_SIZE; y ++)
         for (int z = 0; z < CHUNK_SIZE; z ++)
         if (y + yOffset > 32) {
-                ch_setBlock(blocks, x, y, z, BLOCK_STONE);
+                ch_setBlock(blocks, x, y, z, BLOCK_STONE, 1);
         } else {
-                ch_setBlock(blocks, x, y, z, BLOCK_AIR);
+                ch_setBlock(blocks, x, y, z, BLOCK_AIR, 1);
         }
 }
 
@@ -515,13 +536,13 @@ void ch_genFlat (Block *blocks, int yOffset) {
         for (int z = 0; z < CHUNK_SIZE; z ++)
         for (int y = 0; y < CHUNK_SIZE; y ++) {
                 if (y + yOffset <  32) {
-                        ch_setBlock(blocks, x, y, z, BLOCK_AIR);
+                        ch_setBlock(blocks, x, y, z, BLOCK_AIR, 1);
                 }
                 if (y + yOffset == 32) {
-                        ch_setBlock(blocks, x, y, z, BLOCK_GRASS);
+                        ch_setBlock(blocks, x, y, z, BLOCK_GRASS, 1);
                 }
                 if (y + yOffset >  32) {
-                        ch_setBlock(blocks, x, y, z, BLOCK_DIRT);
+                        ch_setBlock(blocks, x, y, z, BLOCK_DIRT, 1);
                 }
         }
 }
@@ -535,7 +556,7 @@ void ch_genDev (Block *blocks, int xOffset, int yOffset, int zOffset) {
 
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
-                ch_setBlock(blocks, x, 3, z, BLOCK_PLAYER_BODY);
-                ch_setBlock(blocks, x, 4, z, BLOCK_PLAYER_HEAD);
+                ch_setBlock(blocks, x, 3, z, BLOCK_PLAYER_HEAD, 1);
+                ch_setBlock(blocks, x, 4, z, BLOCK_PLAYER_BODY, 1);
         }
 }

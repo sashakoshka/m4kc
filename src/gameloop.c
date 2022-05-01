@@ -195,6 +195,20 @@ int gameLoop (
       }
       */
 
+      ;int headInWater = World_getBlock (&world,
+        player.pos.x - 64,
+        player.pos.y - 64,
+        player.pos.z - 64) == BLOCK_WATER;
+
+      int feetInWater = World_getBlock (&world,
+        player.pos.x - 64,
+        player.pos.y - 63,
+        player.pos.z - 64) == BLOCK_WATER;
+
+      int effectDrawDistance = drawDistance;
+      // Restrict view distance while in water
+      if (headInWater) { effectDrawDistance = 10; }
+
       // Update directional vectors
       player.vectorH.x = sin(player.hRot);
       player.vectorH.y = cos(player.hRot);
@@ -207,14 +221,25 @@ int gameLoop (
       timeCoef  = sin(timeCoef);
       timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
       timeCoef  = (timeCoef + 1) / 2;
-      
-      SDL_SetRenderDrawColor (
-        renderer,
-        153 * timeCoef,
-        204 * timeCoef,
-        255 * timeCoef,
-        255
-      );
+
+      // Change ambient color depending on if we are in the water or the air
+      if (headInWater) {
+        SDL_SetRenderDrawColor (
+          renderer,
+          48  * timeCoef,
+          96 * timeCoef,
+          200 * timeCoef,
+          255
+        );
+      } else {
+        SDL_SetRenderDrawColor (
+          renderer,
+          153 * timeCoef,
+          204 * timeCoef,
+          255 * timeCoef,
+          255
+        );
+      }
       
       SDL_RenderClear(renderer);
       
@@ -229,8 +254,6 @@ int gameLoop (
         fps_now     = fps_count;
         fps_count   = 0;
       }
-
-      
       
       /* Things that should run at a constant speed, regardless
       of CPU power. If the rendering takes a long time, this
@@ -238,7 +261,7 @@ int gameLoop (
       while (SDL_GetTicks() - l > 10L) {
         gameTime++;
         l += 10L;
-        gameLoop_processMovement(inputs);
+        gameLoop_processMovement(inputs, feetInWater);
       }
       
       if (!gamePopup) {
@@ -393,7 +416,7 @@ int gameLoop (
           f24 = rayOffsetX * player.vectorH.y + f22        * player.vectorH.x;
           f25 = f22        * player.vectorH.y - rayOffsetX * player.vectorH.x;
 
-          double rayDistanceLimit = drawDistance;
+          double rayDistanceLimit = effectDrawDistance;
           
           f26 = 5.0;
           for (int blockFace = 0; blockFace < 3; blockFace++) {
@@ -493,7 +516,10 @@ int gameLoop (
                 goto chunkNull;
               }
               
-              if (intersectedBlock != BLOCK_AIR) {
+              if (
+                intersectedBlock != BLOCK_AIR &&
+                !(headInWater && intersectedBlock == BLOCK_WATER)
+              ) {
                 // I'm guessing this eldritch horror figures out what pixel of
                 // the block we hit
                 i6 = (int)((f34 + f36) * 16.0) & 0xF;
@@ -556,7 +582,8 @@ int gameLoop (
                 
                 if (pixelColor > 0) {
                   finalPixelColor = pixelColor;
-                  pixelMist = 255 - (int)(f33 / (float)drawDistance * 255.0F);
+                  pixelMist = 255 - (int)(
+                    f33 / (float)effectDrawDistance * 255.0F);
                   pixelShade = 255 - (blockFace + 2) % 3 * 50;
                   rayDistanceLimit = f33;
                 } 
@@ -591,6 +618,12 @@ int gameLoop (
             SDL_RenderDrawPoint(renderer, pixelX, pixelY);
           }
         }
+      }
+
+      // Make camera blue if in water
+      if (headInWater) {
+        SDL_SetRenderDrawColor(renderer, 16, 32, 255, 128);
+        SDL_RenderFillRect(renderer, &backgroundRect);
       }
       
       // Pass info about selected block on
@@ -683,7 +716,12 @@ int gameLoop (
   return 1;
 }
 
-void gameLoop_processMovement (Inputs *inputs) {
+void gameLoop_processMovement (Inputs *inputs, int inWater) {
+        // Run at half speed if in water
+        static int flipFlop = 0;
+        flipFlop = !flipFlop;
+        int doPhysics = !flipFlop || !inWater;
+
         // Only process movement controls if there are no active popup
         if (gamePopup == 0) {
                 // Looking around
@@ -717,49 +755,66 @@ void gameLoop_processMovement (Inputs *inputs) {
                 if (player.vRot < -1.57) player.vRot = -1.57;
                 if (player.vRot >  1.57) player.vRot =  1.57;
 
-                player.FBVelocity =
-                        (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
-                player.LRVelocity =
-                        (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
+                float speed = 0.02;
+
+                if (doPhysics) {
+                        player.FBVelocity =
+                                (inputs->keyboard.w - inputs->keyboard.s) *
+                                speed;
+                        player.LRVelocity =
+                                (inputs->keyboard.d - inputs->keyboard.a) *
+                                speed;
+                }
         }
 
         // Moving around
-        playerMovement.x *= 0.5;
-        playerMovement.y *= 0.99;
-        playerMovement.z *= 0.5;
+        if (doPhysics) {
+                playerMovement.x *= 0.5;
+                playerMovement.y *= 0.99;
+                playerMovement.z *= 0.5;
 
-        playerMovement.x +=
-                player.vectorH.x * player.FBVelocity +
-                player.vectorH.y * player.LRVelocity;
-        playerMovement.z +=
-                player.vectorH.y * player.FBVelocity -
-                player.vectorH.x * player.LRVelocity;
-        playerMovement.y += 0.003;
+                playerMovement.x +=
+                        player.vectorH.x * player.FBVelocity +
+                        player.vectorH.y * player.LRVelocity;
+                playerMovement.z +=
+                        player.vectorH.y * player.FBVelocity -
+                        player.vectorH.x * player.LRVelocity;
+                playerMovement.y += 0.003;
+        }
 
-        // detect collisions
+        // Detect collisions and jump
         for (int axis = 0; axis < 3; axis++) {
-                float f16 = player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2);
-                float f17 = player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2);
-                float f19 = player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2);
+                if (!doPhysics) { break; }
+                
+                float f16 = player.pos.x +
+                        playerMovement.x * ((axis + 2) % 3 / 2);
+                float f17 = player.pos.y +
+                        playerMovement.y * ((axis + 1) % 3 / 2);
+                float f19 = player.pos.z +
+                        playerMovement.z * ((axis + 3) % 3 / 2);
 
                 for (int i12 = 0; i12 < 12; i12++) {
-                        int i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  - 64;
-                        int i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
-                        int i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
+                        int i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  -
+                                64;
+                        int i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) -
+                                64;
+                        int i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  -
+                                64;
 
-                        if (World_getBlock(&world, i13, i14, i15) > 0) {
+                        Block block = World_getBlock(&world, i13, i14, i15);
+                        if (block != BLOCK_AIR && block != BLOCK_WATER) {
                                 if (axis != 1) {
                                         goto label208;
                                 }
                                 if (
                                         inputs->keyboard.space > 0 &&
-                                        (playerMovement.y > 0.0)   &!
-                                        gamePopup
+                                        (playerMovement.y > 0.0)   &&
+                                        !gamePopup
                                 ) {
                                         inputs->keyboard.space = 0;
                                         playerMovement.y = -0.1;
                                         goto label208;
-                                } 
+                                }
                                 playerMovement.y = 0.0;
                                 goto label208;
                         }
@@ -770,6 +825,18 @@ void gameLoop_processMovement (Inputs *inputs) {
                 player.pos.z = f19;
 
                 label208:;
+        }
+
+        // Swim in water
+        if (inWater && doPhysics) {
+                if (
+                        inputs->keyboard.space > 0 &&
+                        (playerMovement.y > -0.05)   &&
+                        !gamePopup
+                ) {
+                        inputs->keyboard.space = 0;
+                        playerMovement.y = -0.1;
+                }
         }
 }
 

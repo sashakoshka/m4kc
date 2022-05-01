@@ -10,6 +10,7 @@
 #define BLOCK_WOOD        7
 #define BLOCK_LEAVES      8
 #define BLOCK_COBBLESTONE 9
+#define BLOCK_WATER       10
 
 #define BLOCK_PLAYER_HEAD 14
 #define BLOCK_PLAYER_BODY 15

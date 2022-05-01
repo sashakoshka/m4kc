@@ -21,14 +21,14 @@ int   World_setBlock (World *, int, int, int, Block, int);
 Block World_getBlock (World *, int, int, int);
 
 Chunk *chunkLookup  (World *, int, int, int);
-int    setCube      (World *, int, int, int, int, int, int, Block, int);
-void   genStructure (World *, int, int, int, int);
 int    genChunk     (World *, unsigned int, int, int, int, int, int, Coords);
+void   genStructure (Block *, int, int, int, int);
 void   genAround    (World *, Coords);
 
-int  ch_setBlock   (Block *, int, int, int, Block);
+int  ch_setCube    (Block *, int, int, int, int, int, int, Block, int);
+int  ch_setBlock   (Block *, int, int, int, Block, int);
 void ch_genClassic (Block *, int);
-void ch_genNew     (Block *, World *, unsigned int, int, int, int);
+void ch_genNew     (Block *, unsigned int, int, int, int);
 void ch_genStone   (Block *, int);
 void ch_genFlat    (Block *, int);
 void ch_genDev     (Block *, int, int, int);
