@@ -429,12 +429,12 @@ void ch_genNew (
                 } else if (y + yOffset > heightmap[x][z]) {
                         ch_setBlock(blocks, x, y, z, BLOCK_DIRT, 1);
                 } else if (y + yOffset == heightmap[x][z]) {
-                        if (y + yOffset < 39) {
+                        if (y + yOffset < 44) {
                                 ch_setBlock(blocks, x, y, z, BLOCK_GRASS, 1);
                         } else {
                                 ch_setBlock(blocks, x, y, z, BLOCK_SAND, 1);
                         }
-                } else if (y + yOffset < 40) {
+                } else if (y + yOffset < 45) {
                         ch_setBlock(blocks, x, y, z, BLOCK_AIR, 1);
                 } else {
                         ch_setBlock(blocks, x, y, z, BLOCK_WATER, 1);

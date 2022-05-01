@@ -1,5 +1,6 @@
 #include <time.h>
 #include "menus.h"
+#include "blocks.h"
 
 int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *, InputBuffer *);
 
@@ -759,36 +760,42 @@ void popup_chunkPeek (
                         chunkPeekRZ < 63;
                         chunkPeekRZ++
                 ) {
+                        Block currentBlock = debugChunk->blocks [
+                                chunkPeekRX +
+                                (chunkPeekRY << 6) +
+                                (chunkPeekRZ << 12)];
+                        
                         chunkPeekColor = textures [
-                                debugChunk->blocks [
-                                  chunkPeekRX +
-                                  (chunkPeekRY << 6) +
-                                  (chunkPeekRZ << 12)
-                                ] * 256 * 3 + 6 * 16
-                        ];
+                                currentBlock * 256 * 3 + 6 * 16];
+
                         if (chunkPeekColor) {
+                                int alpha = 255;
+                                
+                                if (currentBlock == BLOCK_WATER) {
+                                        alpha = 64;
+                                }
+                        
                                 SDL_SetRenderDrawColor (
                                         renderer,
                                         (chunkPeekColor >> 16 & 0xFF),
                                         (chunkPeekColor >> 8 & 0xFF),
                                         (chunkPeekColor & 0xFF),
-                                        255
-                                );
+                                        alpha);
+                                
                                 SDL_RenderDrawPoint (
                                         renderer,
                                         chunkPeekRX + 128,
-                                        chunkPeekRY + chunkPeekRZ
-                                );
+                                        chunkPeekRY + chunkPeekRZ);
+                                        
                                 // A little shadow for depth
                                 SDL_SetRenderDrawColor (
                                         renderer,
-                                        0, 0, 0, 64
-                                );
+                                        0, 0, 0, 64);
+                                
                                 SDL_RenderDrawPoint (
                                         renderer,
                                         chunkPeekRX + 128,
-                                        chunkPeekRY + chunkPeekRZ + 1
-                                );
+                                        chunkPeekRY + chunkPeekRZ + 1);
                         }
                 }
         } else {
