@@ -429,12 +429,12 @@ void ch_genNew (
                 } else if (y + yOffset > heightmap[x][z]) {
                         ch_setBlock(blocks, x, y, z, BLOCK_DIRT, 1);
                 } else if (y + yOffset == heightmap[x][z]) {
-                        if (y + yOffset < 49) {
+                        if (y + yOffset < 39) {
                                 ch_setBlock(blocks, x, y, z, BLOCK_GRASS, 1);
                         } else {
                                 ch_setBlock(blocks, x, y, z, BLOCK_SAND, 1);
                         }
-                } else if (y + yOffset < 50) {
+                } else if (y + yOffset < 40) {
                         ch_setBlock(blocks, x, y, z, BLOCK_AIR, 1);
                 } else {
                         ch_setBlock(blocks, x, y, z, BLOCK_WATER, 1);
@@ -489,19 +489,6 @@ void ch_genNew (
                         }
                 }
         }
-        
-        // Generate trees
-        for (int i = randm(16) + 64; i > 0; i --) {
-                int x = randm(64);
-                int z = randm(64);
-
-                genStructure ( 
-                        blocks,
-                        x, heightmap[x][z] - 1, z,
-                        0
-                );
-
-        }
 
         // Generate pyramids
         for (int i = randm(2); i > 0; i --) {
@@ -513,6 +500,23 @@ void ch_genNew (
                         x, heightmap[x][z] + 1, z,
                         1
                 );
+        }
+        
+        // Generate trees
+        for (int i = randm(16) + 64; i > 0; i --) {
+                int x = randm(64);
+                int z = randm(64);
+
+                if (ch_getBlock(blocks, x, heightmap[x][z], z) != BLOCK_GRASS) {
+                        continue;
+                }
+
+                genStructure (
+                        blocks,
+                        x, heightmap[x][z] - 1, z,
+                        0
+                );
+
         }
 }
 
