@@ -3,7 +3,7 @@
 #include "blocks.h"
 #include "data.h"
 
-int menu_optionsMain (SDL_Renderer *, Inputs *);
+static int menu_optionsMain (SDL_Renderer *, Inputs *);
 
 /* === GAME STATES === */
 
@@ -279,7 +279,6 @@ void popup_hud (
         int *debugOn, u_int32_t *fps_now,
         Player *player
 ) {
-
         int i;
 
         static SDL_Rect hotbarRect;
@@ -823,7 +822,7 @@ void popup_chunkPeek (
  * Returns 1 when the user pressed the "Done" button. Capable of changing
  * settings.
  */
-int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
+static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
         static int page = 0;
 
         switch (page) {

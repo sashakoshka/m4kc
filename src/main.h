@@ -54,6 +54,3 @@ typedef struct {
         int keyTyped;
         int keySym;
 } Inputs;
-
-int controlLoop(Inputs *inputs, const u_int8_t *keyboard);
-int handleEvent(Inputs *inputs, const u_int8_t *keyboard, SDL_Event event);

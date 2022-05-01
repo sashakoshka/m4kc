@@ -28,6 +28,9 @@
 #define MAX_FPS 60
 #define MIN_FRAME_MILLISECONDS 1000 / MAX_FPS
 
+static int controlLoop(Inputs *, const u_int8_t *);
+static int handleEvent(Inputs *, const u_int8_t *, SDL_Event);
+
 int main (/*int argc, char *argv[]*/) {
         //----  initializing SDL  ----//
 
@@ -100,7 +103,7 @@ int main (/*int argc, char *argv[]*/) {
         return 0;
 }
 
-int controlLoop (Inputs *inputs, const Uint8 *keyboard) {
+static int controlLoop (Inputs *inputs, const Uint8 *keyboard) {
         SDL_PumpEvents();
         int mouseX = 0, mouseY = 0;
         SDL_GetMouseState(&mouseX, &mouseY);
@@ -127,7 +130,7 @@ int controlLoop (Inputs *inputs, const Uint8 *keyboard) {
         return 1;
 }
 
-int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
+static int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
         switch (event.type) {
         case SDL_QUIT:
                 return 0;

@@ -54,8 +54,15 @@ static SDL_Rect backgroundRect;
 Player player = { 0 };
 Coords playerMovement = { 0.0, 0.0, 0.0 };
 
-static int screenshot ();
-static void gameLoop_gameplay (SDL_Renderer *, Inputs *);
+static int  screenshot ();
+static void gameLoop_gameplay        (SDL_Renderer *, Inputs *);
+static void gameLoop_drawPopup       (SDL_Renderer *, Inputs *);
+static void gameLoop_processMovement (Inputs *, int);
+
+static u_int32_t
+        fps_lastmil  = 0,
+        fps_count    = 0,
+        fps_now      = 0;
 
 /* gameLoop_resetGame
  * Resets elements of the game such as time and the player position. This will
@@ -142,6 +149,9 @@ int gameLoop (
         return 1;
 }
 
+/* gameLoop_gameplay
+ * Runs game logic and rendering. This is where most of the obfuscated code is.
+ */
 static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   static float
         f21,
@@ -168,10 +178,6 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   static int
         blockSelected = 0,
         selectedPass;
-
-  static u_int32_t fps_lastmil  = 0,
-                   fps_count    = 0,
-                   fps_now      = 0;
   
   static IntCoords blockSelect       = { 0 };
   static IntCoords blockSelectOffset = { 0 };
@@ -665,66 +671,69 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     inputs->keyboard.f2 = 0;
     screenshot(renderer);
   }
-  
-  // In-game menus
 
-  if (gamePopup) {
-    SDL_SetRelativeMouseMode(0);
-  }
-  
-  switch (gamePopup) {
-    // HUD
-    case 0:
-      if (data_options.trapMouse) SDL_SetRelativeMouseMode(1);
-      if (guiOn) popup_hud (
-        renderer, inputs, &world,
-        &debugOn, &fps_now, &player
-      );
-      break;
-       
-    // Pause menu
-    case 1:
-      tblack(renderer);
-      SDL_RenderFillRect(renderer, &backgroundRect);
-      popup_pause(renderer, inputs, &gamePopup, &gameState);
-      break;
-    
-    // Options
-    case 2:
-      tblack(renderer);
-      SDL_RenderFillRect(renderer, &backgroundRect);
-      popup_options (renderer, inputs, &gamePopup);
-      break;
-    
-    // Inventory
-    case 3:
-      popup_inventory(renderer, inputs, &player, &gamePopup);
-      break;
-
-    #ifndef small
-    // Advanced debug menu
-    case 4:
-      tblack(renderer);
-      SDL_RenderFillRect(renderer, &backgroundRect);
-      popup_debugTools(renderer, inputs, &gamePopup);
-      break;
-    
-    // Chunk peek
-    case 5:
-      tblack(renderer);
-      SDL_RenderFillRect(renderer, &backgroundRect);
-      popup_chunkPeek(renderer, inputs, &world, &gamePopup, &player);
-      break;
-    #endif
-    
-    // Chat
-    case 6:
-      popup_chat(renderer, inputs, world.time);
-      break;
-  }
+  gameLoop_drawPopup(renderer, inputs);
 }
 
-void gameLoop_processMovement (Inputs *inputs, int inWater) {
+static void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
+        // In-game menus
+        if (gamePopup != 0) {
+                SDL_SetRelativeMouseMode(0);
+        }
+
+        switch (gamePopup) {
+        case 0:
+                // HUD
+                if (data_options.trapMouse) SDL_SetRelativeMouseMode(1);
+                if (guiOn) popup_hud (
+                renderer, inputs, &world,
+                &debugOn, &fps_now, &player
+                );
+                break;
+
+        case 1:
+                // Pause menu
+                tblack(renderer);
+                SDL_RenderFillRect(renderer, &backgroundRect);
+                popup_pause(renderer, inputs, &gamePopup, &gameState);
+                break;
+
+        case 2:
+                // Options
+                tblack(renderer);
+                SDL_RenderFillRect(renderer, &backgroundRect);
+                popup_options (renderer, inputs, &gamePopup);
+                break;
+
+        case 3:
+                // Inventory
+                popup_inventory(renderer, inputs, &player, &gamePopup);
+                break;
+
+        #ifndef small
+        case 4:
+                // Advanced debug menu
+                tblack(renderer);
+                SDL_RenderFillRect(renderer, &backgroundRect);
+                popup_debugTools(renderer, inputs, &gamePopup);
+                break;
+
+        case 5:
+                // Chunk peek
+                tblack(renderer);
+                SDL_RenderFillRect(renderer, &backgroundRect);
+                popup_chunkPeek(renderer, inputs, &world, &gamePopup, &player);
+                break;
+        #endif
+
+        case 6:
+                // Chat
+                popup_chat(renderer, inputs, world.time);
+                break;
+        }
+}
+
+static void gameLoop_processMovement (Inputs *inputs, int inWater) {
         // Run at half speed if in water
         static int flipFlop = 0;
         flipFlop = !flipFlop;
