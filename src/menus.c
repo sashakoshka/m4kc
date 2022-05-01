@@ -547,7 +547,7 @@ void popup_inventory (
  * Allows the user to type in chat, and view farther back in the message
  * history. Capable of closing itself.
  */
-void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
+void popup_chat (SDL_Renderer *renderer, Inputs *inputs, u_int64_t gameTime) {
         static char buffer[64] = { 0 };
         static InputBuffer chatBox = {
                 .buffer = buffer,
@@ -599,7 +599,7 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         white(renderer);
         drawChar (
                 renderer,
-                95 + 32 * ((*gameTime >> 6) % 2),
+                95 + 32 * ((gameTime >> 6) % 2),
                 drawStr (
                         renderer, chatBox.buffer,
                         0, BUFFER_H - 8
@@ -838,7 +838,7 @@ int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                         "Capture Mouse: ON"
                 };
                 if (button(renderer, trapMouseTexts[data_options.trapMouse],
-                        BUFFER_HALF_W - 64, 48, 128,
+                        BUFFER_HALF_W - 64, 42, 128,
                         inputs->mouse.x, inputs->mouse.y) &&
                         inputs->mouse.left
                 ) {

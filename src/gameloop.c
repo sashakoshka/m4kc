@@ -18,7 +18,7 @@
  * psychological effects.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-long l, gameTime;
+long l;
 
 World world = { 0 };
 
@@ -62,7 +62,7 @@ int screenshot ();
  */
 void gameLoop_resetGame () {
         l = SDL_GetTicks();
-        gameTime = 2048;
+        world.time = 2048;
 
         player = (const Player) { 0 };
         player.pos.x = 96.5;
@@ -209,7 +209,7 @@ int gameLoop (
       float timeCoef;
       switch (world.dayNightMode) {
         case 0:
-          timeCoef  = (float)(gameTime % 102944) / 16384;
+          timeCoef  = (float)(world.time % 102944) / 16384;
           timeCoef  = sin(timeCoef);
           timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
           timeCoef  = (timeCoef + 1) / 2;
@@ -259,7 +259,7 @@ int gameLoop (
       of CPU power. If the rendering takes a long time, this
       will fire more times to compensate. */
       while (SDL_GetTicks() - l > 10L) {
-        gameTime++;
+        world.time++;
         l += 10L;
         gameLoop_processMovement(inputs, feetInWater);
       }
@@ -697,7 +697,7 @@ int gameLoop (
         
         // Chat
         case 6:
-          popup_chat(renderer, inputs, &gameTime);
+          popup_chat(renderer, inputs, world.time);
           break;
       }
       break;

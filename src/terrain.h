@@ -54,8 +54,9 @@ struct _Chunk {
  * Stores chunks.
  */
 struct _World {
-        int type;
-        int seed;
-        int dayNightMode;
+        int       type;
+        int       seed;
+        int       dayNightMode;
+        u_int64_t time;
         Chunk chunk[CHUNKARR_SIZE];
 };
