@@ -156,7 +156,7 @@ int gameLoop (
     // World creation menu
     case 3:
       state_newWorld (renderer, inputs,
-              &gameState, &world.type, &world.seed, &world.dayNightMode);
+              &gameState, &world.type, &world.dayNightMode, &world.seed);
       break;
     
     // Generate a world and present a loading screen
