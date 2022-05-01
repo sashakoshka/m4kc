@@ -125,9 +125,6 @@ int gameLoop (
         blockSelected = 0,
         selectedPass;
 
-  int inWater = World_getBlock (&world,
-        player.pos.x - 64, player.pos.y - 64, player.pos.z - 64) == BLOCK_WATER;
-
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
                    fps_now      = 0;
@@ -198,6 +195,15 @@ int gameLoop (
       }
       */
 
+      ;int inWater = World_getBlock (&world,
+        player.pos.x - 64,
+        player.pos.y - 64,
+        player.pos.z - 64) == BLOCK_WATER;
+
+      int effectDrawDistance = drawDistance;
+      // Restrict view distance while in water
+      if (inWater) { effectDrawDistance = 10; }
+
       // Update directional vectors
       player.vectorH.x = sin(player.hRot);
       player.vectorH.y = cos(player.hRot);
@@ -210,14 +216,25 @@ int gameLoop (
       timeCoef  = sin(timeCoef);
       timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
       timeCoef  = (timeCoef + 1) / 2;
-      
-      SDL_SetRenderDrawColor (
-        renderer,
-        153 * timeCoef,
-        204 * timeCoef,
-        255 * timeCoef,
-        255
-      );
+
+      // Change ambient color depending on if we are in the water or the air
+      if (inWater) {
+        SDL_SetRenderDrawColor (
+          renderer,
+          48  * timeCoef,
+          96 * timeCoef,
+          200 * timeCoef,
+          255
+        );
+      } else {
+        SDL_SetRenderDrawColor (
+          renderer,
+          153 * timeCoef,
+          204 * timeCoef,
+          255 * timeCoef,
+          255
+        );
+      }
       
       SDL_RenderClear(renderer);
       
@@ -232,8 +249,6 @@ int gameLoop (
         fps_now     = fps_count;
         fps_count   = 0;
       }
-
-      
       
       /* Things that should run at a constant speed, regardless
       of CPU power. If the rendering takes a long time, this
@@ -396,7 +411,7 @@ int gameLoop (
           f24 = rayOffsetX * player.vectorH.y + f22        * player.vectorH.x;
           f25 = f22        * player.vectorH.y - rayOffsetX * player.vectorH.x;
 
-          double rayDistanceLimit = drawDistance;
+          double rayDistanceLimit = effectDrawDistance;
           
           f26 = 5.0;
           for (int blockFace = 0; blockFace < 3; blockFace++) {
@@ -562,7 +577,8 @@ int gameLoop (
                 
                 if (pixelColor > 0) {
                   finalPixelColor = pixelColor;
-                  pixelMist = 255 - (int)(f33 / (float)drawDistance * 255.0F);
+                  pixelMist = 255 - (int)(
+                    f33 / (float)effectDrawDistance * 255.0F);
                   pixelShade = 255 - (blockFace + 2) % 3 * 50;
                   rayDistanceLimit = f33;
                 } 
@@ -597,6 +613,12 @@ int gameLoop (
             SDL_RenderDrawPoint(renderer, pixelX, pixelY);
           }
         }
+      }
+
+      // Make camera blue if in water
+      if (inWater) {
+        SDL_SetRenderDrawColor(renderer, 16, 32, 255, 128);
+        SDL_RenderFillRect(renderer, &backgroundRect);
       }
       
       // Pass info about selected block on
