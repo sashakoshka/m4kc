@@ -91,5 +91,15 @@ float perlin2d (
  * Find the distance between two points in two dimensional space.
  */
 float dist2d (float x1, float y1, float x2, float y2) {
-        return sqrt(pow(x1 - y1, 2) + pow(x2 - y2, 2));
+        return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+}
+
+/* dist3d
+ * Find the distance between two points in three dimensional space.
+ */
+float dist3d (float x1, float y1, float z1, float x2, float y2, float z2) {
+        return sqrt (
+                pow(x1 - x2, 2) +
+                pow(y1 - y2, 2) +
+                pow(z1 - z2, 2));
 }

@@ -112,27 +112,27 @@ void genTexture (int blockId) {
                 case BLOCK_PLAYER_HEAD:
                         k = 255;
                         if (
-                                dist2d(x, 8, y % 16, 8) > 6.2 ||
+                                dist2d(x, y % 16, 8, 8) > 6.2 ||
                                 (y / 16) % 3 == 2
                         ) {
                                 baseColor = 0x000000;
                         } else {
                                 baseColor = 0xFFFFFF;
-                                k -= dist2d(x, 8, y % 16, 2) * 8;
+                                k -= dist2d(x, y % 16, 8, 2) * 8;
                         }
                         break;
                         
                 case BLOCK_PLAYER_BODY:
                         k = 255;
                         if (
-                                (dist2d(x, 8, y % 16, 16) > 12.2 ||
+                                (dist2d(x, y % 16, 8, 16) > 12.2 ||
                                 (y / 16) % 3 != 1) &&
                                 (y / 16) % 3 != 2
                         ) {
                                 baseColor = 0x000000;
                         } else {
                                 baseColor = 0xFFFFFF;
-                                k -= dist2d(x, 8, y % 16, 2) * 8;
+                                k -= dist2d(x, y % 16, 8, 2) * 8;
                         }
                         break;
                 }

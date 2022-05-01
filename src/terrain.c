@@ -24,7 +24,7 @@ void World_sort (World* world) {
  * same as last time, it does not do another lookup, meaning this
  * function can be called very frequently.
  */
-Chunk* chunkLookup (World *world, int x, int y, int z) {
+Chunk *chunkLookup (World *world, int x, int y, int z) {
         static Chunk *chunk;
         // Rather unlikely position. Not a coord because integers are
         // faster
@@ -192,9 +192,9 @@ int ch_setCube (
 ) {
         static int xx, yy, zz, blockPlaced;
         x --; y --; z --; blockPlaced = 0;
-        for(xx = w + x; xx > x; xx--)
-        for(yy = h + y; yy > y; yy--)
-        for(zz = l + z; zz > z; zz--) {
+        for (xx = w + x; xx > x; xx--)
+        for (yy = h + y; yy > y; yy--)
+        for (zz = l + z; zz > z; zz--) {
                 blockPlaced |= ch_setBlock(blocks, xx, yy, zz, block, force);
         }
         return blockPlaced;
@@ -285,11 +285,11 @@ int genChunk (
                         distMax  = 0;
                         distMaxI = 0;
                         for (i = 0; i < CHUNKARR_SIZE; i ++) {
-                                int dist = sqrt (
-                                        pow(coords.x - world->chunk[i].center.x, 2) +
-                                        pow(coords.y - world->chunk[i].center.y, 2) +
-                                        pow(coords.z - world->chunk[i].center.z, 2)
-                                );
+                                int dist = dist3d (
+                                        coords.x - world->chunk[i].center.x,
+                                        coords.y - world->chunk[i].center.y,
+                                        coords.z - world->chunk[i].center.z,
+                                        2, 2, 2);
                                 if(dist > distMax) {
                                         distMax  = dist;
                                         distMaxI = i;

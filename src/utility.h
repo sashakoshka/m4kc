@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-int   randm(int);
-int   nmod(int, int);
-float perlin2d(int, double, double, double);
-float dist2d(float, float, float, float);
+int   randm    (int);
+int   nmod     (int, int);
+float perlin2d (int, double, double, double);
+float dist2d   (float, float, float, float);
+float dist3d   (float, float, float, float, float, float);
