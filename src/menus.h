@@ -4,6 +4,20 @@
 #include "terrain.h"
 #include "main.h"
 
+#define STATE_TITLE     0
+#define STATE_NEW_WORLD 3
+#define STATE_LOADING   4
+#define STATE_GAMEPLAY  5
+#define STATE_OPTIONS   8
+
+#define POPUP_HUD            0
+#define POPUP_PAUSE          1
+#define POPUP_OPTIONS        2
+#define POPUP_INVENTORY      3
+#define POPUP_ADVANCED_DEBUG 4
+#define POPUP_CHUNK_PEEK     5
+#define POPUP_CHAT           6
+
 int  state_title      (SDL_Renderer *, Inputs *, int *);
 void state_newWorld   (SDL_Renderer *, Inputs *, int *, int *, int *, int *);
 int  state_loading    (SDL_Renderer *, World *, unsigned int, Coords);

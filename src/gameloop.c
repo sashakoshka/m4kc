@@ -18,28 +18,10 @@
  * psychological effects.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 World world = { 0 };
 
-/* 0: Main menu
- * 2: World select
- * 3: World creation
- * 4: Loading
- * 5: Gameplay
- * 6: World editing (renaming etc)
- * 7: Join game
- * 8: Options
- */
-int gameState = 0;
 
-/* 0: Gameplay
- * 1: Pause menu
- * 2: In-game options menu
- * 3: Inventory
- * 4: Advanced debug menu
- * 5: Chunk peek
- * 6: Chat
- */
+int gameState = STATE_TITLE;
 int gamePopup;
 
 static int guiOn;
@@ -109,31 +91,31 @@ int gameLoop (
         }
 
         switch (gameState) {
+        case STATE_TITLE:
                 // A main menu
-        case 0:
                 if (state_title(renderer, inputs, &gameState)) return 0;
                 break;
 
+        case STATE_NEW_WORLD:
                 // World creation menu
-        case 3:
                 state_newWorld (renderer, inputs,
                 &gameState, &world.type, &world.dayNightMode, &world.seed);
                 break;
 
+        case STATE_LOADING:
                 // Generate a world and present a loading screen
-        case 4:
                 if (state_loading(renderer, &world, world.seed, player.pos)) {
                 gameLoop_resetGame();
                 gameState = 5;
                 };
                 break;
 
+        case STATE_GAMEPLAY:
                 // The actual gameplay
-        case 5:
                 gameLoop_gameplay(renderer, inputs);
                 break;
 
-        case 8:
+        case STATE_OPTIONS:
                 state_options(renderer, inputs, &gameState);
                 break;
 
@@ -142,7 +124,7 @@ int gameLoop (
                 break;
         }
 
-        if (gameState != 5 || gamePopup) {
+        if (gameState != STATE_GAMEPLAY || gamePopup != POPUP_HUD) {
                 inputs->mouse.left  = 0;
                 inputs->mouse.right = 0;
         }
@@ -293,8 +275,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     gameLoop_processMovement(inputs, feetInWater);
   }
   
-  if (!gamePopup) {
-
+  if (gamePopup == POPUP_HUD) {
     if (blockSelected) {
       InvSlot *activeSlot = &player.inventory.hotbar [
         player.inventory.hotbarSelect
@@ -375,18 +356,26 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
       debugOn = !debugOn;
     }
 
+    // Toggle advanced debug menu
+    #ifndef small
+    if (inputs->keyboard.f4) {
+      inputs->keyboard.f4 = 0;
+      gamePopup = (gamePopup == POPUP_ADVANCED_DEBUG) ? 0 : 4;
+    }
+    #endif
+
     // Enter chat
     if (inputs->keyboard.t) {
       // reset text input
       inputs->keyboard.t = 0;
       inputs->keyTyped   = 0;
-      gamePopup = 6;
+      gamePopup = POPUP_CHAT;
     }
 
     // Enter inventory
     if (inputs->keyboard.e) {
       inputs->keyboard.e = 0;
-      gamePopup = 3;
+      gamePopup = POPUP_INVENTORY;
     }
 
     // Swap hotbar selection with offhand
@@ -417,13 +406,6 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     if (inputs->keyboard.num8) { player.inventory.hotbarSelect = 7; }
     if (inputs->keyboard.num9) { player.inventory.hotbarSelect = 8; }
   }
-
-  #ifndef small
-  if (inputs->keyboard.f4) {
-    inputs->keyboard.f4 = 0;
-    gamePopup = (gamePopup == 4) ? 0 : 4;
-  }
-  #endif
   
   /* Cast rays. selectedPass passes wether or not a block is
   selected to the blockSelected variable */
@@ -683,7 +665,7 @@ static void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
         }
 
         switch (gamePopup) {
-        case 0:
+        case POPUP_HUD:
                 // HUD
                 if (data_options.trapMouse) SDL_SetRelativeMouseMode(1);
                 if (guiOn) popup_hud (
@@ -692,34 +674,34 @@ static void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
                 );
                 break;
 
-        case 1:
+        case POPUP_PAUSE:
                 // Pause menu
                 tblack(renderer);
                 SDL_RenderFillRect(renderer, &backgroundRect);
                 popup_pause(renderer, inputs, &gamePopup, &gameState);
                 break;
 
-        case 2:
+        case POPUP_OPTIONS:
                 // Options
                 tblack(renderer);
                 SDL_RenderFillRect(renderer, &backgroundRect);
                 popup_options (renderer, inputs, &gamePopup);
                 break;
 
-        case 3:
+        case POPUP_INVENTORY:
                 // Inventory
                 popup_inventory(renderer, inputs, &player, &gamePopup);
                 break;
 
         #ifndef small
-        case 4:
+        case POPUP_ADVANCED_DEBUG:
                 // Advanced debug menu
                 tblack(renderer);
                 SDL_RenderFillRect(renderer, &backgroundRect);
                 popup_debugTools(renderer, inputs, &gamePopup);
                 break;
 
-        case 5:
+        case POPUP_CHUNK_PEEK:
                 // Chunk peek
                 tblack(renderer);
                 SDL_RenderFillRect(renderer, &backgroundRect);
@@ -727,7 +709,7 @@ static void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
                 break;
         #endif
 
-        case 6:
+        case POPUP_CHAT:
                 // Chat
                 popup_chat(renderer, inputs, world.time);
                 break;

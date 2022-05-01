@@ -124,7 +124,7 @@ void state_newWorld (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = 0;
+                *gameState = STATE_TITLE;
         }
 
         if (button(renderer, "Generate",
@@ -134,7 +134,7 @@ void state_newWorld (
         ) {
                 *type         = typeSelect;
                 *dayNightMode = dayNightSelect;
-                *gameState    = 4;
+                *gameState    = STATE_LOADING;
 
                 // Get numeric seed
                 *seed = 0;
@@ -232,7 +232,7 @@ void state_egg (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = 0;
+                *gameState = STATE_TITLE;
         }
 }
 
@@ -538,7 +538,7 @@ void popup_inventory (
         // Exit inventory
         if (inputs->keyboard.e) {
                 inputs->keyboard.e = 0;
-                *gamePopup = 0;
+                *gamePopup = POPUP_HUD;
         }
 }
 
@@ -620,7 +620,7 @@ void popup_pause (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gamePopup = 0;
+                *gamePopup = POPUP_HUD;
         }
 
         if (button(renderer, "Options...",
@@ -628,7 +628,7 @@ void popup_pause (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gamePopup = 2;
+                *gamePopup = POPUP_OPTIONS;
         }
 
         if (button(renderer, "Quit to Title",
@@ -636,7 +636,7 @@ void popup_pause (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = 0;
+                *gameState = STATE_TITLE;
         }
 }
 
@@ -660,7 +660,7 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gamePopup = 5;
+                *gamePopup = POPUP_CHUNK_PEEK;
         }
 
         if (button(renderer, "Done",
@@ -668,7 +668,7 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gamePopup = 0;
+                *gamePopup = POPUP_HUD;
         }
 }
 
@@ -811,7 +811,7 @@ void popup_chunkPeek (
                 inputs->mouse.x, inputs->mouse.y)
                 && inputs->mouse.left
         ) {
-                *gamePopup = 4;
+                *gamePopup = POPUP_ADVANCED_DEBUG;
         }
 }
 #endif
