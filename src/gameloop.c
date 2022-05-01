@@ -256,7 +256,7 @@ int gameLoop (
       while (SDL_GetTicks() - l > 10L) {
         gameTime++;
         l += 10L;
-        gameLoop_processMovement(inputs);
+        gameLoop_processMovement(inputs, inWater);
       }
       
       if (!gamePopup) {
@@ -711,7 +711,7 @@ int gameLoop (
   return 1;
 }
 
-void gameLoop_processMovement (Inputs *inputs) {
+void gameLoop_processMovement (Inputs *inputs, int inWater) {
         // Only process movement controls if there are no active popup
         if (gamePopup == 0) {
                 // Looking around
@@ -745,16 +745,25 @@ void gameLoop_processMovement (Inputs *inputs) {
                 if (player.vRot < -1.57) player.vRot = -1.57;
                 if (player.vRot >  1.57) player.vRot =  1.57;
 
+                float speed = 0.02;
+                if (inWater) speed = 0.0013;
+
                 player.FBVelocity =
-                        (inputs->keyboard.w - inputs->keyboard.s) * 0.02;
+                        (inputs->keyboard.w - inputs->keyboard.s) * speed;
                 player.LRVelocity =
-                        (inputs->keyboard.d - inputs->keyboard.a) * 0.02;
+                        (inputs->keyboard.d - inputs->keyboard.a) * speed;
         }
 
         // Moving around
-        playerMovement.x *= 0.5;
-        playerMovement.y *= 0.99;
-        playerMovement.z *= 0.5;
+        if (inWater) {
+                playerMovement.x *= 0.95;
+                playerMovement.y *= 0.999;
+                playerMovement.z *= 0.95;
+        } else {
+                playerMovement.x *= 0.5;
+                playerMovement.y *= 0.99;
+                playerMovement.z *= 0.5;
+        }
 
         playerMovement.x +=
                 player.vectorH.x * player.FBVelocity +
@@ -762,7 +771,11 @@ void gameLoop_processMovement (Inputs *inputs) {
         playerMovement.z +=
                 player.vectorH.y * player.FBVelocity -
                 player.vectorH.x * player.LRVelocity;
-        playerMovement.y += 0.003;
+        if (inWater) {
+                playerMovement.y += 0.0003;
+        } else {
+                playerMovement.y += 0.003;
+        }
 
         // detect collisions
         for (int axis = 0; axis < 3; axis++) {
@@ -782,13 +795,17 @@ void gameLoop_processMovement (Inputs *inputs) {
                                 }
                                 if (
                                         inputs->keyboard.space > 0 &&
-                                        (playerMovement.y > 0.0)   &!
-                                        gamePopup
+                                        (playerMovement.y > 0.0)   &&
+                                        !gamePopup
                                 ) {
                                         inputs->keyboard.space = 0;
-                                        playerMovement.y = -0.1;
+                                        if (inWater) {
+                                                playerMovement.y = -0.03;
+                                        } else {
+                                                playerMovement.y = -0.1;
+                                        }
                                         goto label208;
-                                } 
+                                }
                                 playerMovement.y = 0.0;
                                 goto label208;
                         }
