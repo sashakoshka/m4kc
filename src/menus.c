@@ -1,8 +1,9 @@
 #include <time.h>
 #include "menus.h"
 #include "blocks.h"
+#include "data.h"
 
-int menu_optionsMain (SDL_Renderer *, Inputs *, int *, int *, InputBuffer *);
+int menu_optionsMain (SDL_Renderer *, Inputs *);
 
 /* === GAME STATES === */
 
@@ -56,7 +57,8 @@ const char *terrainNames[16] = {
         "Classic Terrain",
         "Natural Terrain",
         "Flat Stone",
-        "Flat Grass"
+        "Flat Grass",
+        "Water World"
 };
 
 const char *dayNightModes[16] = {
@@ -97,7 +99,7 @@ void state_newWorld (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                typeSelect = (typeSelect + 1) % 4;
+                typeSelect = (typeSelect + 1) % 5;
         }
 
         manageInputBuffer(&seedInput, inputs);
@@ -199,19 +201,13 @@ int state_loading (
 /* state_options
  * Shows an options screen. Capable of changing settings and the game state.
  */
-void state_options (
-        SDL_Renderer *renderer, Inputs *inputs,
-        int *gameState, int *drawDistance, int *trapMouse, InputBuffer *username
-) {
+void state_options (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         inputs->mouse.x /= BUFFER_SCALE;
         inputs->mouse.y /= BUFFER_SCALE;
 
         dirtBg(renderer);
 
-        if (
-                menu_optionsMain (renderer, inputs, drawDistance, trapMouse,
-                        username)
-        ) {
+        if (menu_optionsMain (renderer, inputs)) {
                 *gameState = 0;
         }
 }
@@ -551,10 +547,7 @@ void popup_inventory (
  * Allows the user to type in chat, and view farther back in the message
  * history. Capable of closing itself.
  */
-void popup_chat (
-        SDL_Renderer *renderer, Inputs *inputs,
-        long *gameTime, char *username
-) {
+void popup_chat (SDL_Renderer *renderer, Inputs *inputs, long *gameTime) {
         static char buffer[64] = { 0 };
         static InputBuffer chatBox = {
                 .buffer = buffer,
@@ -583,7 +576,7 @@ void popup_chat (
                 // 1:  null
                 static char chatNameConcat[63 + 7 + 2 + 1];
                 snprintf (chatNameConcat,  63 + 7 + 2, "%s: %s",
-                        username, chatBox.buffer);
+                        data_options.username.buffer, chatBox.buffer);
                 
                 // Add input to chat
                 chatAdd(chatNameConcat);
@@ -651,14 +644,8 @@ void popup_pause (
 /* popup_options
  * Shows an options screen. Capable of changing settings and closing itself.
  */
-void popup_options (
-        SDL_Renderer *renderer, Inputs *inputs,
-        int *gamePopup, int *drawDistance, int *trapMouse, InputBuffer *username
-) {
-        if (
-                menu_optionsMain (renderer, inputs, drawDistance, trapMouse,
-                        username)
-        ) {
+void popup_options (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
+        if (menu_optionsMain(renderer, inputs)) {
                 *gamePopup = 1;
         }
 }
@@ -836,12 +823,9 @@ void popup_chunkPeek (
  * Returns 1 when the user pressed the "Done" button. Capable of changing
  * settings.
  */
-int menu_optionsMain (
-        SDL_Renderer *renderer, Inputs *inputs,
-        int *drawDistance, int *trapMouse, InputBuffer *username
-) {
-        manageInputBuffer(username, inputs);
-        input (renderer, "Username", username->buffer,
+int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
+        manageInputBuffer(&data_options.username, inputs);
+        input (renderer, "Username", data_options.username.buffer,
                 BUFFER_HALF_W - 64, 20, 128,
                 inputs->mouse.x, inputs->mouse.y, 1);
 
@@ -853,24 +837,24 @@ int menu_optionsMain (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                switch(*drawDistance) {
+                switch(data_options.drawDistance) {
                 case 20:
-                        *drawDistance = 32;
+                        data_options.drawDistance = 32;
                         break;
                 case 32:
-                        *drawDistance = 64;
+                        data_options.drawDistance = 64;
                         break;
                 case 64:
-                        *drawDistance = 96;
+                        data_options.drawDistance = 96;
                         break;
                 case 96:
-                        *drawDistance = 128;
+                        data_options.drawDistance = 128;
                         break;
                 default:
-                        *drawDistance = 20;
+                        data_options.drawDistance = 20;
                         break;
                 }
-                strnum(drawDistanceText, 15, *drawDistance);
+                strnum(drawDistanceText, 15, data_options.drawDistance);
         }
 
         if (button(renderer, trapMouseText,
@@ -878,11 +862,11 @@ int menu_optionsMain (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                if (*trapMouse) {
-                        *trapMouse = 0;
+                if (data_options.trapMouse) {
+                        data_options.trapMouse = 0;
                         sprintf(trapMouseText + 15, "OFF");
                 } else {
-                        *trapMouse = 1;
+                        data_options.trapMouse = 1;
                         sprintf(trapMouseText + 15, "ON");
                 }
         }

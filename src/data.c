@@ -6,10 +6,14 @@
 #include <string.h>
 #include <sys/stat.h>
 
+Options data_options = { 0 };
+
 char directoryName            [PATH_MAX] = { 0 };
 char settingsFileName         [PATH_MAX] = { 0 };
 char worldsDirectoryName      [PATH_MAX] = { 0 };
 char screenshotsDirectoryName [PATH_MAX] = { 0 };
+
+char username[8] = "guest";
 
 /* data_init
  * Initializes the data module. Returns zero on success, nonzero on failure.
@@ -29,6 +33,18 @@ int data_init () {
         err = data_findDirectoryName (
                 screenshotsDirectoryName, "/.m4kc/screenshots");
         if (err) { return err; }
+
+        data_options = (const Options) {
+                .fogType      = 0,
+                .drawDistance = 20,
+                .trapMouse    = 0,
+                .fov          = 90.0,
+                .username     = (const InputBuffer){
+                        .buffer = username,
+                        .len    = 8,
+                        .cursor = 5
+                }
+        };
         
         return 0;
 }

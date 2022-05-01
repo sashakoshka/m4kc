@@ -31,6 +31,7 @@ void ch_genClassic (Block *, int);
 void ch_genNew     (Block *, unsigned int, int, int, int);
 void ch_genStone   (Block *, int);
 void ch_genFlat    (Block *, int);
+void ch_genWater   (Block *, int);
 void ch_genDev     (Block *, int, int, int);
 
 /* _Chunk

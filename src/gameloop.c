@@ -45,20 +45,9 @@ int
         gamePopup,
 
         guiOn        = 1,
-        debugOn      = 0,
-        fogLog       = 0,
-        drawDistance = 20,
-        trapMouse    = 0;
-
-float fov = 90;
+        debugOn      = 0;
 
 char *errorMessage = NULL;
-char usernameBuffer[8] = "guest";
-InputBuffer username = {
-        .buffer = usernameBuffer,
-        .len    = 8,
-        .cursor = 5
-};
 
 static SDL_Rect backgroundRect;
 
@@ -156,7 +145,7 @@ int gameLoop (
     // World creation menu
     case 3:
       state_newWorld (renderer, inputs,
-              &gameState, &world.type, &world.dayNightMode, &world.seed);
+        &gameState, &world.type, &world.dayNightMode, &world.seed);
       break;
     
     // Generate a world and present a loading screen
@@ -206,7 +195,7 @@ int gameLoop (
         player.pos.y - 63,
         player.pos.z - 64) == BLOCK_WATER;
 
-      int effectDrawDistance = drawDistance;
+      int effectDrawDistance = data_options.drawDistance;
       // Restrict view distance while in water
       if (headInWater) { effectDrawDistance = 10; }
 
@@ -409,15 +398,20 @@ int gameLoop (
       
       /* Cast rays. selectedPass passes wether or not a block is
       selected to the blockSelected variable */
+
+      // Decrease foc when in water
+      float effectFov = data_options.fov;
+      if (headInWater) { effectFov += 20; }
+      
       selectedPass = 0;
       for (int pixelX = 0; pixelX < BUFFER_W; pixelX++) {
-        float rayOffsetX = (pixelX - BUFFER_HALF_W) / fov;
+        float rayOffsetX = (pixelX - BUFFER_HALF_W) / effectFov;
         for (int pixelY = 0; pixelY < BUFFER_H; pixelY++) {
           int finalPixelColor = 0;
           int pixelMist = 255;
           int pixelShade;
           
-          float rayOffsetY = (pixelY - BUFFER_HALF_H) / fov;
+          float rayOffsetY = (pixelY - BUFFER_HALF_H) / effectFov;
 
           // Ray offset Z?
           f21 = 1.0;
@@ -566,11 +560,11 @@ int gameLoop (
                 if (
                   f33 < f26 && (
                     (
-                       ! trapMouse
+                       ! data_options.trapMouse
                       && pixelX == inputs->mouse.x / BUFFER_SCALE
                       && pixelY == inputs->mouse.y / BUFFER_SCALE
                     ) || (
-                         trapMouse
+                         data_options.trapMouse
                       && pixelX == BUFFER_HALF_W
                       && pixelY == BUFFER_HALF_H
                     )
@@ -608,7 +602,7 @@ int gameLoop (
           }
           
           // Draw inverted color crosshair
-          if (trapMouse && (
+          if (data_options.trapMouse && (
             (pixelX == BUFFER_HALF_W
               && abs(BUFFER_HALF_H - pixelY) < 4) ||
             (pixelY == BUFFER_HALF_H
@@ -623,7 +617,7 @@ int gameLoop (
               ((finalPixelColor >> 16 & 0xFF) * pixelShade) >> 8,
               ((finalPixelColor >> 8  & 0xFF) * pixelShade) >> 8,
               ((finalPixelColor       & 0xFF) * pixelShade) >> 8,
-              fogLog ? sqrt(pixelMist) * 16 : pixelMist
+              data_options.fogType ? sqrt(pixelMist) * 16 : pixelMist
             );
             
             SDL_RenderDrawPoint(renderer, pixelX, pixelY);
@@ -659,7 +653,7 @@ int gameLoop (
       switch (gamePopup) {
         // HUD
         case 0:
-          if (trapMouse) SDL_SetRelativeMouseMode(1);
+          if (data_options.trapMouse) SDL_SetRelativeMouseMode(1);
           if (guiOn) popup_hud (
             renderer, inputs, &world,
             &debugOn, &fps_now, &player
@@ -677,8 +671,7 @@ int gameLoop (
         case 2:
           tblack(renderer);
           SDL_RenderFillRect(renderer, &backgroundRect);
-          popup_options (renderer, inputs, &gamePopup, &drawDistance,
-            &trapMouse, &username);
+          popup_options (renderer, inputs, &gamePopup);
           break;
         
         // Inventory
@@ -704,14 +697,13 @@ int gameLoop (
         
         // Chat
         case 6:
-          popup_chat(renderer, inputs, &gameTime, username.buffer);
+          popup_chat(renderer, inputs, &gameTime);
           break;
       }
       break;
 
     case 8:
-      state_options (renderer, inputs, &gameState, &drawDistance, &trapMouse,
-        &username);
+      state_options (renderer, inputs, &gameState);
       break;
     
     default:
@@ -727,16 +719,21 @@ int gameLoop (
   return 1;
 }
 
+// TODO: move gameplay state into here
+void gameLoop_gameplay () {
+        
+}
+
 void gameLoop_processMovement (Inputs *inputs, int inWater) {
         // Run at half speed if in water
         static int flipFlop = 0;
         flipFlop = !flipFlop;
-        int doPhysics = !flipFlop || !inWater;
+        int doPhysics = !inWater || flipFlop;
 
         // Only process movement controls if there are no active popup
         if (gamePopup == 0) {
                 // Looking around
-                if (trapMouse) {
+                if (data_options.trapMouse) {
                         player.hRot += (float)inputs->mouse.x / 64;
                         player.vRot -= (float)inputs->mouse.y / 64;
                 } else {

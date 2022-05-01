@@ -373,6 +373,10 @@ int genChunk (
                 // Flat grass
                 ch_genFlat(blocks, yOffset);
                 break;
+        case 4:
+                // Water world
+                ch_genWater(blocks, yOffset);
+                break;
         }
 
         // Sort all chunks
@@ -479,7 +483,7 @@ void ch_genNew (
                         // What block we place down depends on the block above
                         if (
                                 ch_getBlock(blocks, x, highPoint - 1, z) ==
-                                BLOCK_AIR
+                                        BLOCK_AIR
                         ) {
                                 ch_setBlock (blocks, x, lowPoint, z,
                                         BLOCK_GRASS, 1);
@@ -544,6 +548,19 @@ void ch_genFlat (Block *blocks, int yOffset) {
                 if (y + yOffset >  32) {
                         ch_setBlock(blocks, x, y, z, BLOCK_DIRT, 1);
                 }
+        }
+}
+
+void ch_genWater (Block *blocks, int yOffset) {
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int y = 0; y < CHUNK_SIZE; y ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++)
+        if (y + yOffset > 64) {
+                ch_setBlock(blocks, x, y, z, BLOCK_SAND, 1);
+        } else if (y + yOffset > 32) {
+                ch_setBlock(blocks, x, y, z, BLOCK_WATER, 1);
+        } else {
+                ch_setBlock(blocks, x, y, z, BLOCK_AIR, 1);
         }
 }
 
