@@ -747,7 +747,8 @@ void gameLoop_processMovement (Inputs *inputs) {
                         int i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
                         int i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
 
-                        if (World_getBlock(&world, i13, i14, i15) > 0) {
+                        Block block = World_getBlock(&world, i13, i14, i15);
+                        if (block != BLOCK_AIR && block != BLOCK_WATER) {
                                 if (axis != 1) {
                                         goto label208;
                                 }
