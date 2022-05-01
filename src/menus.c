@@ -330,17 +330,25 @@ void popup_hud (
                 strnum(debugText[8], 8, ((int)player->pos.z - 64) >> 6);
 
                 // Text
-                for (i = 0; i < 9; i++) { drawBGStr(renderer, debugText[i], 0, i * 9); }
+                for (i = 0; i < 9; i++) {
+                        drawBGStr(renderer, debugText[i], 0, i * 9);
+                }
 
                 // Chunk monitor
                 #ifndef small
                 #define CHUNKMONW   10
                 #define CHUNKMONCOL 9
 
-                SDL_Rect chunkMonitorRect = {0, 1 - CHUNKMONW, CHUNKMONW, CHUNKMONW};
+                SDL_Rect chunkMonitorRect = { 
+                        .x = 0,
+                        .y = 1 - CHUNKMONW,
+                        .w = CHUNKMONW,
+                        .h = CHUNKMONW
+                };
                 for (i = 0; i < CHUNKARR_SIZE; i++) {
                         if (i % CHUNKMONCOL == 0) {
-                                chunkMonitorRect.x = BUFFER_W - ((CHUNKMONW * (CHUNKMONCOL - 1)) + 2);
+                                chunkMonitorRect.x = BUFFER_W - (
+                                        (CHUNKMONW * (CHUNKMONCOL - 1)) + 2);
                                 chunkMonitorRect.y += CHUNKMONW - 1;
                         } else {
                                 chunkMonitorRect.x += CHUNKMONW - 1;

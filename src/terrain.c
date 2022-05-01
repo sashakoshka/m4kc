@@ -290,7 +290,7 @@ int genChunk (
                                         coords.y - world->chunk[i].center.y,
                                         coords.z - world->chunk[i].center.z,
                                         2, 2, 2);
-                                if(dist > distMax) {
+                                if (dist > distMax) {
                                         distMax  = dist;
                                         distMaxI = i;
                                 }
@@ -346,7 +346,8 @@ int genChunk (
         chunk->loaded = ++ count;
 
         printf (
-                "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\tstamp: %i\taddr: %p\tgenerated\n",
+                "chunk hash: %#016x\tx: %i\ty: %i\tz:"
+                "%i\tstamp: %i\taddr: %p\tgenerated\n",
                 chunk->coordHash,
                 xOffset, yOffset, zOffset,
                 chunk->loaded, chunk
