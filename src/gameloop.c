@@ -18,41 +18,39 @@
  * psychological effects.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-long l;
 
 World world = { 0 };
 
-int
-        /* 0: Main menu
-         * 2: World select
-         * 3: World creation
-         * 4: Loading
-         * 5: Gameplay
-         * 6: World editing (renaming etc)
-         * 7: Join game
-         * 8: Options
-         */
-        gameState = 0,
+/* 0: Main menu
+ * 2: World select
+ * 3: World creation
+ * 4: Loading
+ * 5: Gameplay
+ * 6: World editing (renaming etc)
+ * 7: Join game
+ * 8: Options
+ */
+int gameState = 0;
 
-        /* 0: Gameplay
-         * 1: Pause menu
-         * 2: In-game options menu
-         * 3: Inventory
-         * 4: Advanced debug menu
-         * 5: Chunk peek
-         * 6: Chat
-         */
-        gamePopup,
+/* 0: Gameplay
+ * 1: Pause menu
+ * 2: In-game options menu
+ * 3: Inventory
+ * 4: Advanced debug menu
+ * 5: Chunk peek
+ * 6: Chat
+ */
+int gamePopup;
 
-        guiOn        = 1,
-        debugOn      = 0;
-
-char *errorMessage = NULL;
-
-static SDL_Rect backgroundRect;
+static int guiOn;
+static int debugOn;
 
 Player player = { 0 };
-Coords playerMovement = { 0.0, 0.0, 0.0 };
+
+static Coords playerMovement = { 0.0, 0.0, 0.0 };
+static SDL_Rect backgroundRect;
+static char *errorMessage = NULL;
+static long l;
 
 static int  screenshot ();
 static void gameLoop_gameplay        (SDL_Renderer *, Inputs *);
@@ -78,6 +76,9 @@ void gameLoop_resetGame () {
         player.pos.z = 96.5;
 
         gamePopup = 0;
+        
+        guiOn   = 1;
+        debugOn = 0;
 
         backgroundRect.x = 0;
         backgroundRect.y = 0;
