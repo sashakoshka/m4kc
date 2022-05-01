@@ -195,14 +195,19 @@ int gameLoop (
       }
       */
 
-      ;int inWater = World_getBlock (&world,
+      ;int headInWater = World_getBlock (&world,
         player.pos.x - 64,
         player.pos.y - 64,
         player.pos.z - 64) == BLOCK_WATER;
 
+      int feetInWater = World_getBlock (&world,
+        player.pos.x - 64,
+        player.pos.y - 63,
+        player.pos.z - 64) == BLOCK_WATER;
+
       int effectDrawDistance = drawDistance;
       // Restrict view distance while in water
-      if (inWater) { effectDrawDistance = 10; }
+      if (headInWater) { effectDrawDistance = 10; }
 
       // Update directional vectors
       player.vectorH.x = sin(player.hRot);
@@ -218,7 +223,7 @@ int gameLoop (
       timeCoef  = (timeCoef + 1) / 2;
 
       // Change ambient color depending on if we are in the water or the air
-      if (inWater) {
+      if (headInWater) {
         SDL_SetRenderDrawColor (
           renderer,
           48  * timeCoef,
@@ -256,7 +261,7 @@ int gameLoop (
       while (SDL_GetTicks() - l > 10L) {
         gameTime++;
         l += 10L;
-        gameLoop_processMovement(inputs, inWater);
+        gameLoop_processMovement(inputs, feetInWater);
       }
       
       if (!gamePopup) {
@@ -513,7 +518,7 @@ int gameLoop (
               
               if (
                 intersectedBlock != BLOCK_AIR &&
-                !(inWater && intersectedBlock == BLOCK_WATER)
+                !(headInWater && intersectedBlock == BLOCK_WATER)
               ) {
                 // I'm guessing this eldritch horror figures out what pixel of
                 // the block we hit
@@ -616,7 +621,7 @@ int gameLoop (
       }
 
       // Make camera blue if in water
-      if (inWater) {
+      if (headInWater) {
         SDL_SetRenderDrawColor(renderer, 16, 32, 255, 128);
         SDL_RenderFillRect(renderer, &backgroundRect);
       }
@@ -826,7 +831,7 @@ void gameLoop_processMovement (Inputs *inputs, int inWater) {
         if (inWater && doPhysics) {
                 if (
                         inputs->keyboard.space > 0 &&
-                        (playerMovement.y > 0)   &&
+                        (playerMovement.y > -0.05)   &&
                         !gamePopup
                 ) {
                         inputs->keyboard.space = 0;
