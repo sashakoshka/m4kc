@@ -807,7 +807,11 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 blockX,
                                 blockY,
                                 blockZ);
-                        if (block != BLOCK_AIR && block != BLOCK_WATER) {
+                        if (
+                                block != BLOCK_AIR &&
+                                block != BLOCK_WATER &&
+                                block != BLOCK_TALL_GRASS
+                        ) {
                                 if (axis != 1) {
                                         goto label208;
                                 }

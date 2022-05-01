@@ -574,7 +574,9 @@ void ch_genDev (Block *blocks, int xOffset, int yOffset, int zOffset) {
 
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
-                ch_setBlock(blocks, x, 3, z, BLOCK_PLAYER_HEAD, 1);
-                ch_setBlock(blocks, x, 4, z, BLOCK_PLAYER_BODY, 1);
+                if (randm(4) == 0) {
+                        ch_setBlock(blocks, x, 3, z, BLOCK_TALL_GRASS, 1);
+                }
+                ch_setBlock(blocks, x, 4, z, BLOCK_DIRT, 1);
         }
 }

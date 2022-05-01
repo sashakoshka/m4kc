@@ -16,6 +16,7 @@ typedef u_int8_t Block;
 #define BLOCK_LEAVES      8
 #define BLOCK_COBBLESTONE 9
 #define BLOCK_WATER       10
+#define BLOCK_TALL_GRASS  11
 
 #define BLOCK_PLAYER_HEAD 14
 #define BLOCK_PLAYER_BODY 15

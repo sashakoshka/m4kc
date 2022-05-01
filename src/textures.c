@@ -1,5 +1,5 @@
+#include <math.h>
 #include "textures.h"
-#include<stdio.h>
 
 int textures[TEXTURES_SIZE] = { 0 };
 const u_int16_t cobbleCracks[BLOCK_TEXTURE_H] = {
@@ -22,6 +22,7 @@ const u_int16_t cobbleCracks[BLOCK_TEXTURE_H] = {
 };
 
 static void genTexture (Block);
+static inline float determ2d (float, float);
 
 /* genTextures
  * Takes in a seed and an array where the textures should go.
@@ -147,16 +148,31 @@ static void genTexture (Block blockId) {
                                         8, 2) * 8;
                         }
                         break;
-                }
-
-                if (blockId == BLOCK_LEAVES) {
+                
+                case BLOCK_LEAVES:
                         baseColor = 0x50D937;
 
-                        // Randomly punch holes in the texture
+                        // Make transparent gaps between leaves
                         if (randm(2) == 0) {
                                 baseColor = 0;
                                 brightness = 255;
                         }
+                        break;
+                        
+                case BLOCK_TALL_GRASS:
+                        baseColor = 0x50D937;
+
+                        // Make transparent gaps between blades of grass, and
+                        // make top transparent
+                        if (
+                                determ2d(x, y / 3) < 0.2 ||
+                                y < BLOCK_TEXTURE_H      ||
+                                randm(y - BLOCK_TEXTURE_H + 1) < 2
+                        ) {
+                                baseColor = 0;
+                                brightness = 255;
+                        }
+                        break;
                 }
 
                 // Darken bottom of blocks
@@ -176,4 +192,12 @@ static void genTexture (Block blockId) {
                         blockId * BLOCK_TEXTURE_W * BLOCK_TEXTURE_H * 3
                 ] = finalColor;
         }
+}
+
+/* determ2d
+ * A deterministic pseudorandom noise generator separate from randm. Takes in
+ * an x and y value.
+ */
+static inline float determ2d (float x, float y) {
+        return fmod(fabs(tan(9 * (float)x + 1 + y)), 1);
 }
