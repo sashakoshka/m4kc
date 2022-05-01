@@ -318,7 +318,7 @@ int drawSlot (
         i = slot->blockid * 256 * 3;
         for (yy = 0; yy < 16; yy++) {
                 for (xx = 0; xx < 16; xx++) {
-                        color = textures[i];
+                        color = textures[i + BLOCK_TEXTURE_H * BLOCK_TEXTURE_W];
                         SDL_SetRenderDrawColor(
                                 renderer,
                                 (color >> 16 & 0xFF),
