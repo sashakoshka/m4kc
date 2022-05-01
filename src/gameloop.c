@@ -796,23 +796,28 @@ void gameLoop_processMovement (Inputs *inputs, int inWater) {
         // Detect collisions and jump
         for (int axis = 0; axis < 3; axis++) {
                 if (!doPhysics) { break; }
-                
-                float f16 = player.pos.x +
-                        playerMovement.x * ((axis + 2) % 3 / 2);
-                float f17 = player.pos.y +
-                        playerMovement.y * ((axis + 1) % 3 / 2);
-                float f19 = player.pos.z +
-                        playerMovement.z * ((axis + 3) % 3 / 2);
+
+                Coords playerPosTry = {
+                        player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2),
+                        player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2),
+                        player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2),
+                };
 
                 for (int i12 = 0; i12 < 12; i12++) {
-                        int i13 = (int)(f16 + (i12 >> 0 & 0x1) * 0.6 - 0.3)  -
-                                64;
-                        int i14 = (int)(f17 + ((i12 >> 2) - 1) * 0.8 + 0.65) -
-                                64;
-                        int i15 = (int)(f19 + (i12 >> 1 & 0x1) * 0.6 - 0.3)  -
-                                64;
+                        int blockX = (int) (
+                                playerPosTry.x +
+                                (i12 >> 0 & 0x1) * 0.6 - 0.3) - 64;
+                        int blockY = (int) (
+                                playerPosTry.y +
+                                ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
+                        int blockZ = (int) (
+                                playerPosTry.z +
+                                (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
 
-                        Block block = World_getBlock(&world, i13, i14, i15);
+                        Block block = World_getBlock (&world,
+                                blockX,
+                                blockY,
+                                blockZ);
                         if (block != BLOCK_AIR && block != BLOCK_WATER) {
                                 if (axis != 1) {
                                         goto label208;
@@ -831,9 +836,7 @@ void gameLoop_processMovement (Inputs *inputs, int inWater) {
                         }
                 }
 
-                player.pos.x = f16;
-                player.pos.y = f17;
-                player.pos.z = f19;
+                player.pos = playerPosTry;
 
                 label208:;
         }
