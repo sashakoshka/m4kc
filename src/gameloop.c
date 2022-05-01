@@ -125,6 +125,9 @@ int gameLoop (
         blockSelected = 0,
         selectedPass;
 
+  int inWater = World_getBlock (&world,
+        player.pos.x - 64, player.pos.y - 64, player.pos.z - 64) == BLOCK_WATER;
+
   static u_int32_t fps_lastmil  = 0,
                    fps_count    = 0,
                    fps_now      = 0;
@@ -493,7 +496,10 @@ int gameLoop (
                 goto chunkNull;
               }
               
-              if (intersectedBlock != BLOCK_AIR) {
+              if (
+                intersectedBlock != BLOCK_AIR &&
+                !(inWater && intersectedBlock == BLOCK_WATER)
+              ) {
                 // I'm guessing this eldritch horror figures out what pixel of
                 // the block we hit
                 i6 = (int)((f34 + f36) * 16.0) & 0xF;
