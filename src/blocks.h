@@ -1,4 +1,9 @@
 #pragma once
+#include <stdlib.h>
+
+typedef u_int8_t Block;
+
+#define NUMBER_OF_BLOCKS 16
 
 #define BLOCK_AIR         0
 #define BLOCK_GRASS       1

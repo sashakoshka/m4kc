@@ -3,7 +3,11 @@
 #include <math.h>
 #include <stdlib.h>
 #include "utility.h"
+#include "blocks.h"
 
-extern int textures[12288];
-void genTextures(unsigned int);
-void genTexture (int);
+#define BLOCK_TEXTURE_W  16
+#define BLOCK_TEXTURE_H  16
+#define TEXTURES_SIZE NUMBER_OF_BLOCKS * BLOCK_TEXTURE_W * BLOCK_TEXTURE_H * 3
+
+extern int textures[TEXTURES_SIZE];
+void genTextures (unsigned int);

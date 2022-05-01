@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include "blocks.h"
 #include "coords.h"
 #include "utility.h"
 
@@ -12,7 +13,6 @@
 #define CHUNK_SIZE 64
 #define CHUNK_DATA_SIZE CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE
 
-typedef u_int8_t      Block;
 typedef struct _Chunk Chunk;
 typedef struct _World World;
 
