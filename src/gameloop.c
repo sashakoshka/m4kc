@@ -821,6 +821,18 @@ void gameLoop_processMovement (Inputs *inputs, int inWater) {
 
                 label208:;
         }
+
+        // Swim in water
+        if (inWater && doPhysics) {
+                if (
+                        inputs->keyboard.space > 0 &&
+                        (playerMovement.y > 0)   &&
+                        !gamePopup
+                ) {
+                        inputs->keyboard.space = 0;
+                        playerMovement.y = -0.1;
+                }
+        }
 }
 
 int screenshot (SDL_Renderer *renderer) {
