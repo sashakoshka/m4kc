@@ -413,14 +413,21 @@ void ch_genNew (
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int y = 0; y < CHUNK_SIZE; y ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
-                if (y + yOffset > heightmap[x][z] + 4)
+                if (y + yOffset > heightmap[x][z] + 4) {
                         ch_setBlock(blocks, x, y, z, BLOCK_STONE);
-                else if (y + yOffset > heightmap[x][z])
+                } else if (y + yOffset > heightmap[x][z]) {
                         ch_setBlock(blocks, x, y, z, BLOCK_DIRT);
-                else if (y + yOffset == heightmap[x][z])
-                        ch_setBlock(blocks, x, y, z, BLOCK_GRASS);
-                else
+                } else if (y + yOffset == heightmap[x][z]) {
+                        if (y + yOffset < 49) {
+                                ch_setBlock(blocks, x, y, z, BLOCK_GRASS);
+                        } else {
+                                ch_setBlock(blocks, x, y, z, BLOCK_SAND);
+                        }
+                } else if (y + yOffset < 50) {
                         ch_setBlock(blocks, x, y, z, BLOCK_AIR);
+                } else {
+                        ch_setBlock(blocks, x, y, z, BLOCK_WATER);
+                }
         }
 
         // Generate caves
@@ -449,7 +456,6 @@ void ch_genNew (
                         0.0625
                 ) * 4 + 2 - (randm(1) > 0);
 
-                // Cave starts at lowPoint and 
                 int lowPoint  = 64 - elevation;
                 int highPoint = 64 - elevation - height;
 
@@ -535,7 +541,6 @@ void ch_genDev (Block *blocks, int xOffset, int yOffset, int zOffset) {
 
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
-                ch_setBlock(blocks, x, 3, z, BLOCK_PLAYER_BODY);
-                ch_setBlock(blocks, x, 4, z, BLOCK_PLAYER_HEAD);
+                ch_setBlock(blocks, x, 3, z, BLOCK_WATER);
         }
 }

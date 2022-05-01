@@ -54,7 +54,10 @@ void genTexture (int blockId) {
                         noiseScale = 140;
                 }
 
-                if (blockId != BLOCK_STONE || randm(3) == 0)
+                int needAltNoise =
+                        blockId == BLOCK_STONE ||
+                        blockId == BLOCK_WATER;
+                if (!needAltNoise || randm(3) == 0)
                         k = noiseFloor - randm(noiseScale);
 
                 if (
@@ -100,6 +103,10 @@ void genTexture (int blockId) {
                 case BLOCK_COBBLESTONE:
                         baseColor = 0x999999;
                         k -= ((cobbleCracks[y & 0xF] >> x) & 0b1) * 128;
+                        break;
+
+                case BLOCK_WATER:
+                        baseColor = 0x3355EE;
                         break;
                         
                 case BLOCK_PLAYER_HEAD:
