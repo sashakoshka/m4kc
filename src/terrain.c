@@ -496,6 +496,7 @@ void ch_genNew (
         }
 
         // Generate pyramids
+        srand(seed + 1);
         for (int i = randm(2); i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
@@ -508,6 +509,7 @@ void ch_genNew (
         }
         
         // Generate trees
+        srand(seed + 2);
         for (int i = randm(16) + 64; i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
@@ -522,6 +524,19 @@ void ch_genNew (
                         0
                 );
 
+        }
+        
+        // Plant tall grass
+        srand(seed + 3);
+        for (int x = 0; x < CHUNK_SIZE; x ++)
+        for (int z = 0; z < CHUNK_SIZE; z ++)
+        if (
+                ch_getBlock(blocks, x, heightmap[x][z], z) == BLOCK_GRASS &&
+                randm(2) == 0
+        ) {
+                ch_setBlock (blocks,
+                        x, heightmap[x][z] - 1, z,
+                        BLOCK_TALL_GRASS, 0);
         }
 }
 
