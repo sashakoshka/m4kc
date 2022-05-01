@@ -55,5 +55,6 @@ struct _Chunk {
 struct _World {
         int type;
         int seed;
+        int dayNightMode;
         Chunk chunk[CHUNKARR_SIZE];
 };

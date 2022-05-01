@@ -155,7 +155,8 @@ int gameLoop (
     
     // World creation menu
     case 3:
-      state_newWorld(renderer, inputs, &gameState, &world.type, &world.seed);
+      state_newWorld (renderer, inputs,
+              &gameState, &world.type, &world.seed, &world.dayNightMode);
       break;
     
     // Generate a world and present a loading screen
@@ -217,10 +218,20 @@ int gameLoop (
       
       // Skybox, basically
       float timeCoef;
-      timeCoef  = (float)(gameTime % 102944) / 16384;
-      timeCoef  = sin(timeCoef);
-      timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
-      timeCoef  = (timeCoef + 1) / 2;
+      switch (world.dayNightMode) {
+        case 0:
+          timeCoef  = (float)(gameTime % 102944) / 16384;
+          timeCoef  = sin(timeCoef);
+          timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
+          timeCoef  = (timeCoef + 1) / 2;
+          break;
+        case 1:
+          timeCoef = 1;
+          break;
+        case 2:
+          timeCoef = 0;
+          break;
+      }
 
       // Change ambient color depending on if we are in the water or the air
       if (headInWater) {

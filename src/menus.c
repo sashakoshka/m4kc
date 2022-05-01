@@ -53,10 +53,16 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
 }
 
 const char *terrainNames[16] = {
-        "Classic terrain",
-        "Natural terrain",
-        "Flat stone",
-        "Flat grass"
+        "Classic Terrain",
+        "Natural Terrain",
+        "Flat Stone",
+        "Flat Grass"
+};
+
+const char *dayNightModes[16] = {
+        "Day and Night",
+        "Always Day",
+        "Always Night",
 };
 
 /* state_newWorld
@@ -68,9 +74,12 @@ void state_newWorld (
         Inputs *inputs,
         int *gameState,
         int *type,
+        int *dayNightMode,
         int *seed
 ) {
-        static int typeSelect = 1;
+        static int typeSelect     = 1;
+        static int dayNightSelect = 0;
+        
         static char buffer[16];
         static InputBuffer seedInput = {
                 .buffer = buffer,
@@ -100,8 +109,16 @@ void state_newWorld (
                 
         }
 
+        if (button(renderer, dayNightModes[dayNightSelect],
+                BUFFER_HALF_W - 64, 64, 128,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                dayNightSelect = (dayNightSelect + 1) % 3;
+        }
+
         if (button(renderer, "Cancel",
-                BUFFER_HALF_W - 64, 64, 61,
+                BUFFER_HALF_W - 64, 86, 61,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -109,12 +126,13 @@ void state_newWorld (
         }
 
         if (button(renderer, "Generate",
-                BUFFER_HALF_W + 3, 64, 61,
+                BUFFER_HALF_W + 3, 86, 61,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *type = typeSelect;
-                *gameState = 4;
+                *type         = typeSelect;
+                *dayNightMode = dayNightSelect;
+                *gameState    = 4;
 
                 // Get numeric seed
                 *seed = 0;
