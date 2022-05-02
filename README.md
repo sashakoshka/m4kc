@@ -22,7 +22,7 @@ This project is an attempt to translate the game into C in order to increase its
 * Keeping the final executable under 20 KB (on Linux, with the system I have set up in `build.sh`) ✅️
 * More blocks 🏗️
 * Perlin noise terrain generation ✅️
-  * Water 🏗️
+  * Water ✅️
   * Biomes 🏗️
   * Caves ✅️
 * Infinite worlds, horizontally and vertically too 🏗️
