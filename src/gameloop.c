@@ -20,7 +20,6 @@
 
 World world = { 0 };
 
-
 int gameState = STATE_TITLE;
 int gamePopup;
 
@@ -34,7 +33,6 @@ static SDL_Rect backgroundRect;
 static char *errorMessage = NULL;
 static long l;
 
-static int  screenshot ();
 static void gameLoop_gameplay        (SDL_Renderer *, Inputs *);
 static void gameLoop_drawPopup       (SDL_Renderer *, Inputs *);
 static void gameLoop_processMovement (Inputs *, int);
@@ -648,17 +646,21 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   
   inputs->mouse.x /= BUFFER_SCALE;
   inputs->mouse.y /= BUFFER_SCALE;
+
+  // Draw current popup
+  gameLoop_drawPopup(renderer, inputs);
   
   // If we need to take a screenshot, do so
   if (inputs->keyboard.f2) {
     inputs->keyboard.f2 = 0;
-    screenshot(renderer);
+    char path [PATH_MAX];
+    int err = data_getScreenshotPath(path);
+    printf("%s\t%i\n", path, err);
+    gameLoop_screenshot(renderer, err ? NULL : path);
   }
-
-  gameLoop_drawPopup(renderer, inputs);
 }
 
-static void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
+void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
         // In-game menus
         if (gamePopup != 0) {
                 SDL_SetRelativeMouseMode(0);
@@ -847,7 +849,7 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
         }
 }
 
-static int screenshot (SDL_Renderer *renderer) {
+int gameLoop_screenshot (SDL_Renderer *renderer, const char *path) {
         SDL_Surface *grab = SDL_CreateRGBSurfaceWithFormat (
                 0, BUFFER_W * BUFFER_SCALE, BUFFER_H * BUFFER_SCALE,
                 32, SDL_PIXELFORMAT_ARGB8888
@@ -858,10 +860,7 @@ static int screenshot (SDL_Renderer *renderer) {
                 grab->pixels, grab->pitch
         );
 
-        char path [PATH_MAX];
-        int err = data_getScreenshotPath(path);
-        printf("%s\t%i\n", path, err);
-        if (err) {
+        if (path == NULL) {
                 chatAdd("Couldn't save screenshot");
                 return 1;
         }

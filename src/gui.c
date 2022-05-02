@@ -278,7 +278,7 @@ int manageInputBuffer (InputBuffer *inputBuffer, Inputs *inputs) {
         } else if (inputs->keySym == SDLK_RETURN && inputBuffer->cursor > 0) {
                 return 1;
         } else if (
-                inputs->keyTyped > 31 &&
+                inputs->keyTyped > 31  &&
                 inputs->keyTyped < 127 &&
                 inputBuffer->cursor < inputBuffer->len - 1
         ) {
