@@ -94,10 +94,15 @@ int gameLoop (
                 if (state_title(renderer, inputs, &gameState)) return 0;
                 break;
 
+        case STATE_SELECT_WORLD:
+                // World creation menu
+                state_selectWorld(renderer, inputs,&gameState);
+                break;
+
         case STATE_NEW_WORLD:
                 // World creation menu
-                state_newWorld (renderer, inputs,
-                &gameState, &world.type, &world.dayNightMode, &world.seed);
+                state_newWorld (renderer, inputs, &gameState,
+                        &world.type, &world.dayNightMode, &world.seed);
                 break;
 
         case STATE_LOADING:

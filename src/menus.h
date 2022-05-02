@@ -4,11 +4,15 @@
 #include "terrain.h"
 #include "main.h"
 
-#define STATE_TITLE     0
-#define STATE_NEW_WORLD 3
-#define STATE_LOADING   4
-#define STATE_GAMEPLAY  5
-#define STATE_OPTIONS   8
+#define STATE_TITLE        0
+#define STATE_ABOUT        1
+#define STATE_SELECT_WORLD 2
+#define STATE_NEW_WORLD    3
+#define STATE_LOADING      4
+#define STATE_GAMEPLAY     5
+#define STATE_EDIT_WORLD   6
+#define STATE_JOIN_GAME    7
+#define STATE_OPTIONS      8
 
 #define POPUP_HUD            0
 #define POPUP_PAUSE          1
@@ -18,12 +22,13 @@
 #define POPUP_CHUNK_PEEK     5
 #define POPUP_CHAT           6
 
-int  state_title      (SDL_Renderer *, Inputs *, int *);
-void state_newWorld   (SDL_Renderer *, Inputs *, int *, int *, int *, int *);
-int  state_loading    (SDL_Renderer *, World *, unsigned int, Coords);
-void state_options    (SDL_Renderer *, Inputs *, int *);
-void state_egg        (SDL_Renderer *, Inputs *, int *);
-int  state_err        (SDL_Renderer *, Inputs *, char *);
+int  state_title       (SDL_Renderer *, Inputs *, int *);
+void state_selectWorld (SDL_Renderer *, Inputs *, int *);
+void state_newWorld    (SDL_Renderer *, Inputs *, int *, int *, int *, int *);
+int  state_loading     (SDL_Renderer *, World *, unsigned int, Coords);
+void state_options     (SDL_Renderer *, Inputs *, int *);
+void state_egg         (SDL_Renderer *, Inputs *, int *);
+int  state_err         (SDL_Renderer *, Inputs *, char *);
 
 void popup_hud (
         SDL_Renderer *, Inputs *, World *world,

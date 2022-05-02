@@ -35,7 +35,7 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = 3;
+                *gameState = STATE_SELECT_WORLD;
         }
 
         if (button(renderer, "Options",
@@ -43,7 +43,7 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = 8;
+                *gameState = STATE_OPTIONS;
         }
 
         if (button(renderer, "Quit Game",
@@ -55,6 +55,44 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
         }
 
         return 0;
+}
+
+void state_selectWorld (
+        SDL_Renderer *renderer,
+        Inputs *inputs,
+        int *gameState
+) {
+        SDL_Rect listBackground;
+        listBackground.x = 0;
+        listBackground.y = 0;
+        listBackground.w = BUFFER_W;
+        listBackground.h = BUFFER_H - 28;
+        
+        inputs->mouse.x /= BUFFER_SCALE;
+        inputs->mouse.y /= BUFFER_SCALE;
+
+        dirtBg(renderer);
+        tblack(renderer);
+        SDL_RenderFillRect (renderer, &listBackground);
+        SDL_RenderDrawLine (renderer,
+                0,        BUFFER_H - 29,
+                BUFFER_W, BUFFER_H - 29);
+
+        if (button(renderer, "Cancel",
+                BUFFER_HALF_W - 64, BUFFER_H - 22, 61,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *gameState = STATE_TITLE;
+        }
+
+        if (button(renderer, "New",
+                BUFFER_HALF_W + 3, BUFFER_H - 22, 61,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *gameState = STATE_NEW_WORLD;
+        }
 }
 
 const char *terrainNames[16] = {
@@ -128,7 +166,7 @@ void state_newWorld (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = STATE_TITLE;
+                *gameState = STATE_SELECT_WORLD;
         }
 
         if (button(renderer, "Generate",
@@ -172,7 +210,7 @@ int state_loading (
         IntCoords chunkLoadCoords;
         static int chunkLoadNum = 0;
         
-        if(chunkLoadNum < CHUNKARR_SIZE) {
+        if (chunkLoadNum < CHUNKARR_SIZE) {
                 chunkLoadCoords.x =
                         ((chunkLoadNum % CHUNKARR_DIAM) -
                         CHUNKARR_RAD) * 64;
@@ -476,19 +514,19 @@ void popup_inventory (
         Player *player,
         int *gamePopup
 ) {     
-        static SDL_Rect inventoryRect;
+        SDL_Rect inventoryRect;
         inventoryRect.x = BUFFER_HALF_W - 77;
         inventoryRect.y = (BUFFER_H - 18) / 2 - 26;
         inventoryRect.w = 154;
         inventoryRect.h = 52;
 
-        static SDL_Rect hotbarRect;
+        SDL_Rect hotbarRect;
         hotbarRect.x = BUFFER_HALF_W - 77;
         hotbarRect.y = BUFFER_H - 18;
         hotbarRect.w = 154;
         hotbarRect.h = 18;
 
-        static SDL_Rect offhandRect;
+        SDL_Rect offhandRect;
         offhandRect.x = 0;
         offhandRect.y = BUFFER_H - 18;
         offhandRect.w = 18;
