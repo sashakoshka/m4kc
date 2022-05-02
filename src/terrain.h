@@ -48,7 +48,7 @@ void ch_genDev     (Block *, int, int, int);
  */
 struct _Chunk {
         IntCoords center;
-        int coordHash;
+        u_int32_t coordHash;
         int loaded;
         Block *blocks;
 };

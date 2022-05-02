@@ -742,7 +742,7 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, u_int64_t gameTime) {
  */
 void popup_pause (
         SDL_Renderer *renderer, Inputs *inputs,
-        int *gamePopup, int *gameState
+        int *gamePopup, int *gameState, World *world
 ) {
         if (button(renderer, "Back to Game",
                 BUFFER_HALF_W - 64, 20, 128,
@@ -760,12 +760,16 @@ void popup_pause (
                 *gamePopup = POPUP_OPTIONS;
         }
 
-        if (button(renderer, "Quit to Title",
+        if (button(renderer, "Save and Quit",
                 BUFFER_HALF_W - 64, 64, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = STATE_TITLE;
+                if (World_save(world)) {
+                        gameLoop_error("Could not save world");
+                } else {
+                        *gameState = STATE_TITLE;
+                }
         }
 }
 

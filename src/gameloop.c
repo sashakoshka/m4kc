@@ -683,7 +683,7 @@ void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
                 // Pause menu
                 tblack(renderer);
                 SDL_RenderFillRect(renderer, &backgroundRect);
-                popup_pause(renderer, inputs, &gamePopup, &gameState);
+                popup_pause(renderer, inputs, &gamePopup, &gameState, &world);
                 break;
 
         case POPUP_OPTIONS:

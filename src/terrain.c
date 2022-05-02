@@ -1,5 +1,8 @@
+#include <stdio.h>
+#include "gameloop.h"
 #include "terrain.h"
 #include "blocks.h"
+#include "data.h"
 
 static void chunkFilePath (World *, char *, int, int, int);
 
@@ -25,6 +28,31 @@ void World_sort (World* world) {
  * failure.
  */
 int World_save (World *world) {
+        if (data_ensureDirectoryExists(world->path)) { return 1; }
+
+        for (int index = 0; index < CHUNKARR_SIZE; index ++) {
+                Chunk *chunk = &world->chunk[index];
+
+                if (chunk->loaded) {
+                        char path[PATH_MAX];
+                        chunkFilePath (
+                                world, path,
+                                chunk->center.x - 32,
+                                chunk->center.y - 32,
+                                chunk->center.z - 32);
+                        
+                        FILE *file = fopen(path, "wb");
+                        if (file == NULL) { return 2; }
+                        
+                        fwrite (
+                                chunk->blocks,
+                                sizeof(Block),
+                                CHUNK_DATA_SIZE,
+                                file);
+                        fclose(file);
+                }
+
+        }
         return 0;
 }
 
@@ -81,7 +109,7 @@ Chunk *chunkLookup (World *world, int x, int y, int z) {
                 ago.y = y;
                 ago.z = z;
 
-                int hash = chunkHash(x, y, z);
+                u_int32_t hash = chunkHash(x, y, z);
 
                 // Look up chunk using a binary search
                 int first, middle, last;
@@ -343,7 +371,6 @@ int genChunk (
         // TODO: check if chunk exists on disk, and load if it does
         char path[PATH_MAX];
         chunkFilePath(world, path, xOffset, yOffset, zOffset);
-        puts(path);
 
         for (int i = 0; i < CHUNK_DATA_SIZE; i++) {
                 blocks[i] = 0;
@@ -367,18 +394,22 @@ int genChunk (
         chunk->coordHash ++;
 
         chunk->center.x = xOffset + 32;
-        chunk->center.y = xOffset + 32;
-        chunk->center.z = xOffset + 32;
+        chunk->center.y = yOffset + 32;
+        chunk->center.z = zOffset + 32;
 
         // What we have here won't cause a segfault, so it is safe to
         // mark the chunk as loaded and set its stamp.
         chunk->loaded = ++ count;
 
         // printf (
-                // "chunk hash: %#016x\tx: %i\ty: %i\tz:"
-                // "%i\tstamp: %i\taddr: %p\tgenerated\n",
+                // "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\t"
+                // "cx: %i\tcy: %i\tcz: %i\t"
+                // "stamp: %i\taddr: %p \tgenerated\n",
                 // chunk->coordHash,
                 // xOffset, yOffset, zOffset,
+                // chunk->center.x,
+                // chunk->center.y,
+                // chunk->center.z,
                 // chunk->loaded, chunk
         // );
         
@@ -525,7 +556,7 @@ void ch_genNew (
         }
 
         // Generate pyramids
-        srand(seed + 1);
+        srand(seed * (xOffset * yOffset * zOffset + 2));
         for (int i = randm(2); i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
@@ -538,7 +569,7 @@ void ch_genNew (
         }
         
         // Generate trees
-        srand(seed + 2);
+        srand(seed * (xOffset * yOffset * zOffset + 3));
         for (int i = randm(16) + 64; i > 0; i --) {
                 int x = randm(64);
                 int z = randm(64);
@@ -556,7 +587,7 @@ void ch_genNew (
         }
         
         // Plant tall grass
-        srand(seed + 3);
+        srand(seed * (xOffset * yOffset * zOffset + 4));
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++)
         if (

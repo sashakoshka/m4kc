@@ -36,7 +36,7 @@ void popup_hud (
 );
 void popup_inventory  (SDL_Renderer *, Inputs *, Player *, int *);
 void popup_chat       (SDL_Renderer *, Inputs *, u_int64_t);
-void popup_pause      (SDL_Renderer *, Inputs *, int *, int *);
+void popup_pause      (SDL_Renderer *, Inputs *, int *, int *, World *);
 void popup_options    (SDL_Renderer *, Inputs *, int *);
 void popup_debugTools (SDL_Renderer *, Inputs *, int *);
 void popup_chunkPeek  (SDL_Renderer *, Inputs *, World *, int *, Player *);

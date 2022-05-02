@@ -179,6 +179,7 @@ int data_refreshWorldList () {
                         last = data_worldList;
                 } else {
                         last->next = item;
+                        last = item;
                 }
 
                 // Get thumbnail
@@ -190,10 +191,9 @@ int data_refreshWorldList () {
                         item->name);
 
                 SDL_Surface *image = SDL_LoadBMP(path);
-                if (!image) { return 4; }
-
+                
                 // Do not accept vertical images
-                if (image->h <= image->w) {
+                if (image != NULL && image->h <= image->w) {
                         int scale = image->h / 16;
                         int *pixel = item->thumbnail.buffer;
                         for (int y = 0; y < 16; y ++)
