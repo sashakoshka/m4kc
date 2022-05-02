@@ -1,7 +1,8 @@
 #include <time.h>
 #include "menus.h"
-#include "blocks.h"
 #include "data.h"
+#include "blocks.h"
+#include "gameloop.h"
 
 static int menu_optionsMain (SDL_Renderer *, Inputs *);
 
@@ -35,7 +36,11 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                *gameState = STATE_SELECT_WORLD;
+                if (data_refreshWorldList()) {
+                        gameLoop_error("Cannot refresh world list");
+                } else {
+                        *gameState = STATE_SELECT_WORLD;
+                }
         }
 
         if (button(renderer, "Options",

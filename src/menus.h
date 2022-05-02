@@ -31,7 +31,7 @@ void state_egg         (SDL_Renderer *, Inputs *, int *);
 int  state_err         (SDL_Renderer *, Inputs *, char *);
 
 void popup_hud (
-        SDL_Renderer *, Inputs *, World *world,
+        SDL_Renderer *, Inputs *, World *,
         int *, u_int32_t *, Player *
 );
 void popup_inventory  (SDL_Renderer *, Inputs *, Player *, int *);

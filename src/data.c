@@ -2,11 +2,14 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <limits.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
-Options data_options = { 0 };
+Options data_options     = { 0 };
+WorldListItem *worldList = NULL;
 
 char directoryName            [PATH_MAX] = { 0 };
 char settingsFileName         [PATH_MAX] = { 0 };
@@ -136,5 +139,47 @@ int data_getWorldPath (char *path, const char *worldName) {
         if (data_ensureDirectoryExists(worldsDirectoryName)) { return 1; }
 
         snprintf(path, PATH_MAX, "%s/%s", worldsDirectoryName, worldName);
+        return 0;
+}
+
+/* data_refreshWorldList
+ * Regreshes the world list, clearing the previous one. Reads world names and
+ * thumbnails from ~/.m4kc/worlds
+ */
+int data_refreshWorldList () {
+        // Free previous list
+        WorldListItem *item = worldList;
+        while (item != NULL) {
+                WorldListItem *next = item->next;
+                free(item);
+                item = next;
+        }
+
+        if (data_ensureDirectoryExists(worldsDirectoryName)) { return 1; }
+        
+        // Iterate through worlds directory
+        struct dirent *directoryEntry;
+        DIR *directory = opendir(worldsDirectoryName);
+        if (!directory) { return 2; }
+
+        WorldListItem *last = NULL;
+        while ((directoryEntry = readdir(directory)) != NULL) {
+                if (directoryEntry->d_name[0] == '.') { continue; }
+
+                // Allocate new list item
+                WorldListItem *item = calloc(sizeof(WorldListItem), 1);
+                if (item == NULL) { return 3; }
+                
+                strncpy(item->name, directoryEntry->d_name, NAME_MAX);
+                if (last == NULL) {
+                        worldList = item;
+                        last = worldList;
+                } else {
+                        last->next = item;
+                }
+        }
+        
+        closedir(directory);
+
         return 0;
 }
