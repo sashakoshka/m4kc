@@ -18,6 +18,8 @@ char screenshotsDirectoryName [PATH_MAX] = { 0 };
 
 char username[8] = "guest";
 
+static u_int32_t getSurfacePixel (SDL_Surface *, int, int);
+
 /* data_init
  * Initializes the data module. Returns zero on success, nonzero on failure.
  */
@@ -178,9 +180,43 @@ int data_refreshWorldList () {
                 } else {
                         last->next = item;
                 }
+
+                // Get thumbnail
+                char path[PATH_MAX];
+                snprintf (
+                        path, PATH_MAX,
+                        "%s/%s/thumbnail.bmp",
+                        worldsDirectoryName,
+                        item->name);
+
+                SDL_Surface *image = SDL_LoadBMP(path);
+                if (!image) { return 4; }
+
+                if (image->h < image->w) {
+                        int scale = image->h / 16;
+                        int *pixel = item->thumbnail.buffer;
+                        for (int y = 0; y < 16; y ++)
+                        for (int x = 0; x < 16; x ++) {
+                                *pixel = getSurfacePixel (image,
+                                        x * scale,
+                                        y * scale);
+                                pixel ++;
+                        }
+                }
+
+                SDL_FreeSurface(image);
         }
         
         closedir(directory);
 
         return 0;
+}
+
+/* getSurfacePixel
+ * Gets a pixel value from an SDL surface at the specified coordinates.
+ */
+static u_int32_t getSurfacePixel (SDL_Surface *surface, int x, int y) {
+        return *((u_int32_t *) ((u_int8_t *) surface->pixels
+                + y * surface->pitch
+                + x * surface->format->BytesPerPixel));
 }
