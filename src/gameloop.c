@@ -96,21 +96,19 @@ int gameLoop (
 
         case STATE_SELECT_WORLD:
                 // World creation menu
-                state_selectWorld(renderer, inputs,&gameState);
+                state_selectWorld(renderer, inputs, &gameState);
                 break;
 
         case STATE_NEW_WORLD:
                 // World creation menu
-                state_newWorld (renderer, inputs, &gameState,
-                        &world.type, &world.dayNightMode, &world.seed,
-                        world.path);
+                state_newWorld(renderer, inputs, &gameState, &world);
                 break;
 
         case STATE_LOADING:
                 // Generate a world and present a loading screen
                 if (state_loading(renderer, &world, world.seed, player.pos)) {
-                gameLoop_resetGame();
-                gameState = 5;
+                        gameLoop_resetGame();
+                        gameState = 5;
                 };
                 break;
 

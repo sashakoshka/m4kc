@@ -138,10 +138,7 @@ void state_newWorld (
         SDL_Renderer *renderer,
         Inputs *inputs,
         int *gameState,
-        int *type,
-        int *dayNightMode,
-        int *seed,
-        char *path
+        World *world
 ) {
         static int badName    = 0;
         static int whichInput = 0;
@@ -231,33 +228,32 @@ void state_newWorld (
                         }
                 }
 
-                if (data_getWorldPath(path, nameInput.buffer)) {
+                if (data_getWorldPath(world->path, nameInput.buffer)) {
                         goto cantMakeWorld;
                 }
 
-                if (data_directoryExists(path)) {
+                if (data_directoryExists(world->path)) {
                         goto cantMakeWorld;
                 }
                 
-                *type         = typeSelect;
-                *dayNightMode = dayNightSelect;
-                *gameState    = STATE_LOADING;
+                world->type         = typeSelect;
+                world->dayNightMode = dayNightSelect;
 
                 // Get numeric seed
-                *seed = 0;
+                world->seed = 0;
                 for (int index = 0; seedInput.buffer[index]; index ++) {
-                        *seed *= 10;
-                        *seed += seedInput.buffer[index] - '0';
+                        world->seed *= 10;
+                        world->seed += seedInput.buffer[index] - '0';
                 }
 
                 // "Randomize" seed if it was not set
-                if (*seed == 0) {
-                        *seed = time(0) % 999999999999999;
+                if (world->seed == 0) {
+                        world->seed = time(0) % 999999999999999;
                 }
 
                 // Secret world for testing nonsense. Type "dev"
-                if (*seed == 5800) {
-                        *type = -1;
+                if (world->seed == 5800) {
+                        world->type = -1;
                 }
                 
                 whichInput = 0;
@@ -268,6 +264,8 @@ void state_newWorld (
                 nameInput.buffer[0] = 0;
                 nameInput.cursor    = 0;
                 badName             = 0;
+                
+                *gameState = STATE_LOADING;
         }
 
         return;
