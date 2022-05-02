@@ -1,8 +1,9 @@
 #pragma once
 
 #include <stdlib.h>
-#include <math.h>
+#include <limits.h>
 #include <stdio.h>
+#include <math.h>
 #include "blocks.h"
 #include "coords.h"
 #include "utility.h"
@@ -58,5 +59,6 @@ struct _World {
         int       seed;
         int       dayNightMode;
         u_int64_t time;
+        char      path[PATH_MAX];
         Chunk chunk[CHUNKARR_SIZE];
 };

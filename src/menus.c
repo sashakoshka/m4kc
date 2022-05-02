@@ -142,12 +142,21 @@ void state_newWorld (
         int *dayNightMode,
         int *seed
 ) {
+        static int whichInput = 0;
+
         static int typeSelect     = 1;
         static int dayNightSelect = 0;
         
-        static char buffer[16];
+        static char seedBuffer[16];
         static InputBuffer seedInput = {
-                .buffer = buffer,
+                .buffer = seedBuffer,
+                .len    = 16,
+                .cursor = 0
+        };
+        
+        static char nameBuffer[16];
+        static InputBuffer nameInput = {
+                .buffer = nameBuffer,
                 .len    = 16,
                 .cursor = 0
         };
@@ -157,25 +166,35 @@ void state_newWorld (
 
         dirtBg(renderer);
         
+        if (whichInput == 0) {manageInputBuffer(&nameInput, inputs); }
+        if (input(renderer, "Name", nameInput.buffer,
+                BUFFER_HALF_W - 64, 8, 128,
+                inputs->mouse.x, inputs->mouse.y, whichInput == 0) &&
+                inputs->mouse.left
+        ) {
+                whichInput = 0;
+        }
+        
+        if (whichInput == 1) {manageInputBuffer(&seedInput, inputs); }
+        if (input(renderer, "Seed", seedInput.buffer,
+                BUFFER_HALF_W - 64, 30, 128,
+                inputs->mouse.x, inputs->mouse.y, whichInput == 1) &&
+                inputs->mouse.left
+        ) {
+                whichInput = 1;
+        }
+        
         if (button(renderer, terrainNames[typeSelect],
-                BUFFER_HALF_W - 64, 20, 128,
+                BUFFER_HALF_W - 64, 52, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
                 typeSelect = (typeSelect + 1) % 5;
         }
 
-        manageInputBuffer(&seedInput, inputs);
-        if (input(renderer, "Seed", seedInput.buffer,
-                BUFFER_HALF_W - 64, 42, 128,
-                inputs->mouse.x, inputs->mouse.y, 1) &&
-                inputs->mouse.left
-        ) {
-                
-        }
 
         if (button(renderer, dayNightModes[dayNightSelect],
-                BUFFER_HALF_W - 64, 64, 128,
+                BUFFER_HALF_W - 64, 74, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -183,7 +202,7 @@ void state_newWorld (
         }
 
         if (button(renderer, "Cancel",
-                BUFFER_HALF_W - 64, 86, 61,
+                BUFFER_HALF_W - 64, 96, 61,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -191,7 +210,7 @@ void state_newWorld (
         }
 
         if (button(renderer, "Generate",
-                BUFFER_HALF_W + 3, 86, 61,
+                BUFFER_HALF_W + 3, 96, 61,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -215,6 +234,14 @@ void state_newWorld (
                 if (*seed == 5800) {
                         *type = -1;
                 }
+                
+                whichInput = 0;
+                
+                seedInput.buffer[0] = 0;
+                seedInput.cursor    = 0;
+                
+                nameInput.buffer[0] = 0;
+                nameInput.cursor    = 0;
         }
 }
 
