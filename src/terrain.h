@@ -59,7 +59,7 @@ struct _Chunk {
  */
 struct _World {
         int       type;
-        int       seed;
+        u_int64_t seed;
         int       dayNightMode;
         u_int64_t time;
         char      path[PATH_MAX];

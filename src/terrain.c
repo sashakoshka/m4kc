@@ -44,7 +44,18 @@ int World_save (World *world) {
         char metadataPath[PATH_MAX];
         data_getWorldMetaPath(metadataPath, world->path);
         
-        // FILE *metadata = fopen()
+        FILE *metadata = fopen(metadataPath, "w");
+        if (metadata == NULL) { return 2; }
+
+        fprintf (
+                metadata,
+                "%i\n%i\n%lu\n%i\n%lu\n", 0,
+                world->type,
+                world->seed,
+                world->dayNightMode,
+                world->time);
+        
+        fclose(metadata);
         return 0;
 }
 
