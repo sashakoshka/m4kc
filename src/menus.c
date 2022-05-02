@@ -142,6 +142,7 @@ void state_newWorld (
         int *dayNightMode,
         int *seed
 ) {
+        static int badName    = 0;
         static int whichInput = 0;
 
         static int typeSelect     = 1;
@@ -173,6 +174,11 @@ void state_newWorld (
                 inputs->mouse.left
         ) {
                 whichInput = 0;
+        }
+
+        if (badName) {
+                SDL_SetRenderDrawColor(renderer, 255, 128, 128, 255);
+                drawChar(renderer, '!', BUFFER_HALF_W + 70, 12);
         }
         
         if (whichInput == 1) {manageInputBuffer(&seedInput, inputs); }
@@ -252,9 +258,15 @@ void state_newWorld (
                 
                 nameInput.buffer[0] = 0;
                 nameInput.cursor    = 0;
+                badName             = 0;
         }
 
-        cantMakeWorld:;
+        return;
+
+        cantMakeWorld:
+        nameInput.buffer[0] = 0;
+        nameInput.cursor    = 0;
+        badName             = 1;
 }
 
 /* state_loading

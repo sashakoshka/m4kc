@@ -251,7 +251,7 @@ int input (
                 drawStr(renderer, placeholder, x + 4, y + 4);
         }
 
-        if (flash < 32) {
+        if (flash < 32 && active) {
                 white(renderer);
                 drawChar(renderer, '_', textX, y + 4);
         }
