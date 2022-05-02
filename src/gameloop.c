@@ -102,7 +102,8 @@ int gameLoop (
         case STATE_NEW_WORLD:
                 // World creation menu
                 state_newWorld (renderer, inputs, &gameState,
-                        &world.type, &world.dayNightMode, &world.seed);
+                        &world.type, &world.dayNightMode, &world.seed,
+                        world.path);
                 break;
 
         case STATE_LOADING:

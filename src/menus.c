@@ -140,7 +140,8 @@ void state_newWorld (
         int *gameState,
         int *type,
         int *dayNightMode,
-        int *seed
+        int *seed,
+        char *path
 ) {
         static int badName    = 0;
         static int whichInput = 0;
@@ -228,6 +229,14 @@ void state_newWorld (
                         if (nameInput.buffer[index] == '/') {
                                 goto cantMakeWorld;
                         }
+                }
+
+                if (data_getWorldPath(path, nameInput.buffer)) {
+                        goto cantMakeWorld;
+                }
+
+                if (data_directoryExists(path)) {
+                        goto cantMakeWorld;
                 }
                 
                 *type         = typeSelect;
