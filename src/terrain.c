@@ -65,8 +65,27 @@ int World_save (World *world) {
  */
 int World_load (World *world, const char *name) {
         int err = data_getWorldPath(world->path, name);
-        if (err) { return err; }
+        if (err) { return 1; }
 
+        char metadataPath[PATH_MAX];
+        data_getWorldMetaPath(metadataPath, world->path);
+
+        FILE *metadata = fopen(metadataPath, "r");
+        if (metadata == NULL) { return 2; }
+
+        int version;
+        fscanf(metadata, "%i", &version);
+        if (version != 0) { return 3; }
+
+        fscanf (
+                metadata,
+                "%i %lu %i %lu",
+                &world->type,
+                &world->seed,
+                &world->dayNightMode,
+                &world->time);
+        
+        fclose(metadata);
         return 0;
 }
 
