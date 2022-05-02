@@ -173,30 +173,31 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   
   /* Look to see if there are chunks that need to be
   loaded in*/
-  /*
-  if(chunkLoadNum < CHUNKARR_SIZE) {
-    chunkLoadCoords.x =
-      ((chunkLoadNum % CHUNKARR_DIAM) -
-      CHUNKARR_RAD) * 64 + player.pos.x - 64;
-    chunkLoadCoords.y =
-      (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) - 
-      CHUNKARR_RAD) * 64 + player.pos.y - 64;
-    chunkLoadCoords.z =
-      ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
-      CHUNKARR_RAD) * 64 + player.pos.z - 64;
-    chunkLoadNum++;
-    
-    genChunk(
-      world, seed,
-      chunkLoadCoords.x,
-      chunkLoadCoords.y,
-      chunkLoadCoords.z, 1, 0,
-      player.pos
-    );
-  } else {
-    chunkLoadNum = 0;
-  }
-  */
+  
+  // static int chunkLoadNum = 0;
+  // if(chunkLoadNum < CHUNKARR_SIZE) {
+    // static IntCoords chunkLoadCoords = { 0 };
+    // chunkLoadCoords.x =
+      // ((chunkLoadNum % CHUNKARR_DIAM) -
+      // CHUNKARR_RAD) * 64 + player.pos.x - 64;
+    // chunkLoadCoords.y =
+      // (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) -
+      // CHUNKARR_RAD) * 64 + player.pos.y - 64;
+    // chunkLoadCoords.z =
+      // ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
+      // CHUNKARR_RAD) * 64 + player.pos.z - 64;
+    // chunkLoadNum++;
+    // 
+    // genChunk (
+      // &world, world.seed,
+      // chunkLoadCoords.x,
+      // chunkLoadCoords.y,
+      // chunkLoadCoords.z, world->type, 0,
+      // player.pos
+    // );
+  // } else {
+    // chunkLoadNum = 0;
+  // }
 
   ;int headInWater = World_getBlock (&world,
     player.pos.x - 64,

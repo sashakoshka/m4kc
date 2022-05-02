@@ -435,8 +435,10 @@ int genChunk (
         // If there is no array, allocate one.
         if (chunk->loaded) {
                 int err = Chunk_save(world, chunk);
-                printf("genChunk: chunk save fail\n");
-                if (err) { gameLoop_error("Could not save/unload chunk"); }
+                if (err) {
+                        printf("genChunk: chunk save fail\n");
+                        gameLoop_error("Could not save/unload chunk");
+                }
                 return 0;
         } else {
                 chunk->blocks = (Block *)calloc(CHUNK_DATA_SIZE, sizeof(Block));
