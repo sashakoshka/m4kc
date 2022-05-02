@@ -1,4 +1,3 @@
-#include "data.h"
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +7,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "data.h"
+#include "textures.h"
 
 data_Options data_options          = { 0 };
 data_WorldListItem *data_worldList = NULL;
@@ -206,16 +207,26 @@ int data_refreshWorldList () {
                         item->name);
 
                 SDL_Surface *image = SDL_LoadBMP(path);
+                int *pixel = item->thumbnail.buffer;
                 
                 // Do not accept vertical images
                 if (image != NULL && image->h <= image->w) {
                         int scale = image->h / 16;
-                        int *pixel = item->thumbnail.buffer;
                         for (int y = 0; y < 16; y ++)
                         for (int x = 0; x < 16; x ++) {
                                 *pixel = getSurfacePixel (image,
                                         x * scale,
                                         y * scale);
+                                pixel ++;
+                        }
+                } else {
+                        for (int y = 0; y < 16; y ++)
+                        for (int x = 0; x < 16; x ++) {
+                                *pixel = textures [
+                                        x +
+                                        y * BLOCK_TEXTURE_W +
+                                        (BLOCK_GRASS * 3 + 1) *
+                                        BLOCK_TEXTURE_W * BLOCK_TEXTURE_H];
                                 pixel ++;
                         }
                 }
