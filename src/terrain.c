@@ -40,6 +40,11 @@ int World_save (World *world) {
                 }
 
         }
+
+        char metadataPath[PATH_MAX];
+        data_getWorldMetaPath(metadataPath, world->path);
+        
+        // FILE *metadata = fopen()
         return 0;
 }
 
@@ -102,9 +107,9 @@ u_int32_t chunkHash (int x, int y, int z) {
 static void chunkFilePath (World *world, char *path, int x, int y, int z) {
         snprintf (
                 path, PATH_MAX,
-                "%s/%08x.ch",
+                "%s/%08x-%08x-%08x.ch",
                 world->path,
-                chunkHash(x / 64, y / 64, z / 64));
+                x >> 6, y >> 6, z >> 6);
 }
 
 /* chunkLookup
