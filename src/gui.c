@@ -326,10 +326,19 @@ int drawWorldListItem (
                 mouseY <  y + 16 ;
 
         SDL_Rect rect;
-        rect.x = x;
-        rect.y = y;
-        rect.w = 128;
-        rect.h = 16;
+        rect.x = x - 1;
+        rect.y = y - 1;
+        rect.w = 130;
+        rect.h = 18;
+
+        SDL_Rect thumbnailShadow;
+        thumbnailShadow.x = x + 1;
+        thumbnailShadow.y = y + 1;
+        thumbnailShadow.w = 16;
+        thumbnailShadow.h = 16;
+
+        tblack(renderer);
+        SDL_RenderFillRect(renderer, &thumbnailShadow);
         
         int *pixel = item->thumbnail.buffer;
         for (int yy = 0; yy < 16; yy++) {

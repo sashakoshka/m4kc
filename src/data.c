@@ -192,7 +192,8 @@ int data_refreshWorldList () {
                 SDL_Surface *image = SDL_LoadBMP(path);
                 if (!image) { return 4; }
 
-                if (image->h < image->w) {
+                // Do not accept vertical images
+                if (image->h <= image->w) {
                         int scale = image->h / 16;
                         int *pixel = item->thumbnail.buffer;
                         for (int y = 0; y < 16; y ++)
