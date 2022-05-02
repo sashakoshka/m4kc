@@ -1,6 +1,8 @@
 #include "terrain.h"
 #include "blocks.h"
 
+static void chunkFilePath (World *, char *, int, int, int);
+
 /* World_sort
  * Sorts all chunks in a world by hash
  */
@@ -16,6 +18,43 @@ void World_sort (World* world) {
                 world->chunk[j] = world->chunk[j + 1];
                 world->chunk[j + 1] = temp;
         }
+}
+
+/* World_save
+ * Saves all loaded chunks in a world to disk. Returns 0 on success, non-zero on
+ * failure.
+ */
+int World_save (World *world) {
+        return 0;
+}
+
+/* chunkHash
+ * Produces a chunk hash from the specified coordinates. Expects coordinates to
+ * be by chunk, not by block.
+ */
+u_int32_t chunkHash (int x, int y, int z) {
+        // Modulo-like operation by bitmasking
+        x &= 0b1111111111;
+        y &= 0b1111111111;
+        z &= 0b1111111111;
+
+        // Move these into their correct "slots"
+        y <<= 10;
+        z <<= 20;
+
+        // Flatten them using binary or.
+        return (x | y | z) + 1;
+}
+
+/* chunkFilePath
+ * Returns the file name of a chunk.
+ */
+static void chunkFilePath (World *world, char *path, int x, int y, int z) {
+        snprintf (
+                path, PATH_MAX,
+                "%s/%08x.ch",
+                world->path,
+                chunkHash(x / 64, y / 64, z / 64));
 }
 
 /* chunkLookup
@@ -42,22 +81,7 @@ Chunk *chunkLookup (World *world, int x, int y, int z) {
                 ago.y = y;
                 ago.z = z;
 
-                // Quickly hash the chunk coordinates
-
-                // Since we already divided them by 64 (with bit shifting),
-                // we can pick up from here.
-                // Modulo-like operation by bitmasking
-                x &= 0b1111111111;
-                y &= 0b1111111111;
-                z &= 0b1111111111;
-
-                // Move these into their correct "slots"
-                y <<= 10;
-                z <<= 20;
-
-                // Flatten them using binary or. Hash is stored in X.
-                x |= y | z;
-                x++;
+                int hash = chunkHash(x, y, z);
 
                 // Look up chunk using a binary search
                 int first, middle, last;
@@ -67,9 +91,9 @@ Chunk *chunkLookup (World *world, int x, int y, int z) {
                 middle = (CHUNKARR_SIZE - 1) / 2;
 
                 while (first <= last) {
-                        if (world->chunk[middle].coordHash > x) {
+                        if (world->chunk[middle].coordHash > hash) {
                                 first = middle + 1;
-                        } else if (world->chunk[middle].coordHash == x) {
+                        } else if (world->chunk[middle].coordHash == hash) {
                                 chunk = &world->chunk[middle];
                                 return chunk;
                         } else {
@@ -315,6 +339,11 @@ int genChunk (
         }
 
         Block *blocks = chunk->blocks;
+
+        // TODO: check if chunk exists on disk, and load if it does
+        char path[PATH_MAX];
+        chunkFilePath(world, path, xOffset, yOffset, zOffset);
+        puts(path);
 
         for (int i = 0; i < CHUNK_DATA_SIZE; i++) {
                 blocks[i] = 0;

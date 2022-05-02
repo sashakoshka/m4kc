@@ -57,7 +57,7 @@ float perlin2d (
         137,139,255,114,20,218,113,154,27,127,246,250,1,8,198,250,209,
         92,222,173,21,88,102,219};
 
-        double xa = x * freq; //0.0625 TODO: update chunkGen
+        double xa = x * freq; //0.0625 TODO: update chunkGen TODO: figure out wtf that means
         double ya = y * freq; //0.0625
         double amp = 1.0;
         double fin = 0;

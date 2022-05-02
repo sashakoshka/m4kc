@@ -18,9 +18,11 @@ typedef struct _Chunk Chunk;
 typedef struct _World World;
 
 void  World_sort     (World *);
+int   World_save     (World *);
 int   World_setBlock (World *, int, int, int, Block, int);
 Block World_getBlock (World *, int, int, int);
 
+u_int32_t chunkHash (int, int, int);
 Chunk *chunkLookup  (World *, int, int, int);
 int    genChunk     (World *, unsigned int, int, int, int, int, int, Coords);
 void   genStructure (Block *, int, int, int, int);
