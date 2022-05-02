@@ -774,11 +774,14 @@ void popup_pause (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
-                if (World_save(world)) {
+                int err = World_save(world);
+                if (err) {
                         gameLoop_error("Could not save world");
-                } else {
-                        *gameState = STATE_TITLE;
+                        return;
                 }
+
+                World_wipe(world);
+                *gameState = STATE_TITLE;
         }
 }
 

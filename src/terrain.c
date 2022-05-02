@@ -59,11 +59,28 @@ int World_save (World *world) {
         return 0;
 }
 
+/* World_wipe
+ * Wipes a world, freeing all data inside of it. This does not save anything.
+ */
+void World_wipe (World *world) {
+        for (int index = 0; index < CHUNKARR_SIZE; index ++) {
+                Chunk *chunk = &world->chunk[index];
+
+                if (chunk->loaded) {
+                        free(chunk->blocks);
+                        *chunk = (const Chunk) { 0 };
+                }
+        }
+}
+
 /* World_load
  * Loads the specified save into a world struct. This does not load any chunks,
- * as that will be handled automatically later.
+ * as that will be handled automatically later. This also completely wipes the
+ * world.
  */
 int World_load (World *world, const char *name) {
+        World_wipe(world);
+
         int err = data_getWorldPath(world->path, name);
         if (err) { return 1; }
 
@@ -380,15 +397,15 @@ int genChunk (
         // To make sure structure generation accross chunks is
         // different, but predictable
         srand(seed * (xOffset * yOffset * zOffset + 1));
-        int i, distMax, distMaxI;
+        int distMax, distMaxI;
         static int count = 0;
 
         Chunk *chunk = chunkLookup(world, xOffset, yOffset, zOffset);
 
         // Only generate if that chunk hasn't been generated yet.
-        i = 0;
         if (chunk == NULL) {
                 // See if there is an empty slot
+                int i = 0;
                 for (; i < CHUNKARR_SIZE && world->chunk[i].loaded; i ++);
 
                 // Pick out the oldest chunk (loaded) and overrwrite it.
@@ -410,13 +427,17 @@ int genChunk (
                 }
                 chunk = &world->chunk[i];
         } else if (!force) {
+                // The chunk exists, if we aren't forcing generation then don't
+                // generate a chunk.
                 return 0;
         }
   
         // If there is no array, allocate one.
         if (chunk->loaded) {
                 int err = Chunk_save(world, chunk);
+                printf("genChunk: chunk save fail\n");
                 if (err) { gameLoop_error("Could not save/unload chunk"); }
+                return 0;
         } else {
                 chunk->blocks = (Block *)calloc(CHUNK_DATA_SIZE, sizeof(Block));
         }
@@ -427,22 +448,6 @@ int genChunk (
         }
 
         Block *blocks = chunk->blocks;
-
-        // If the chunk exists on disk, load it and halt the function
-        char path[PATH_MAX];
-        chunkFilePath(world, path, xOffset, yOffset, zOffset);
-        if (data_fileExists(path)) {
-                FILE *file = fopen(path, "rb");
-                if (file == NULL) { return 2; }
-                
-                fread (
-                        chunk->blocks,
-                        sizeof(Block),
-                        CHUNK_DATA_SIZE,
-                        file);
-                fclose(file);
-                return 1;
-        }
 
         for (int i = 0; i < CHUNK_DATA_SIZE; i++) {
                 blocks[i] = 0;
@@ -473,17 +478,33 @@ int genChunk (
         // mark the chunk as loaded and set its stamp.
         chunk->loaded = ++ count;
 
-        // printf (
-                // "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\t"
-                // "cx: %i\tcy: %i\tcz: %i\t"
-                // "stamp: %i\taddr: %p \tgenerated\n",
-                // chunk->coordHash,
-                // xOffset, yOffset, zOffset,
-                // chunk->center.x,
-                // chunk->center.y,
-                // chunk->center.z,
-                // chunk->loaded, chunk
-        // );
+        printf (
+                "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\t"
+                "cx: %i\tcy: %i\tcz: %i\t"
+                "stamp: %i\taddr: %p \tgenerated\n",
+                chunk->coordHash,
+                xOffset, yOffset, zOffset,
+                chunk->center.x,
+                chunk->center.y,
+                chunk->center.z,
+                chunk->loaded, chunk
+        );
+        
+        // If the chunk exists on disk, load it and halt the function
+        char path[PATH_MAX];
+        chunkFilePath(world, path, xOffset, yOffset, zOffset);
+        if (data_fileExists(path)) {
+                FILE *file = fopen(path, "rb");
+                if (file == NULL) { return 2; }
+                
+                fread (
+                        blocks,
+                        sizeof(Block),
+                        CHUNK_DATA_SIZE,
+                        file);
+                fclose(file);
+                return 1;
+        }
         
         switch (type) {
         case -1:
