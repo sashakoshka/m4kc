@@ -152,6 +152,13 @@ int data_getWorldPath (char *path, const char *worldName) {
         return 0;
 }
 
+/* data_getWorldMetaPath
+ * Returns the path to the metadata file of a world, given a world path.
+ */
+void data_getWorldMetaPath (char *path, const char *worldPath) {
+        snprintf(path, PATH_MAX, "%s/metadata", worldPath);
+}
+
 /* data_refreshWorldList
  * Regreshes the world list, clearing the previous one. Reads world names and
  * thumbnails from ~/.m4kc/worlds

@@ -19,6 +19,7 @@ typedef struct _World World;
 
 void  World_sort     (World *);
 int   World_save     (World *);
+int   World_load     (World *, const char *path);
 int   World_setBlock (World *, int, int, int, Block, int);
 Block World_getBlock (World *, int, int, int);
 

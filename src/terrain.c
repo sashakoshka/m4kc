@@ -43,6 +43,17 @@ int World_save (World *world) {
         return 0;
 }
 
+/* World_load
+ * Loads the specified save into a world struct. This does not load any chunks,
+ * as that will be handled automatically later.
+ */
+int World_load (World *world, const char *name) {
+        int err = data_getWorldPath(world->path, name);
+        if (err) { return err; }
+
+        return 0;
+}
+
 /* Chunk_save
  * Saves a chunk to disk. Returns 0 on success, non-zero on failure.
  */

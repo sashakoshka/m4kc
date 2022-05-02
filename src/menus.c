@@ -92,12 +92,7 @@ void state_selectWorld (
                         BUFFER_HALF_W - 64, y,
                         inputs->mouse.x,
                         inputs->mouse.y) && inputs->mouse.left) {
-                                // TODO: create function for loading world data
-                                // into world
-                                if (data_getWorldPath(
-                                        world->path,
-                                        item->name)
-                                ) {
+                                if (World_load(world, item->name)) {
                                         gameLoop_error("Could not load world");
                                 } else {
                                         *gameState = STATE_LOADING;
