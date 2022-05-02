@@ -96,7 +96,7 @@ int gameLoop (
 
         case STATE_SELECT_WORLD:
                 // World creation menu
-                state_selectWorld(renderer, inputs, &gameState);
+                state_selectWorld(renderer, inputs, &gameState, &world);
                 break;
 
         case STATE_NEW_WORLD:
@@ -497,7 +497,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             lookup_now.y <<= 10;
             lookup_now.z <<= 20;
             
-            int lookup_hash = lookup_now.x | lookup_now.y | lookup_now.z;
+            u_int32_t lookup_hash = lookup_now.x | lookup_now.y | lookup_now.z;
             lookup_hash++;
             
             int lookup_first  = 0,

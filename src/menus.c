@@ -65,7 +65,8 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
 void state_selectWorld (
         SDL_Renderer *renderer,
         Inputs *inputs,
-        int *gameState
+        int *gameState,
+        World *world
 ) {
         SDL_Rect listBackground;
         listBackground.x = 0;
@@ -87,9 +88,22 @@ void state_selectWorld (
         int y = 6;
         data_WorldListItem *item = data_worldList;
         while (item != NULL) {
-                drawWorldListItem (renderer, item,
+                if (drawWorldListItem(renderer, item,
                         BUFFER_HALF_W - 64, y,
-                        inputs->mouse.x, inputs->mouse.y);
+                        inputs->mouse.x,
+                        inputs->mouse.y) && inputs->mouse.left) {
+                                // TODO: create function for loading world data
+                                // into world
+                                if (data_getWorldPath(
+                                        world->path,
+                                        item->name)
+                                ) {
+                                        gameLoop_error("Could not load world");
+                                } else {
+                                        *gameState = STATE_LOADING;
+                                }
+                                return;
+                        }
                 y += 22;
                 item = item->next;
         }

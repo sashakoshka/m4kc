@@ -5,6 +5,7 @@
 #include "data.h"
 
 static void chunkFilePath (World *, char *, int, int, int);
+static int  Chunk_save    (World *, Chunk *);
 
 /* World_sort
  * Sorts all chunks in a world by hash
@@ -34,25 +35,35 @@ int World_save (World *world) {
                 Chunk *chunk = &world->chunk[index];
 
                 if (chunk->loaded) {
-                        char path[PATH_MAX];
-                        chunkFilePath (
-                                world, path,
-                                chunk->center.x - 32,
-                                chunk->center.y - 32,
-                                chunk->center.z - 32);
-                        
-                        FILE *file = fopen(path, "wb");
-                        if (file == NULL) { return 2; }
-                        
-                        fwrite (
-                                chunk->blocks,
-                                sizeof(Block),
-                                CHUNK_DATA_SIZE,
-                                file);
-                        fclose(file);
+                        int err = Chunk_save(world, chunk);
+                        if (err) { return err; }
                 }
 
         }
+        return 0;
+}
+
+/* Chunk_save
+ * Saves a chunk to disk. Returns 0 on success, non-zero on failure.
+ */
+static int Chunk_save (World *world, Chunk *chunk) {
+        char path[PATH_MAX];
+        chunkFilePath (
+                world, path,
+                chunk->center.x - 32,
+                chunk->center.y - 32,
+                chunk->center.z - 32);
+        
+        FILE *file = fopen(path, "wb");
+        if (file == NULL) { return 2; }
+        
+        fwrite (
+                chunk->blocks,
+                sizeof(Block),
+                CHUNK_DATA_SIZE,
+                file);
+        fclose(file);
+
         return 0;
 }
 
@@ -301,9 +312,11 @@ void genStructure (
 }
 
 /* genChunk
- * Takes in a seed and a chunk array. Chunk is 64x64x64 blocks.
- * Fills the chunk array with generated terrain. If force is set
- * to true, a chunk at the same coordinates will be overwritten.
+ * Takes in a seed and a chunk array. Chunk is 64x64x64 blocks. Fills the chunk
+ * array with generated terrain. If force is set to true, a chunk at the same
+ * coordinates will be overwritten. If the chunk exists on disk, nothing is
+ * generated and the file is loaded instead. Returns 1 if the chunk was
+ * generated or loaded, and 0 if it wasn't.
  */
 int genChunk (
         World *world,
@@ -356,7 +369,8 @@ int genChunk (
   
         // If there is no array, allocate one.
         if (chunk->loaded) {
-                // TODO: Save chunk to disk
+                int err = Chunk_save(world, chunk);
+                if (err) { gameLoop_error("Could not save/unload chunk"); }
         } else {
                 chunk->blocks = (Block *)calloc(CHUNK_DATA_SIZE, sizeof(Block));
         }
@@ -368,9 +382,21 @@ int genChunk (
 
         Block *blocks = chunk->blocks;
 
-        // TODO: check if chunk exists on disk, and load if it does
+        // If the chunk exists on disk, load it and halt the function
         char path[PATH_MAX];
         chunkFilePath(world, path, xOffset, yOffset, zOffset);
+        if (data_fileExists(path)) {
+                FILE *file = fopen(path, "rb");
+                if (file == NULL) { return 2; }
+                
+                fread (
+                        chunk->blocks,
+                        sizeof(Block),
+                        CHUNK_DATA_SIZE,
+                        file);
+                fclose(file);
+                return 1;
+        }
 
         for (int i = 0; i < CHUNK_DATA_SIZE; i++) {
                 blocks[i] = 0;

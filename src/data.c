@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <dirent.h>
 #include <limits.h>
 #include <string.h>
@@ -63,6 +64,13 @@ int data_directoryExists (const char *path) {
         return (stat(path, &directoryInfo) == 0 &&
                 S_ISDIR(directoryInfo.st_mode));
         
+}
+
+/* data_fileExists
+ * Test if a file exists at the specified path.
+ */
+int data_fileExists (const char *path) {
+        return access(path, F_OK) == 0;
 }
 
 /* data_ensureDirectoryExists

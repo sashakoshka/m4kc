@@ -26,6 +26,7 @@ extern data_Options data_options;
 
 int data_init ();
 int data_directoryExists       (const char *);
+int data_fileExists            (const char *);
 int data_ensureDirectoryExists (const char *);
 
 int data_findDirectoryName (char *, const char *);

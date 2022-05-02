@@ -23,7 +23,7 @@
 #define POPUP_CHAT           6
 
 int  state_title       (SDL_Renderer *, Inputs *, int *);
-void state_selectWorld (SDL_Renderer *, Inputs *, int *);
+void state_selectWorld (SDL_Renderer *, Inputs *, int *, World *);
 void state_newWorld    (SDL_Renderer *, Inputs *, int *, World *);
 int  state_loading     (SDL_Renderer *, World *, unsigned int, Coords);
 void state_options     (SDL_Renderer *, Inputs *, int *);
