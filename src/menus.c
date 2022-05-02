@@ -94,6 +94,11 @@ void state_selectWorld (
                 item = item->next;
         }
 
+        if (y == 6) {
+                shadowCenterStr (renderer, "No worlds",
+                        BUFFER_HALF_W, BUFFER_HALF_H - 15);
+        }
+
         if (button(renderer, "Cancel",
                 BUFFER_HALF_W - 64, BUFFER_H - 22, 61,
                 inputs->mouse.x, inputs->mouse.y) &&
