@@ -262,34 +262,6 @@ int input (
         return hover;
 }
 
-/* manageInputBuffer
- * Applies keyboard input to a text input buffer. Returns 1 if the enter key was
- * pressed (there must be content in buffer)
- */
-int manageInputBuffer (InputBuffer *inputBuffer, Inputs *inputs) {
-        if (!inputs->keyTyped && !inputs->keySym) { return 0; }
-        
-        if (inputs->keySym == SDLK_BACKSPACE) {
-                // Delete last char and decrement cursor
-                // position
-                if (inputBuffer->cursor > 0) {
-                        inputBuffer->buffer[-- inputBuffer->cursor] = 0;
-                }
-        } else if (inputs->keySym == SDLK_RETURN && inputBuffer->cursor > 0) {
-                return 1;
-        } else if (
-                inputs->keyTyped > 31  &&
-                inputs->keyTyped < 127 &&
-                inputBuffer->cursor < inputBuffer->len - 1
-        ) {
-                inputBuffer->buffer[inputBuffer->cursor] = inputs->keyTyped;
-                inputBuffer->cursor += 1;
-                inputBuffer->buffer[inputBuffer->cursor] = 0;
-        }
-
-        return 0;
-}
-
 /* drawSlot
  * Takes in a pointer to a renderer, an InvSlot, draws the item
  * with the specified x and y coordinates and width, and then 
@@ -336,7 +308,52 @@ int drawSlot (
         strnum(count, 0, slot->amount);
         shadowStr(renderer, count, x + (slot->amount >= 10 ? 4 : 10), y + 8);
 
-  return hover;
+        return hover;
+}
+
+/* drawWorldListItem
+ * Draws a world list item and reurns whether the mouse is inside of it.
+ */
+int drawWorldListItem (
+        SDL_Renderer *renderer, data_WorldListItem *item,
+        int x, int y, int mouseX, int mouseY
+) {
+        int hover;
+        
+        hover = mouseX >= x       &&
+                mouseY >= y       &&
+                mouseX <  x + 128 &&
+                mouseY <  y + 16 ;
+
+        SDL_Rect rect;
+        rect.x = x;
+        rect.y = y;
+        rect.w = 128;
+        rect.h = 16;
+        
+        int *pixel = item->thumbnail.buffer;
+        for (int yy = 0; yy < 16; yy++) {
+                for (int xx = 0; xx < 16; xx++) {
+                        SDL_SetRenderDrawColor (
+                                renderer,
+                                (*pixel >> 16 & 0xFF),
+                                (*pixel >> 8 & 0xFF),
+                                (*pixel & 0xFF),
+                                255
+                        );
+                        SDL_RenderDrawPoint(renderer, x + xx, y + yy);
+                        pixel ++;
+                }
+        }
+
+        shadowStr(renderer, item->name, x + 20, y + 4);
+
+        if (hover) {
+                white(renderer);
+                SDL_RenderDrawRect(renderer, &rect);
+        }
+
+        return hover;
 }
 
 /* dirtBg

@@ -8,8 +8,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-Options data_options     = { 0 };
-WorldListItem *worldList = NULL;
+data_Options data_options          = { 0 };
+data_WorldListItem *data_worldList = NULL;
 
 char directoryName            [PATH_MAX] = { 0 };
 char settingsFileName         [PATH_MAX] = { 0 };
@@ -37,7 +37,7 @@ int data_init () {
                 screenshotsDirectoryName, "/.m4kc/screenshots");
         if (err) { return err; }
 
-        data_options = (const Options) {
+        data_options = (const data_Options) {
                 .fogType      = 0,
                 .drawDistance = 20,
                 .trapMouse    = 0,
@@ -148,9 +148,9 @@ int data_getWorldPath (char *path, const char *worldName) {
  */
 int data_refreshWorldList () {
         // Free previous list
-        WorldListItem *item = worldList;
+        data_WorldListItem *item = data_worldList;
         while (item != NULL) {
-                WorldListItem *next = item->next;
+                data_WorldListItem *next = item->next;
                 free(item);
                 item = next;
         }
@@ -162,18 +162,19 @@ int data_refreshWorldList () {
         DIR *directory = opendir(worldsDirectoryName);
         if (!directory) { return 2; }
 
-        WorldListItem *last = NULL;
+        data_WorldListItem *last = NULL;
         while ((directoryEntry = readdir(directory)) != NULL) {
                 if (directoryEntry->d_name[0] == '.') { continue; }
 
                 // Allocate new list item
-                WorldListItem *item = calloc(sizeof(WorldListItem), 1);
+                data_WorldListItem *item = calloc (
+                        sizeof(data_WorldListItem), 1);
                 if (item == NULL) { return 3; }
                 
                 strncpy(item->name, directoryEntry->d_name, NAME_MAX);
                 if (last == NULL) {
-                        worldList = item;
-                        last = worldList;
+                        data_worldList = item;
+                        last = data_worldList;
                 } else {
                         last->next = item;
                 }

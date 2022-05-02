@@ -1,18 +1,18 @@
 #pragma once
 #include <limits.h>
-#include "gui.h"
+#include "inputbuffer.h"
 
 typedef struct {
         int buffer[16 * 16];
-} WorldThumbnail;
+} data_WorldThumbnail;
 
-typedef struct WorldListItem {
-        WorldThumbnail thumbnail;
+typedef struct data_WorldListItem {
+        data_WorldThumbnail thumbnail;
         char name[NAME_MAX];
-        struct WorldListItem *next;
-} WorldListItem;
+        struct data_WorldListItem *next;
+} data_WorldListItem;
 
-extern WorldListItem *worldList;
+extern data_WorldListItem *data_worldList;
 
 typedef struct {
         int   fogType;
@@ -20,9 +20,9 @@ typedef struct {
         int   trapMouse;
         float fov;
         InputBuffer username;
-} Options;
+} data_Options;
 
-extern Options data_options;
+extern data_Options data_options;
 
 int data_init ();
 int data_directoryExists       (const char *);

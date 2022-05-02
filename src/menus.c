@@ -83,6 +83,17 @@ void state_selectWorld (
                 0,        BUFFER_H - 29,
                 BUFFER_W, BUFFER_H - 29);
 
+        white(renderer);
+        int y = 6;
+        data_WorldListItem *item = data_worldList;
+        while (item != NULL) {
+                drawWorldListItem (renderer, item,
+                        BUFFER_HALF_W - 64, y,
+                        inputs->mouse.x, inputs->mouse.y);
+                y += 22;
+                item = item->next;
+        }
+
         if (button(renderer, "Cancel",
                 BUFFER_HALF_W - 64, BUFFER_H - 22, 61,
                 inputs->mouse.x, inputs->mouse.y) &&
