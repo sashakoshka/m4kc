@@ -214,6 +214,16 @@ void state_newWorld (
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
+                // Reject empty names and names with slashes
+                if (nameInput.buffer[0] == 0) {
+                        goto cantMakeWorld;
+                }
+                for (int index = 0; nameInput.buffer[index]; index ++) {
+                        if (nameInput.buffer[index] == '/') {
+                                goto cantMakeWorld;
+                        }
+                }
+                
                 *type         = typeSelect;
                 *dayNightMode = dayNightSelect;
                 *gameState    = STATE_LOADING;
@@ -243,6 +253,8 @@ void state_newWorld (
                 nameInput.buffer[0] = 0;
                 nameInput.cursor    = 0;
         }
+
+        cantMakeWorld:;
 }
 
 /* state_loading
