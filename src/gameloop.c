@@ -655,7 +655,6 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     inputs->keyboard.f2 = 0;
     char path [PATH_MAX];
     int err = data_getScreenshotPath(path);
-    printf("%s\t%i\n", path, err);
     gameLoop_screenshot(renderer, err ? NULL : path);
   }
 }

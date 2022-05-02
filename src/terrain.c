@@ -345,13 +345,13 @@ int genChunk (
         // mark the chunk as loaded and set its stamp.
         chunk->loaded = ++ count;
 
-        printf (
-                "chunk hash: %#016x\tx: %i\ty: %i\tz:"
-                "%i\tstamp: %i\taddr: %p\tgenerated\n",
-                chunk->coordHash,
-                xOffset, yOffset, zOffset,
-                chunk->loaded, chunk
-        );
+        // printf (
+                // "chunk hash: %#016x\tx: %i\ty: %i\tz:"
+                // "%i\tstamp: %i\taddr: %p\tgenerated\n",
+                // chunk->coordHash,
+                // xOffset, yOffset, zOffset,
+                // chunk->loaded, chunk
+        // );
         
         switch (type) {
         case -1:

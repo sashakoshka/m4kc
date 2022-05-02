@@ -24,7 +24,11 @@ int state_title (SDL_Renderer *renderer, Inputs *inputs, int *gameState) {
                 16
         );
 
-        shadowStr(renderer, "version 0.7 (pre-release)", 1, BUFFER_H - 9);
+        #ifdef small
+        shadowStr(renderer, "version 0.7", 1, BUFFER_H - 9);
+        #else
+        shadowStr(renderer, "version 0.7 (dev build)", 1, BUFFER_H - 9);
+        #endif
 
         if (button(renderer, "Singleplayer",
                 BUFFER_HALF_W - 64, 42, 128,
