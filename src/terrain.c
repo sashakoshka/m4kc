@@ -107,7 +107,7 @@ u_int32_t chunkHash (int x, int y, int z) {
 static void chunkFilePath (World *world, char *path, int x, int y, int z) {
         snprintf (
                 path, PATH_MAX,
-                "%s/%08x-%08x-%08x.ch",
+                "%s/%08X%08X%08X",
                 world->path,
                 x >> 6, y >> 6, z >> 6);
 }
