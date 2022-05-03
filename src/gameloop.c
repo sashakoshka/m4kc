@@ -593,11 +593,12 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
               // TODO: DONT DO THIS
               /* Treating a coords set as an array and
               blockFace as an index. */
-              blockSelectOffset.x = 0;
-              blockSelectOffset.y = 0;
-              blockSelectOffset.z = 0;
-              *(&(blockSelectOffset.x) + blockFace)
-                = 1 - 2 * (f27 > 0.0);
+              blockSelectOffset = (const IntCoords) { 0 };
+              switch (blockFace) {
+                case 0: blockSelectOffset.x = 1 - 2 * (f27 > 0.0); break;
+                case 1: blockSelectOffset.y = 1 - 2 * (f27 > 0.0); break;
+                case 2: blockSelectOffset.z = 1 - 2 * (f27 > 0.0); break;
+              }
               
               f26 = f33;
             }
