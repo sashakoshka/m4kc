@@ -590,9 +590,6 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
               selectedPass = 1;
               coordPass = blockRayPosition;
 
-              // TODO: DONT DO THIS
-              /* Treating a coords set as an array and
-              blockFace as an index. */
               blockSelectOffset = (const IntCoords) { 0 };
               switch (blockFace) {
                 case 0: blockSelectOffset.x = 1 - 2 * (f27 > 0.0); break;

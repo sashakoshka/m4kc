@@ -949,7 +949,7 @@ void popup_chunkPeek (
                         }
                 }
         } else {
-                drawStr(renderer, "NULL chunk!", 0, 0); 
+                drawStr(renderer, "Chunk not found", 0, 0); 
         }
 
         if (button(renderer, "Done",
