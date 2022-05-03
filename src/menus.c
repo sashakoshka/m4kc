@@ -244,7 +244,8 @@ void state_newWorld (
                 if (data_directoryExists(world->path)) {
                         goto cantMakeWorld;
                 }
-                
+
+                world->time         = 2048;
                 world->type         = typeSelect;
                 world->dayNightMode = dayNightSelect;
 

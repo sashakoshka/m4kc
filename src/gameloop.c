@@ -48,7 +48,6 @@ static u_int32_t
  */
 void gameLoop_resetGame () {
         l = SDL_GetTicks();
-        world.time = 2048;
 
         player = (const Player) { 0 };
         player.pos.x = 96.5;
@@ -565,8 +564,12 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
                 && i7 % 16 < 15
               ) || !guiOn || gamePopup
             ) {
-              pixelColor = textures [
-                    i6 + (i7 << 4) + intersectedBlock * 256 * 3];
+              if (intersectedBlock >= NUMBER_OF_BLOCKS) {
+                pixelColor = 0xFF0000;
+              } else {
+                pixelColor = textures [
+                  i6 + (i7 << 4) + intersectedBlock * 256 * 3];
+              }
             }
             
             /* See if the block is selected. There must be a

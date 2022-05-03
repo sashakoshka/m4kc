@@ -38,7 +38,7 @@ float perlin2d (
         double x, double y,
         double freq
 ) {
-        static u_int8_t hash[] =
+        static u_int8_t hash[256] =
 
         {208,34,231,213,32,248,233,56,161,78,24,140,
         71,48,140,254,245,255,247,247,40,185,248,251,245,28,124,204,
