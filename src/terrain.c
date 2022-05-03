@@ -127,6 +127,15 @@ static int Chunk_save (World *world, Chunk *chunk) {
                 file);
         fclose(file);
 
+        int allZero = 0;
+        for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
+                allZero |= chunk->blocks[i];
+        }
+        
+        printf("saved\t%s\t", path);
+        if (allZero) { printf(" ALL AIR"); }
+        puts("");
+
         return 0;
 }
 
@@ -481,9 +490,9 @@ int genChunk (
         chunk->loaded = ++ count;
 
         printf (
-                "chunk hash: %#016x\tx: %i\ty: %i\tz: %i\t"
+                "chunk hash: %#016x x: %i\ty: %i\tz: %i\t"
                 "cx: %i\tcy: %i\tcz: %i\t"
-                "stamp: %i\taddr: %p \tgenerated\n",
+                "stamp: %i\taddr: %p \t",
                 chunk->coordHash,
                 xOffset, yOffset, zOffset,
                 chunk->center.x,
@@ -498,13 +507,25 @@ int genChunk (
         if (data_fileExists(path)) {
                 FILE *file = fopen(path, "rb");
                 if (file == NULL) { return 2; }
-                
+
+                // We can fread because blocks are stored as singular bytes,
+                // which are unaffected by endianness.
                 fread (
                         blocks,
                         sizeof(Block),
                         CHUNK_DATA_SIZE,
                         file);
                 fclose(file);
+
+                int allZero = 0;
+                for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
+                        allZero |= blocks[i];
+                }
+                
+                printf("loaded");
+                if (allZero) { printf(" ALL AIR"); }
+                puts("");
+                
                 return 1;
         }
         
@@ -537,6 +558,9 @@ int genChunk (
 
         // Sort all chunks
         World_sort(world);
+
+        printf("generated\n");
+        
         return 1;
 }
 

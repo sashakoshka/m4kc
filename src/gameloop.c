@@ -714,6 +714,13 @@ void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
                 SDL_RenderFillRect(renderer, &backgroundRect);
                 popup_chunkPeek(renderer, inputs, &world, &gamePopup, &player);
                 break;
+
+        case POPUP_ROLL_CALL:
+                // Chunk peek
+                tblack(renderer);
+                SDL_RenderFillRect(renderer, &backgroundRect);
+                popup_rollCall(renderer, inputs, &world, &gamePopup);
+                break;
         #endif
 
         case POPUP_CHAT:

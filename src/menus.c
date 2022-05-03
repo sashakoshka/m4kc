@@ -808,9 +808,17 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
         ) {
                 *gamePopup = POPUP_CHUNK_PEEK;
         }
+        
+        if (button(renderer, "All Chunks",
+                BUFFER_HALF_W - 64, 42, 128,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *gamePopup = POPUP_ROLL_CALL;
+        }
 
         if (button(renderer, "Done",
-                BUFFER_HALF_W - 64, 42, 128,
+                BUFFER_HALF_W - 64, 64, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -954,6 +962,54 @@ void popup_chunkPeek (
 
         if (button(renderer, "Done",
                 4, 100, 64,
+                inputs->mouse.x, inputs->mouse.y)
+                && inputs->mouse.left
+        ) {
+                *gamePopup = POPUP_ADVANCED_DEBUG;
+        }
+}
+
+void popup_rollCall (
+        SDL_Renderer *renderer, Inputs *inputs, World *world,
+        int *gamePopup
+) {
+        static int scroll = 0;
+
+        if (inputs->mouse.wheel != 0) {
+                scroll += inputs->mouse.wheel;
+                inputs->mouse.wheel = 0;
+        }
+
+        if (scroll > 0) { scroll = 0; }
+        if (scroll < 1 - CHUNKARR_SIZE) { scroll = 1 - CHUNKARR_SIZE; }
+
+        white(renderer);
+        drawStr(renderer, "x    y    z   stmp    hash", 8, 10);
+
+        for (int index = 0; index < CHUNKARR_SIZE; index ++) {
+                Chunk *chunk = &world->chunk[index];
+                char chunkDescription[32];
+                white(renderer);
+
+                int topMargin = 28;
+                int y = (index + scroll) * 8 + topMargin;
+                if (y < topMargin || y >= BUFFER_H) { continue; }
+                
+                snprintf(chunkDescription, 32, "%i", chunk->center.x - 32);
+                drawStr(renderer, chunkDescription, 0,   y);
+                snprintf(chunkDescription, 32, "%i", chunk->center.y - 32);
+                drawStr(renderer, chunkDescription, 24,  y);
+                snprintf(chunkDescription, 32, "%i", chunk->center.z - 32);
+                drawStr(renderer, chunkDescription, 48,  y);
+                
+                snprintf(chunkDescription, 32, "#%i", chunk->loaded);
+                drawStr(renderer, chunkDescription, 72,  y);
+                snprintf(chunkDescription, 32, "%016x", chunk->coordHash);
+                drawStr(renderer, chunkDescription, 96,  y);
+        }
+
+        if (button(renderer, "Done",
+                BUFFER_W - 6 - 32, 6, 32,
                 inputs->mouse.x, inputs->mouse.y)
                 && inputs->mouse.left
         ) {

@@ -21,6 +21,7 @@
 #define POPUP_ADVANCED_DEBUG 4
 #define POPUP_CHUNK_PEEK     5
 #define POPUP_CHAT           6
+#define POPUP_ROLL_CALL      7
 
 int  state_title       (SDL_Renderer *, Inputs *, int *);
 void state_selectWorld (SDL_Renderer *, Inputs *, int *, World *);
@@ -40,3 +41,4 @@ void popup_pause      (SDL_Renderer *, Inputs *, int *, int *, World *);
 void popup_options    (SDL_Renderer *, Inputs *, int *);
 void popup_debugTools (SDL_Renderer *, Inputs *, int *);
 void popup_chunkPeek  (SDL_Renderer *, Inputs *, World *, int *, Player *);
+void popup_rollCall   (SDL_Renderer *, Inputs *, World *, int *);
