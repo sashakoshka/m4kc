@@ -4,6 +4,8 @@
 #include "terrain.h"
 #include "main.h"
 #include "player.h"
+
+#define PLAYER_POSITION_OFFSET 64
  
 int  gameLoop            (Inputs *inputs, SDL_Renderer *renderer);
 void gameLoop_resetGame  ();

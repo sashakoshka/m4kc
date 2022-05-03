@@ -28,7 +28,8 @@ static int debugOn;
 
 Player player = { 0 };
 
-static Coords playerMovement = { 0.0, 0.0, 0.0 };
+static Coords playerMovement  = { 0.0, 0.0, 0.0 };
+static Coords playerOffsetPos = { 0.0, 0.0, 0.0 };
 static SDL_Rect backgroundRect;
 static char *errorMessage = NULL;
 static long l;
@@ -38,9 +39,9 @@ static void gameLoop_drawPopup       (SDL_Renderer *, Inputs *);
 static void gameLoop_processMovement (Inputs *, int);
 
 static u_int32_t
-        fps_lastmil  = 0,
-        fps_count    = 0,
-        fps_now      = 0;
+        fps_lastmil = 0,
+        fps_count   = 0,
+        fps_now     = 0;
 
 /* gameLoop_resetGame
  * Resets elements of the game such as time and the player position. This will
@@ -50,9 +51,9 @@ void gameLoop_resetGame () {
         l = SDL_GetTicks();
 
         player = (const Player) { 0 };
-        player.pos.x = 96.5;
-        player.pos.y = 65.0;
-        player.pos.z = 96.5;
+        player.pos.x = 32.5;
+        player.pos.y = 16;
+        player.pos.z = 32.5;
 
         gamePopup = 0;
         
@@ -178,13 +179,13 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     // static IntCoords chunkLoadCoords = { 0 };
     // chunkLoadCoords.x =
       // ((chunkLoadNum % CHUNKARR_DIAM) -
-      // CHUNKARR_RAD) * 64 + player.pos.x - 64;
+      // CHUNKARR_RAD) * 64 + player.pos.x;
     // chunkLoadCoords.y =
       // (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) -
-      // CHUNKARR_RAD) * 64 + player.pos.y - 64;
+      // CHUNKARR_RAD) * 64 + player.pos.y;
     // chunkLoadCoords.z =
       // ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
-      // CHUNKARR_RAD) * 64 + player.pos.z - 64;
+      // CHUNKARR_RAD) * 64 + player.pos.z;
     // chunkLoadNum++;
     // 
     // genChunk (
@@ -199,14 +200,14 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   // }
 
   ;int headInWater = World_getBlock (&world,
-    player.pos.x - 64,
-    player.pos.y - 64,
-    player.pos.z - 64) == BLOCK_WATER;
+    player.pos.x,
+    player.pos.y,
+    player.pos.z) == BLOCK_WATER;
 
   int feetInWater = World_getBlock (&world,
-    player.pos.x - 64,
-    player.pos.y - 63,
-    player.pos.z - 64) == BLOCK_WATER;
+    player.pos.x,
+    player.pos.y + 1,
+    player.pos.z) == BLOCK_WATER;
 
   int effectDrawDistance = data_options.drawDistance;
   // Restrict view distance while in water
@@ -217,6 +218,11 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   player.vectorH.y = cos(player.hRot);
   player.vectorV.x = sin(player.vRot);
   player.vectorV.y = cos(player.vRot);
+
+  // Update offset player position
+  playerOffsetPos.x = player.pos.x + PLAYER_POSITION_OFFSET;
+  playerOffsetPos.y = player.pos.y + PLAYER_POSITION_OFFSET;
+  playerOffsetPos.z = player.pos.z + PLAYER_POSITION_OFFSET;
   
   // Skybox, basically
   float timeCoef;
@@ -240,7 +246,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     SDL_SetRenderDrawColor (
       renderer,
       48  * timeCoef,
-      96 * timeCoef,
+      96  * timeCoef,
       200 * timeCoef,
       255
     );
@@ -320,9 +326,9 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         if (
           // Player cannot be obstructing the block
           (
-            fabs(player.pos.x - 64.5 - blockSelectOffset.x) >= 0.8 ||
-            fabs(player.pos.y - 64 - blockSelectOffset.y) >= 1.45 ||
-            fabs(player.pos.z - 64.5 - blockSelectOffset.z) >= 0.8
+            fabs(player.pos.x - 0.5 - blockSelectOffset.x) >= 0.8  ||
+            fabs(player.pos.y       - blockSelectOffset.y) >= 1.45 ||
+            fabs(player.pos.z - 0.5 - blockSelectOffset.z) >= 0.8
           ) &&
           // Player must have enough of that block
           activeSlot->amount > 0
@@ -445,14 +451,14 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         f29 = f24 * f28;
         f30 = f23 * f28;
         f31 = f25 * f28;
-        f32 = player.pos.x - (int)player.pos.x;
-        if (blockFace == 1) f32 = player.pos.y - (int)player.pos.y;
-        if (blockFace == 2) f32 = player.pos.z - (int)player.pos.z;
+        f32 = playerOffsetPos.x - (int)playerOffsetPos.x;
+        if (blockFace == 1) f32 = playerOffsetPos.y - (int)playerOffsetPos.y;
+        if (blockFace == 2) f32 = playerOffsetPos.z - (int)playerOffsetPos.z;
         if (f27 > 0.0)      f32 = 1.0 - f32; 
         f33 = f28 * f32;
-        f34 = player.pos.x + f29 * f32;
-        f35 = player.pos.y + f30 * f32;
-        f36 = player.pos.z + f31 * f32;
+        f34 = playerOffsetPos.x + f29 * f32;
+        f35 = playerOffsetPos.y + f30 * f32;
+        f36 = playerOffsetPos.z + f31 * f32;
         if (f27 < 0.0) {
           if (blockFace == 0) f34--; 
           if (blockFace == 1) f35--; 
@@ -462,9 +468,9 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         /* Whatever's in this loop needs to run *extremely*
         fast */
         while (f33 < rayDistanceLimit) {
-          blockRayPosition.x = (int)f34 - 64;
-          blockRayPosition.y = (int)f35 - 64;
-          blockRayPosition.z = (int)f36 - 64;
+          blockRayPosition.x = (int)f34 - PLAYER_POSITION_OFFSET;
+          blockRayPosition.y = (int)f35 - PLAYER_POSITION_OFFSET;
+          blockRayPosition.z = (int)f36 - PLAYER_POSITION_OFFSET;
           
           /* Imitate getBlock so we don't have to launch
           into a function then another function a zillion
@@ -568,7 +574,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
                 pixelColor = 0xFF0000;
               } else {
                 pixelColor = textures [
-                  i6 + (i7 << 4) + intersectedBlock * 256 * 3];
+                  i6 + (i7 * 16) + intersectedBlock * 256 * 3];
               }
             }
             
@@ -816,13 +822,13 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                 for (int i12 = 0; i12 < 12; i12++) {
                         int blockX = (int) (
                                 playerPosTry.x +
-                                (i12 >> 0 & 0x1) * 0.6 - 0.3) - 64;
+                                (i12 >> 0 & 0x1) * 0.6 - 0.3);
                         int blockY = (int) (
                                 playerPosTry.y +
-                                ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
+                                ((i12 >> 2) - 1) * 0.8 + 0.65);
                         int blockZ = (int) (
                                 playerPosTry.z +
-                                (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
+                                (i12 >> 1 & 0x1) * 0.6 - 0.3);
 
                         Block block = World_getBlock (&world,
                                 blockX,
@@ -855,7 +861,9 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                         }
                 }
 
-                player.pos = playerPosTry;
+                player.pos.x = playerPosTry.x;
+                player.pos.y = playerPosTry.y;
+                player.pos.z = playerPosTry.z;
 
                 label208:;
         }
