@@ -816,9 +816,17 @@ void popup_debugTools (SDL_Renderer *renderer, Inputs *inputs, int *gamePopup) {
         ) {
                 *gamePopup = POPUP_ROLL_CALL;
         }
+        
+        if (button(renderer, "World overview",
+                BUFFER_HALF_W - 64, 64, 128,
+                inputs->mouse.x, inputs->mouse.y) &&
+                inputs->mouse.left
+        ) {
+                *gamePopup = POPUP_OVERVIEW;
+        }
 
         if (button(renderer, "Done",
-                BUFFER_HALF_W - 64, 64, 128,
+                BUFFER_HALF_W - 64, 86, 128,
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
@@ -1007,6 +1015,60 @@ void popup_rollCall (
                 snprintf(chunkDescription, 32, "%016x", chunk->coordHash);
                 drawStr(renderer, chunkDescription, 96,  y);
         }
+
+        if (button(renderer, "Done",
+                BUFFER_W - 6 - 32, 6, 32,
+                inputs->mouse.x, inputs->mouse.y)
+                && inputs->mouse.left
+        ) {
+                *gamePopup = POPUP_ADVANCED_DEBUG;
+        }
+}
+
+void popup_overview (
+        SDL_Renderer *renderer, Inputs *inputs, World *world,
+        int *gamePopup
+) {
+        (void)(world);
+
+        for (int y = CHUNK_SIZE * 3; y > -64; y -= 4)
+        for (int x = -64; x < CHUNK_SIZE * 3; x += 4)
+        for (int z = -64; z < CHUNK_SIZE * 3; z += 4) {
+                
+
+                int projectX = (x - z) / 4;
+                int projectY = ((x + z) / 2 + y) / 4;
+        
+                Block currentBlock = World_getBlock(world, x, y, z);
+                int color;
+                int alpha = 255;
+
+                if (currentBlock < NUMBER_OF_BLOCKS) {
+                        color = textures[currentBlock * 256 * 3 + 6 * 16];
+                } else {
+                        color = 0xFF0000;
+                        alpha = 0;
+                }
+
+                if (color != 0) {
+                        if (currentBlock == BLOCK_WATER) {
+                                alpha = 64;
+                        }
+                
+                        SDL_SetRenderDrawColor (
+                                renderer,
+                                (color >> 16 & 0xFF),
+                                (color >> 8 & 0xFF),
+                                (color & 0xFF),
+                                alpha);
+                        
+                        SDL_RenderDrawPoint (
+                                renderer,
+                                projectX + BUFFER_HALF_W,
+                                projectY + 8);
+                }
+        }
+        
 
         if (button(renderer, "Done",
                 BUFFER_W - 6 - 32, 6, 32,

@@ -716,10 +716,17 @@ void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
                 break;
 
         case POPUP_ROLL_CALL:
-                // Chunk peek
+                // Chunk info viewer
                 tblack(renderer);
                 SDL_RenderFillRect(renderer, &backgroundRect);
                 popup_rollCall(renderer, inputs, &world, &gamePopup);
+                break;
+
+        case POPUP_OVERVIEW:
+                // View all chunks
+                tblack(renderer);
+                SDL_RenderFillRect(renderer, &backgroundRect);
+                popup_overview(renderer, inputs, &world, &gamePopup);
                 break;
         #endif
 

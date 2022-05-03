@@ -127,13 +127,13 @@ static int Chunk_save (World *world, Chunk *chunk) {
                 file);
         fclose(file);
 
-        int allZero = 0;
+        int hasData = 0;
         for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
-                allZero |= chunk->blocks[i];
+                hasData |= chunk->blocks[i];
         }
         
         printf("saved\t%s\t", path);
-        if (allZero) { printf(" ALL AIR"); }
+        if (!hasData) { printf(" ALL AIR"); }
         puts("");
 
         return 0;
@@ -517,13 +517,13 @@ int genChunk (
                         file);
                 fclose(file);
 
-                int allZero = 0;
+                int hasData = 0;
                 for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
-                        allZero |= blocks[i];
+                        hasData |= blocks[i];
                 }
                 
                 printf("loaded");
-                if (allZero) { printf(" ALL AIR"); }
+                if (!hasData) { printf(" ALL AIR"); }
                 puts("");
                 
                 return 1;
