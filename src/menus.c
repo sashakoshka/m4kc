@@ -1031,11 +1031,11 @@ void popup_overview (
 ) {
         (void)(world);
 
-        for (int y = CHUNK_SIZE * 3; y > -64; y -= 4)
-        for (int x = -64; x < CHUNK_SIZE * 3; x += 4)
-        for (int z = -64; z < CHUNK_SIZE * 3; z += 4) {
-                
-
+        int worldEndingBound   = CHUNK_SIZE * (CHUNKARR_RAD + 1);
+        int worldStartingBound = CHUNK_SIZE * CHUNKARR_RAD * -1;
+        for (int y = worldEndingBound; y > worldStartingBound; y -= 4)
+        for (int x = worldStartingBound; x < worldEndingBound; x += 4)
+        for (int z = worldStartingBound; z < worldEndingBound; z += 4) {
                 int projectX = (x - z) / 4;
                 int projectY = ((x + z) / 2 + y) / 4;
         
@@ -1065,7 +1065,7 @@ void popup_overview (
                         SDL_RenderDrawPoint (
                                 renderer,
                                 projectX + BUFFER_HALF_W,
-                                projectY + 8);
+                                projectY + 32);
                 }
         }
         
