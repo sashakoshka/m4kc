@@ -521,6 +521,9 @@ int genChunk (
                 for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
                         hasData |= blocks[i];
                 }
+
+                // Sort all chunks
+                World_sort(world);
                 
                 printf("loaded");
                 if (!hasData) { printf(" ALL AIR"); }
