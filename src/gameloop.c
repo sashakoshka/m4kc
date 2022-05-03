@@ -814,14 +814,19 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 blockX,
                                 blockY,
                                 blockZ);
-                        if (
-                                block != BLOCK_AIR &&
-                                block != BLOCK_WATER &&
-                                block != BLOCK_TALL_GRASS
-                        ) {
-                                if (axis != 1) {
-                                        goto label208;
-                                }
+
+                        int shouldCollide = 1;
+                        // Blocks that have collision disabled
+                        shouldCollide &= block != BLOCK_AIR;
+                        shouldCollide &= block != BLOCK_WATER;
+                        shouldCollide &= block != BLOCK_TALL_GRASS;
+                        // Uncomment this line to be able to enter chunks that
+                        // don't exist in memory
+                        // shouldCollide &= block != BLOCK_NIL;
+                        
+                        if (shouldCollide) {
+                                if (axis != 1) { goto label208; }
+                                
                                 if (
                                         inputs->keyboard.space > 0 &&
                                         (playerMovement.y > 0.0)   &&

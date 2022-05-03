@@ -244,7 +244,7 @@ int World_setBlock (
 
 /* World_getBlock
  * Takes in a world, xyz coordinates, and outputs the block
- * id there. Returns -1 if chunk is not loaded
+ * id there. Returns BLOCK_NIL if chunk is not loaded
  */
 Block World_getBlock (
         World *world,
@@ -254,7 +254,7 @@ Block World_getBlock (
         chunk = chunkLookup(world, x, y, z);
 
         // If chunk does not have an allocated block array, exit
-        if(chunk == NULL || !chunk->loaded) return -1;
+        if(chunk == NULL || !chunk->loaded) return BLOCK_NIL;
 
         return chunk->blocks [
                 nmod(x, CHUNK_SIZE) +
