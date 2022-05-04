@@ -41,8 +41,8 @@ int Inventory_transferIn (Inventory *, InvSlot *);
  */
 typedef struct Player {
         Coords pos;
-        float hRot;
-        float vRot;
+        double hRot;
+        double vRot;
 
         Inventory inventory;
         u_int8_t  health;
@@ -53,8 +53,8 @@ typedef struct Player {
         Vector2D vectorH;
         Vector2D vectorV;
 
-        float FBVelocity;
-        float LRVelocity;
+        double FBVelocity;
+        double LRVelocity;
 } Player;
 
 int Player_save (Player *, const char *);

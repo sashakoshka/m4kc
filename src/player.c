@@ -48,8 +48,8 @@ int Player_load (Player *player, const char *path) {
 
         fscanf (
                 file,
-                "%a %a %a "
-                "%a %a "
+                "%lf %lf %lf "
+                "%lf %lf "
                 "%hhu %hhu %hhu "
                 "%hu",
                 &player->pos.x, &player->pos.y, &player->pos.z,

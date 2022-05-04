@@ -15,10 +15,10 @@ typedef struct data_WorldListItem {
 extern data_WorldListItem *data_worldList;
 
 typedef struct {
-        int   fogType;
-        int   drawDistance;
-        int   trapMouse;
-        float fov;
+        int    fogType;
+        int    drawDistance;
+        int    trapMouse;
+        double fov;
         InputBuffer username;
 } data_Options;
 

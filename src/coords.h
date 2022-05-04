@@ -4,9 +4,9 @@
  * Stores xyz coordinates
  */
 typedef struct {
-        float x;
-        float y;
-        float z;
+        double x;
+        double y;
+        double z;
 } Coords;
 
 /* IntCoords
@@ -19,9 +19,9 @@ typedef struct {
 } IntCoords;
 
 /* Vector2D
- * Two dimensional floating point vector
+ * Two dimensional double precision vector
  */
 typedef struct {
-        float x;
-        float y;
+        double x;
+        double y;
 } Vector2D;

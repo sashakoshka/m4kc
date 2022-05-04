@@ -26,14 +26,14 @@ int perlin2d_noise2 (int x, int y, u_int8_t *hash, int seed) {
         return hash[(tmp + x) % 256];
 }
 
-float perlin2d_lerp (float x, float y, float s) {
+double perlin2d_lerp (double x, double y, double s) {
         return x + s * s * (3 - 2 * s) * (y - x);
 }
 
 /* perlin2d
  * Simple 2D perlin noise function.
  */
-float perlin2d (
+double perlin2d (
         int seed,
         double x, double y,
         double freq
@@ -90,14 +90,14 @@ float perlin2d (
 /* dist2d
  * Find the distance between two points in two dimensional space.
  */
-float dist2d (float x1, float y1, float x2, float y2) {
+double dist2d (double x1, double y1, double x2, double y2) {
         return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
 
 /* dist3d
  * Find the distance between two points in three dimensional space.
  */
-float dist3d (float x1, float y1, float z1, float x2, float y2, float z2) {
+double dist3d (double x1, double y1, double z1, double x2, double y2, double z2) {
         return sqrt (
                 pow(x1 - x2, 2) +
                 pow(y1 - y2, 2) +

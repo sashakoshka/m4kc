@@ -132,7 +132,7 @@ int gameLoop (
  * Runs game logic and rendering. This is where most of the obfuscated code is.
  */
 static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
-  static float
+  static double
         f21,
         f22,
         f23,
@@ -215,10 +215,10 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   playerOffsetPos.z = player->pos.z + PLAYER_POSITION_OFFSET;
   
   // Skybox, basically
-  float timeCoef;
+  double timeCoef;
   switch (world.dayNightMode) {
     case 0:
-      timeCoef  = (float)(world.time % 102944) / 16384;
+      timeCoef  = (double)(world.time % 102944) / 16384;
       timeCoef  = sin(timeCoef);
       timeCoef /= sqrt(timeCoef * timeCoef + (1.0 / 128.0));
       timeCoef  = (timeCoef + 1) / 2;
@@ -408,19 +408,19 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   /* Cast rays. selectedPass passes wether or not a block is
   selected to the blockSelected variable */
 
-  // Decrease foc when in water
-  float effectFov = data_options.fov;
+  // Decrease fov when in water
+  double effectFov = data_options.fov;
   if (headInWater) { effectFov += 20; }
   
   selectedPass = 0;
   for (int pixelX = 0; pixelX < BUFFER_W; pixelX++) {
-    float rayOffsetX = (pixelX - BUFFER_HALF_W) / effectFov;
+    double rayOffsetX = (pixelX - BUFFER_HALF_W) / effectFov;
     for (int pixelY = 0; pixelY < BUFFER_H; pixelY++) {
       int finalPixelColor = 0;
       int pixelMist = 255;
       int pixelShade;
       
-      float rayOffsetY = (pixelY - BUFFER_HALF_H) / effectFov;
+      double rayOffsetY = (pixelY - BUFFER_HALF_H) / effectFov;
 
       // Ray offset Z?
       f21 = 1.0;
@@ -534,8 +534,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             intersectedBlock != BLOCK_AIR &&
             !(headInWater && intersectedBlock == BLOCK_WATER)
           ) {
-            // I'm guessing this eldritch horror figures out what pixel of
-            // the block we hit
+            // Determine what texel the ray hit
             int textureX = (int)((f34 + f36) * 16.0) & 0xF;
             int textureY = ((int)(f35 * 16.0) & 0xF) + 16;
             if (blockFace == 1) {
@@ -599,7 +598,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             if (pixelColor > 0) {
               finalPixelColor = pixelColor;
               pixelMist = 255 - (int)(
-                f33 / (float)effectDrawDistance * 255.0F);
+                f33 / (double)effectDrawDistance * 255.0F);
               pixelShade = 255 - (blockFace + 2) % 3 * 50;
               rayDistanceLimit = f33;
             } 
@@ -743,17 +742,17 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
         if (gamePopup == 0) {
                 // Looking around
                 if (data_options.trapMouse) {
-                        player->hRot += (float)inputs->mouse.x / 64;
-                        player->vRot -= (float)inputs->mouse.y / 64;
+                        player->hRot += (double)inputs->mouse.x / 64;
+                        player->vRot -= (double)inputs->mouse.y / 64;
                 } else {
-                        float cameraMoveX =
+                        double cameraMoveX =
                                 (inputs->mouse.x - BUFFER_W * 2) /
-                                (float)BUFFER_W * 2.0;
-                        float cameraMoveY =
+                                (double)BUFFER_W * 2.0;
+                        double cameraMoveY =
                                 (inputs->mouse.y - BUFFER_H * 2) /
-                                (float)BUFFER_H * 2.0;
+                                (double)BUFFER_H * 2.0;
 
-                        float cameraMoveDistance = sqrt (
+                        double cameraMoveDistance = sqrt (
                         cameraMoveX * cameraMoveX +
                         cameraMoveY * cameraMoveY) - 1.2;
 
@@ -772,7 +771,7 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                 if (player->vRot < -1.57) player->vRot = -1.57;
                 if (player->vRot >  1.57) player->vRot =  1.57;
 
-                float speed = 0.02;
+                double speed = 0.02;
 
                 if (doPhysics) {
                         player->FBVelocity =
@@ -807,9 +806,9 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                 if (!doPhysics) { break; }
 
                 Coords playerPosTry = {
-                        player->pos.x + playerMovement.x * (float)((axis + 2) % 3 / 2),
-                        player->pos.y + playerMovement.y * (float)((axis + 1) % 3 / 2),
-                        player->pos.z + playerMovement.z * (float)((axis + 3) % 3 / 2),
+                        player->pos.x + playerMovement.x * (double)((axis + 2) % 3 / 2),
+                        player->pos.y + playerMovement.y * (double)((axis + 1) % 3 / 2),
+                        player->pos.z + playerMovement.z * (double)((axis + 3) % 3 / 2),
                 };
 
                 playerPosTry.x += PLAYER_POSITION_OFFSET;
