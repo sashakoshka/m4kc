@@ -19,6 +19,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 World world = { 0 };
+Player *player = &world.player;
+
+static Coords playerOffsetPos = { 0.0, 0.0, 0.0 };
 
 int gameState = STATE_TITLE;
 int gamePopup;
@@ -26,9 +29,6 @@ int gamePopup;
 static int guiOn;
 static int debugOn;
 
-Player player = { 0 };
-
-static Coords playerMovement = { 0.0, 0.0, 0.0 };
 static SDL_Rect backgroundRect;
 static char *errorMessage = NULL;
 static long l;
@@ -38,9 +38,9 @@ static void gameLoop_drawPopup       (SDL_Renderer *, Inputs *);
 static void gameLoop_processMovement (Inputs *, int);
 
 static u_int32_t
-        fps_lastmil  = 0,
-        fps_count    = 0,
-        fps_now      = 0;
+        fps_lastmil = 0,
+        fps_count   = 0,
+        fps_now     = 0;
 
 /* gameLoop_resetGame
  * Resets elements of the game such as time and the player position. This will
@@ -48,11 +48,6 @@ static u_int32_t
  */
 void gameLoop_resetGame () {
         l = SDL_GetTicks();
-
-        player = (const Player) { 0 };
-        player.pos.x = 96.5;
-        player.pos.y = 65.0;
-        player.pos.z = 96.5;
 
         gamePopup = 0;
         
@@ -105,7 +100,7 @@ int gameLoop (
 
         case STATE_LOADING:
                 // Generate a world and present a loading screen
-                if (state_loading(renderer, &world, world.seed, player.pos)) {
+                if (state_loading(renderer, &world, world.seed, player->pos)) {
                         gameLoop_resetGame();
                         gameState = 5;
                 };
@@ -178,13 +173,13 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     // static IntCoords chunkLoadCoords = { 0 };
     // chunkLoadCoords.x =
       // ((chunkLoadNum % CHUNKARR_DIAM) -
-      // CHUNKARR_RAD) * 64 + player.pos.x - 64;
+      // CHUNKARR_RAD) * 64 + player.pos.x;
     // chunkLoadCoords.y =
       // (((chunkLoadNum / CHUNKARR_DIAM) % CHUNKARR_DIAM) -
-      // CHUNKARR_RAD) * 64 + player.pos.y - 64;
+      // CHUNKARR_RAD) * 64 + player.pos.y;
     // chunkLoadCoords.z =
       // ((chunkLoadNum / (CHUNKARR_DIAM * CHUNKARR_DIAM)) -
-      // CHUNKARR_RAD) * 64 + player.pos.z - 64;
+      // CHUNKARR_RAD) * 64 + player.pos.z;
     // chunkLoadNum++;
     // 
     // genChunk (
@@ -199,24 +194,29 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   // }
 
   ;int headInWater = World_getBlock (&world,
-    player.pos.x - 64,
-    player.pos.y - 64,
-    player.pos.z - 64) == BLOCK_WATER;
+    player->pos.x,
+    player->pos.y,
+    player->pos.z) == BLOCK_WATER;
 
   int feetInWater = World_getBlock (&world,
-    player.pos.x - 64,
-    player.pos.y - 63,
-    player.pos.z - 64) == BLOCK_WATER;
+    player->pos.x,
+    player->pos.y + 1,
+    player->pos.z) == BLOCK_WATER;
 
   int effectDrawDistance = data_options.drawDistance;
   // Restrict view distance while in water
   if (headInWater) { effectDrawDistance = 10; }
 
   // Update directional vectors
-  player.vectorH.x = sin(player.hRot);
-  player.vectorH.y = cos(player.hRot);
-  player.vectorV.x = sin(player.vRot);
-  player.vectorV.y = cos(player.vRot);
+  player->vectorH.x = sin(player->hRot);
+  player->vectorH.y = cos(player->hRot);
+  player->vectorV.x = sin(player->vRot);
+  player->vectorV.y = cos(player->vRot);
+
+  // Update offset player position
+  playerOffsetPos.x = player->pos.x + PLAYER_POSITION_OFFSET;
+  playerOffsetPos.y = player->pos.y + PLAYER_POSITION_OFFSET;
+  playerOffsetPos.z = player->pos.z + PLAYER_POSITION_OFFSET;
   
   // Skybox, basically
   float timeCoef;
@@ -240,7 +240,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     SDL_SetRenderDrawColor (
       renderer,
       48  * timeCoef,
-      96 * timeCoef,
+      96  * timeCoef,
       200 * timeCoef,
       255
     );
@@ -279,8 +279,8 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   
   if (gamePopup == POPUP_HUD) {
     if (blockSelected) {
-      InvSlot *activeSlot = &player.inventory.hotbar [
-        player.inventory.hotbarSelect
+      InvSlot *activeSlot = &player->inventory.hotbar [
+        player->inventory.hotbarSelect
       ];
 
       // Breaking blocks
@@ -300,7 +300,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             .durability = 1
           };
 
-          Inventory_transferIn(&player.inventory, &pickedUp);
+          Inventory_transferIn(&player->inventory, &pickedUp);
           
           World_setBlock (
             &world,
@@ -320,9 +320,9 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         if (
           // Player cannot be obstructing the block
           (
-            fabs(player.pos.x - 64.5 - blockSelectOffset.x) >= 0.8 ||
-            fabs(player.pos.y - 64 - blockSelectOffset.y) >= 1.45 ||
-            fabs(player.pos.z - 64.5 - blockSelectOffset.z) >= 0.8
+            fabs(player->pos.x - 0.5 - blockSelectOffset.x) >= 0.8  ||
+            fabs(player->pos.y       - blockSelectOffset.y) >= 1.45 ||
+            fabs(player->pos.z - 0.5 - blockSelectOffset.z) >= 0.8
           ) &&
           // Player must have enough of that block
           activeSlot->amount > 0
@@ -384,29 +384,29 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     if (inputs->keyboard.f) {
       inputs->keyboard.f = 0;
       InvSlot_swap (
-        &player.inventory.hotbar[player.inventory.hotbarSelect],
-        &player.inventory.offhand
+        &player->inventory.hotbar[player->inventory.hotbarSelect],
+        &player->inventory.offhand
       );
     }
     
     // Select hotbar slots with scroll wheel
     if (inputs->mouse.wheel != 0) {
-            player.inventory.hotbarSelect -= inputs->mouse.wheel;
-            player.inventory.hotbarSelect = nmod (
-                    player.inventory.hotbarSelect, 9);
+            player->inventory.hotbarSelect -= inputs->mouse.wheel;
+            player->inventory.hotbarSelect = nmod (
+                    player->inventory.hotbarSelect, 9);
             inputs->mouse.wheel = 0;
     }
 
     // Select hotbar slots with number keys
-    if (inputs->keyboard.num1) { player.inventory.hotbarSelect = 0; }
-    if (inputs->keyboard.num2) { player.inventory.hotbarSelect = 1; }
-    if (inputs->keyboard.num3) { player.inventory.hotbarSelect = 2; }
-    if (inputs->keyboard.num4) { player.inventory.hotbarSelect = 3; }
-    if (inputs->keyboard.num5) { player.inventory.hotbarSelect = 4; }
-    if (inputs->keyboard.num6) { player.inventory.hotbarSelect = 5; }
-    if (inputs->keyboard.num7) { player.inventory.hotbarSelect = 6; }
-    if (inputs->keyboard.num8) { player.inventory.hotbarSelect = 7; }
-    if (inputs->keyboard.num9) { player.inventory.hotbarSelect = 8; }
+    if (inputs->keyboard.num1) { player->inventory.hotbarSelect = 0; }
+    if (inputs->keyboard.num2) { player->inventory.hotbarSelect = 1; }
+    if (inputs->keyboard.num3) { player->inventory.hotbarSelect = 2; }
+    if (inputs->keyboard.num4) { player->inventory.hotbarSelect = 3; }
+    if (inputs->keyboard.num5) { player->inventory.hotbarSelect = 4; }
+    if (inputs->keyboard.num6) { player->inventory.hotbarSelect = 5; }
+    if (inputs->keyboard.num7) { player->inventory.hotbarSelect = 6; }
+    if (inputs->keyboard.num8) { player->inventory.hotbarSelect = 7; }
+    if (inputs->keyboard.num9) { player->inventory.hotbarSelect = 8; }
   }
   
   /* Cast rays. selectedPass passes wether or not a block is
@@ -429,10 +429,10 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
       // Ray offset Z?
       f21 = 1.0;
       
-      f22 = f21        * player.vectorV.y + rayOffsetY * player.vectorV.x;
-      f23 = rayOffsetY * player.vectorV.y - f21        * player.vectorV.x;
-      f24 = rayOffsetX * player.vectorH.y + f22        * player.vectorH.x;
-      f25 = f22        * player.vectorH.y - rayOffsetX * player.vectorH.x;
+      f22 = f21        * player->vectorV.y + rayOffsetY * player->vectorV.x;
+      f23 = rayOffsetY * player->vectorV.y - f21        * player->vectorV.x;
+      f24 = rayOffsetX * player->vectorH.y + f22        * player->vectorH.x;
+      f25 = f22        * player->vectorH.y - rayOffsetX * player->vectorH.x;
 
       double rayDistanceLimit = effectDrawDistance;
       
@@ -445,14 +445,14 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         f29 = f24 * f28;
         f30 = f23 * f28;
         f31 = f25 * f28;
-        f32 = player.pos.x - (int)player.pos.x;
-        if (blockFace == 1) f32 = player.pos.y - (int)player.pos.y;
-        if (blockFace == 2) f32 = player.pos.z - (int)player.pos.z;
+        f32 = playerOffsetPos.x - (int)playerOffsetPos.x;
+        if (blockFace == 1) f32 = playerOffsetPos.y - (int)playerOffsetPos.y;
+        if (blockFace == 2) f32 = playerOffsetPos.z - (int)playerOffsetPos.z;
         if (f27 > 0.0)      f32 = 1.0 - f32; 
         f33 = f28 * f32;
-        f34 = player.pos.x + f29 * f32;
-        f35 = player.pos.y + f30 * f32;
-        f36 = player.pos.z + f31 * f32;
+        f34 = playerOffsetPos.x + f29 * f32;
+        f35 = playerOffsetPos.y + f30 * f32;
+        f36 = playerOffsetPos.z + f31 * f32;
         if (f27 < 0.0) {
           if (blockFace == 0) f34--; 
           if (blockFace == 1) f35--; 
@@ -462,9 +462,9 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         /* Whatever's in this loop needs to run *extremely*
         fast */
         while (f33 < rayDistanceLimit) {
-          blockRayPosition.x = (int)f34 - 64;
-          blockRayPosition.y = (int)f35 - 64;
-          blockRayPosition.z = (int)f36 - 64;
+          blockRayPosition.x = (int)f34 - PLAYER_POSITION_OFFSET;
+          blockRayPosition.y = (int)f35 - PLAYER_POSITION_OFFSET;
+          blockRayPosition.z = (int)f36 - PLAYER_POSITION_OFFSET;
           
           /* Imitate getBlock so we don't have to launch
           into a function then another function a zillion
@@ -568,7 +568,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
                 pixelColor = 0xFF0000;
               } else {
                 pixelColor = textures [
-                  i6 + (i7 << 4) + intersectedBlock * 256 * 3];
+                  i6 + (i7 * 16) + intersectedBlock * 256 * 3];
               }
             }
             
@@ -677,7 +677,7 @@ void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
                 if (data_options.trapMouse) SDL_SetRelativeMouseMode(1);
                 if (guiOn) popup_hud (
                 renderer, inputs, &world,
-                &debugOn, &fps_now, &player
+                &debugOn, &fps_now, player
                 );
                 break;
 
@@ -697,7 +697,7 @@ void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
 
         case POPUP_INVENTORY:
                 // Inventory
-                popup_inventory(renderer, inputs, &player, &gamePopup);
+                popup_inventory(renderer, inputs, player, &gamePopup);
                 break;
 
         #ifndef small
@@ -712,7 +712,7 @@ void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
                 // Chunk peek
                 tblack(renderer);
                 SDL_RenderFillRect(renderer, &backgroundRect);
-                popup_chunkPeek(renderer, inputs, &world, &gamePopup, &player);
+                popup_chunkPeek(renderer, inputs, &world, &gamePopup, player);
                 break;
 
         case POPUP_ROLL_CALL:
@@ -747,8 +747,8 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
         if (gamePopup == 0) {
                 // Looking around
                 if (data_options.trapMouse) {
-                        player.hRot += (float)inputs->mouse.x / 64;
-                        player.vRot -= (float)inputs->mouse.y / 64;
+                        player->hRot += (float)inputs->mouse.x / 64;
+                        player->vRot -= (float)inputs->mouse.y / 64;
                 } else {
                         float cameraMoveX =
                                 (inputs->mouse.x - BUFFER_W * 2) /
@@ -765,28 +765,30 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 cameraMoveDistance = 0.0;
                         }
                         if (cameraMoveDistance > 0.0) {
-                                player.hRot += cameraMoveX *
+                                player->hRot += cameraMoveX *
                                         cameraMoveDistance / 400.0;
-                                player.vRot -= cameraMoveY *
+                                player->vRot -= cameraMoveY *
                                         cameraMoveDistance / 400.0;
                         }
                 }
 
                 // Restrict camera vertical position
-                if (player.vRot < -1.57) player.vRot = -1.57;
-                if (player.vRot >  1.57) player.vRot =  1.57;
+                if (player->vRot < -1.57) player->vRot = -1.57;
+                if (player->vRot >  1.57) player->vRot =  1.57;
 
                 float speed = 0.02;
 
                 if (doPhysics) {
-                        player.FBVelocity =
+                        player->FBVelocity =
                                 (inputs->keyboard.w - inputs->keyboard.s) *
                                 speed;
-                        player.LRVelocity =
+                        player->LRVelocity =
                                 (inputs->keyboard.d - inputs->keyboard.a) *
                                 speed;
                 }
         }
+        
+        static Coords playerMovement  = { 0.0, 0.0, 0.0 };
 
         // Moving around
         if (doPhysics) {
@@ -795,34 +797,38 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                 playerMovement.z *= 0.5;
 
                 playerMovement.x +=
-                        player.vectorH.x * player.FBVelocity +
-                        player.vectorH.y * player.LRVelocity;
+                        player->vectorH.x * player->FBVelocity +
+                        player->vectorH.y * player->LRVelocity;
                 playerMovement.z +=
-                        player.vectorH.y * player.FBVelocity -
-                        player.vectorH.x * player.LRVelocity;
+                        player->vectorH.y * player->FBVelocity -
+                        player->vectorH.x * player->LRVelocity;
                 playerMovement.y += 0.003;
         }
+
 
         // Detect collisions and jump
         for (int axis = 0; axis < 3; axis++) {
                 if (!doPhysics) { break; }
 
                 Coords playerPosTry = {
-                        player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2),
-                        player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2),
-                        player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2),
+                        player->pos.x + playerMovement.x * (float)((axis + 2) % 3 / 2),
+                        player->pos.y + playerMovement.y * (float)((axis + 1) % 3 / 2),
+                        player->pos.z + playerMovement.z * (float)((axis + 3) % 3 / 2),
                 };
+                
+                for (int step = 0; step < 12; step++) {
+                        int blockX = playerPosTry.x +
+                                ((step >> 0) & 0b0001) * 0.6 - 0.3;
+                        int blockY = playerPosTry.y +
+                                ((step >> 2) - 1     ) * 0.8 + 0.65;
+                        int blockZ = playerPosTry.z +
+                                ((step >> 1) & 0b0001) * 0.6 - 0.3;
 
-                for (int i12 = 0; i12 < 12; i12++) {
-                        int blockX = (int) (
-                                playerPosTry.x +
-                                (i12 >> 0 & 0x1) * 0.6 - 0.3) - 64;
-                        int blockY = (int) (
-                                playerPosTry.y +
-                                ((i12 >> 2) - 1) * 0.8 + 0.65) - 64;
-                        int blockZ = (int) (
-                                playerPosTry.z +
-                                (i12 >> 1 & 0x1) * 0.6 - 0.3)  - 64;
+                        // Very ad-hoc. TODO: look into a deeper fix than this.
+                        blockX -= (blockX < 0);
+                        blockY -= (blockY < 0);
+                        blockZ -= (blockZ < 0);
+                        // ---
 
                         Block block = World_getBlock (&world,
                                 blockX,
@@ -839,7 +845,7 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                         // shouldCollide &= block != BLOCK_NIL;
                         
                         if (shouldCollide) {
-                                if (axis != 1) { goto label208; }
+                                if (axis != 1) { goto stopCheck; }
                                 
                                 if (
                                         inputs->keyboard.space > 0 &&
@@ -848,16 +854,19 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 ) {
                                         inputs->keyboard.space = 0;
                                         playerMovement.y = -0.1;
-                                        goto label208;
+                                        goto stopCheck;
                                 }
                                 playerMovement.y = 0.0;
-                                goto label208;
+                                goto stopCheck;
                         }
+                        
                 }
 
-                player.pos = playerPosTry;
+                player->pos.x = playerPosTry.x;
+                player->pos.y = playerPosTry.y;
+                player->pos.z = playerPosTry.z;
 
-                label208:;
+                stopCheck:;
         }
 
         // Swim in water

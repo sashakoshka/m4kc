@@ -7,6 +7,7 @@
 #include "blocks.h"
 #include "coords.h"
 #include "utility.h"
+#include "player.h"
 
 #define CHUNKARR_DIAM 3
 #define CHUNKARR_RAD  (CHUNKARR_DIAM - 1) / 2
@@ -59,6 +60,7 @@ struct _Chunk {
  * Stores chunks.
  */
 struct _World {
+        Player    player;
         int       type;
         u_int64_t seed;
         int       dayNightMode;

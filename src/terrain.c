@@ -56,6 +56,12 @@ int World_save (World *world) {
                 world->time);
         
         fclose(metadata);
+
+        char playerPath[PATH_MAX];
+        data_getWorldPlayerPath (
+                playerPath, world->path,
+                data_options.username.buffer);
+        if (Player_save(&world->player, playerPath)) { return 3; }
         return 0;
 }
 
@@ -103,6 +109,20 @@ int World_load (World *world, const char *name) {
                 &world->time);
         
         fclose(metadata);
+
+        char playerPath[PATH_MAX];
+        data_getWorldPlayerPath (
+                playerPath, world->path,
+                data_options.username.buffer);
+        if (data_fileExists(playerPath)) {
+                Player_load(&world->player, playerPath);
+        } else {
+                world->player = (const Player) { 0 };
+                world->player.pos.x = 32.5;
+                world->player.pos.y = 64;
+                world->player.pos.z = 32.5;
+        }
+
         return 0;
 }
 
@@ -127,14 +147,14 @@ static int Chunk_save (World *world, Chunk *chunk) {
                 file);
         fclose(file);
 
-        int hasData = 0;
-        for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
-                hasData |= chunk->blocks[i];
-        }
+        // int hasData = 0;
+        // for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
+                // hasData |= chunk->blocks[i];
+        // }
         
-        printf("saved\t%s\t", path);
-        if (!hasData) { printf(" ALL AIR"); }
-        puts("");
+        // printf("saved\t%s\t", path);
+        // if (!hasData) { printf(" ALL AIR"); }
+        // puts("");
 
         return 0;
 }
@@ -489,17 +509,17 @@ int genChunk (
         // mark the chunk as loaded and set its stamp.
         chunk->loaded = ++ count;
 
-        printf (
-                "chunk hash: %#016x x: %i\ty: %i\tz: %i\t"
-                "cx: %i\tcy: %i\tcz: %i\t"
-                "stamp: %i\taddr: %p \t",
-                chunk->coordHash,
-                xOffset, yOffset, zOffset,
-                chunk->center.x,
-                chunk->center.y,
-                chunk->center.z,
-                chunk->loaded, chunk
-        );
+        // printf (
+                // "chunk hash: %#016x x: %i\ty: %i\tz: %i\t"
+                // "cx: %i\tcy: %i\tcz: %i\t"
+                // "stamp: %i\taddr: %p \t",
+                // chunk->coordHash,
+                // xOffset, yOffset, zOffset,
+                // chunk->center.x,
+                // chunk->center.y,
+                // chunk->center.z,
+                // chunk->loaded, chunk
+        // );
         
         // If the chunk exists on disk, load it and halt the function
         char path[PATH_MAX];
@@ -517,17 +537,17 @@ int genChunk (
                         file);
                 fclose(file);
 
-                int hasData = 0;
-                for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
-                        hasData |= blocks[i];
-                }
+                // int hasData = 0;
+                // for (size_t i = 0; i < CHUNK_DATA_SIZE; i ++) {
+                        // hasData |= blocks[i];
+                // }
 
                 // Sort all chunks
                 World_sort(world);
                 
-                printf("loaded");
-                if (!hasData) { printf(" ALL AIR"); }
-                puts("");
+                // printf("loaded");
+                // if (!hasData) { printf(" ALL AIR"); }
+                // puts("");
                 
                 return 1;
         }
@@ -562,7 +582,7 @@ int genChunk (
         // Sort all chunks
         World_sort(world);
 
-        printf("generated\n");
+        // printf("generated\n");
         
         return 1;
 }

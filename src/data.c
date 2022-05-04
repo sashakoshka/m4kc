@@ -160,6 +160,17 @@ void data_getWorldMetaPath (char *path, const char *worldPath) {
         snprintf(path, PATH_MAX, "%s/metadata", worldPath);
 }
 
+/* data_getWorldPlayerPath
+ * Returns the path to a player file, given a world path and a player name.
+ */
+void data_getWorldPlayerPath (
+        char *path,
+        const char *worldPath,
+        const char *name
+) {
+        snprintf(path, PATH_MAX, "%s/%s.player", worldPath, name);
+}
+
 /* data_refreshWorldList
  * Regreshes the world list, clearing the previous one. Reads world names and
  * thumbnails from ~/.m4kc/worlds

@@ -448,17 +448,17 @@ void popup_hud (
                 strnum(debugText[1], 6, world->seed);
 
                 // Coordinates
-                strnum(debugText[2], 3, (int)player->pos.x - 64);
-                strnum(debugText[3], 3, (int)player->pos.y - 64);
-                strnum(debugText[4], 3, (int)player->pos.z - 64);
+                strnum(debugText[2], 3, (int)player->pos.x);
+                strnum(debugText[3], 3, (int)player->pos.y);
+                strnum(debugText[4], 3, (int)player->pos.z);
 
                 // FPS
                 strnum(debugText[5], 5, *fps_now);
 
                 // Chunk coordinates
-                strnum(debugText[6], 8, ((int)player->pos.x - 64) >> 6);
-                strnum(debugText[7], 8, ((int)player->pos.y - 64) >> 6);
-                strnum(debugText[8], 8, ((int)player->pos.z - 64) >> 6);
+                strnum(debugText[6], 8, ((int)player->pos.x) >> 6);
+                strnum(debugText[7], 8, ((int)player->pos.y) >> 6);
+                strnum(debugText[8], 8, ((int)player->pos.z) >> 6);
 
                 // Text
                 for (i = 0; i < 9; i++) {
@@ -858,9 +858,9 @@ void popup_chunkPeek (
 
         debugChunk = chunkLookup (
                 world,
-                (int)player->pos.x - 64,
-                (int)player->pos.y - 64,
-                (int)player->pos.z - 64
+                (int)player->pos.x,
+                (int)player->pos.y,
+                (int)player->pos.z
         );
 
         white(renderer);
