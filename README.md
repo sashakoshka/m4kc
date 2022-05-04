@@ -83,8 +83,8 @@ The game uses a 3D voxel raycaster to render things, which is a lot slower than 
 
 What this actually looks like.
 
-![Main menu](screenshots/0.png)
-![Structure generation](screenshots/1.png)
-![Caves](screenshots/2.png)
-![More caves](screenshots/3.png)
-![Cool house](screenshots/4.png)
+<img alt="Main menu" src="screenshots/0.png" width="214">
+<img alt="Cool house" src="screenshots/1.bmp" width="214">
+<img alt="World selection" src="screenshots/2.png" width="214">
+<img alt="Rolling hills" src="screenshots/3.bmp" width="214">
+<img alt="A beach" src="screenshots/4.bmp" width="214">
