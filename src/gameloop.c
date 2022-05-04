@@ -151,10 +151,6 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         f36;
 
   static int
-        i6,
-        i7;
-
-  static int
         blockSelected = 0,
         selectedPass;
   
@@ -540,13 +536,13 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
           ) {
             // I'm guessing this eldritch horror figures out what pixel of
             // the block we hit
-            i6 = (int)((f34 + f36) * 16.0) & 0xF;
-            i7 = ((int)(f35 * 16.0) & 0xF) + 16;
+            int textureX = (int)((f34 + f36) * 16.0) & 0xF;
+            int textureY = ((int)(f35 * 16.0) & 0xF) + 16;
             if (blockFace == 1) {
-              i6 = (int)(f34 * 16.0) & 0xF;
-              i7 = (int)(f36 * 16.0) & 0xF;
+              textureX = (int)(f34 * 16.0) & 0xF;
+              textureY = (int)(f36 * 16.0) & 0xF;
               if (f30 < 0.0)
-                i7 += 32; 
+                textureY += 32; 
             }
             
             // Block outline color
@@ -558,17 +554,17 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
                 blockRayPosition.y != blockSelect.y ||
                 blockRayPosition.z != blockSelect.z
               ) || (
-                   i6 > 0  
-                && i7 % 16 > 0
-                && i6 < 15
-                && i7 % 16 < 15
+                   textureX > 0  
+                && textureY % 16 > 0
+                && textureX < 15
+                && textureY % 16 < 15
               ) || !guiOn || gamePopup
             ) {
               if (intersectedBlock >= NUMBER_OF_BLOCKS) {
                 pixelColor = 0xFF0000;
               } else {
                 pixelColor = textures [
-                  i6 + (i7 * 16) + intersectedBlock * 256 * 3];
+                  textureX + (textureY * 16) + intersectedBlock * 256 * 3];
               }
             }
             
