@@ -1,6 +1,7 @@
 #pragma once
 #include <limits.h>
 #include "inputbuffer.h"
+#include "compat.h"
 
 typedef struct {
         int buffer[16 * 16];

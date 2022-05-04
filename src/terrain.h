@@ -7,6 +7,7 @@
 #include "coords.h"
 #include "utility.h"
 #include "player.h"
+#include "compat.h"
 
 #define CHUNKARR_DIAM 3
 #define CHUNKARR_RAD  (CHUNKARR_DIAM - 1) / 2
