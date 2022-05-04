@@ -28,7 +28,6 @@ static int debugOn;
 
 Player player = { 0 };
 
-static Coords playerMovement  = { 0.0, 0.0, 0.0 };
 static Coords playerOffsetPos = { 0.0, 0.0, 0.0 };
 static SDL_Rect backgroundRect;
 static char *errorMessage = NULL;
@@ -51,9 +50,11 @@ void gameLoop_resetGame () {
         l = SDL_GetTicks();
 
         player = (const Player) { 0 };
-        player.pos.x = 32.5;
+        player.pos.x = 40;
+        // player.pos.x = 32.5;
         player.pos.y = 16;
-        player.pos.z = 32.5;
+        player.pos.z = -4;
+        // player.pos.z = 32.5;
 
         gamePopup = 0;
         
@@ -793,6 +794,8 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 speed;
                 }
         }
+        
+        static Coords playerMovement  = { 0.0, 0.0, 0.0 };
 
         // Moving around
         if (doPhysics) {
@@ -809,26 +812,30 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                 playerMovement.y += 0.003;
         }
 
+
         // Detect collisions and jump
         for (int axis = 0; axis < 3; axis++) {
                 if (!doPhysics) { break; }
 
                 Coords playerPosTry = {
-                        player.pos.x + playerMovement.x * ((axis + 2) % 3 / 2),
-                        player.pos.y + playerMovement.y * ((axis + 1) % 3 / 2),
-                        player.pos.z + playerMovement.z * ((axis + 3) % 3 / 2),
+                        player.pos.x + playerMovement.x * (float)((axis + 2) % 3 / 2),
+                        player.pos.y + playerMovement.y * (float)((axis + 1) % 3 / 2),
+                        player.pos.z + playerMovement.z * (float)((axis + 3) % 3 / 2),
                 };
+                
+                for (int step = 0; step < 12; step++) {
+                        int blockX = playerPosTry.x +
+                                ((step >> 0) & 0b0001) * 0.6 - 0.3;
+                        int blockY = playerPosTry.y +
+                                ((step >> 2) - 1     ) * 0.8 + 0.65;
+                        int blockZ = playerPosTry.z +
+                                ((step >> 1) & 0b0001) * 0.6 - 0.3;
 
-                for (int i12 = 0; i12 < 12; i12++) {
-                        int blockX = (int) (
-                                playerPosTry.x +
-                                (i12 >> 0 & 0x1) * 0.6 - 0.3);
-                        int blockY = (int) (
-                                playerPosTry.y +
-                                ((i12 >> 2) - 1) * 0.8 + 0.65);
-                        int blockZ = (int) (
-                                playerPosTry.z +
-                                (i12 >> 1 & 0x1) * 0.6 - 0.3);
+                        // Very ad-hoc. TODO: look into a deeper fix than this.
+                        blockX -= (blockX < 0);
+                        blockY -= (blockY < 0);
+                        blockZ -= (blockZ < 0);
+                        // ---
 
                         Block block = World_getBlock (&world,
                                 blockX,
@@ -845,7 +852,7 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                         // shouldCollide &= block != BLOCK_NIL;
                         
                         if (shouldCollide) {
-                                if (axis != 1) { goto label208; }
+                                if (axis != 1) { goto stopCheck; }
                                 
                                 if (
                                         inputs->keyboard.space > 0 &&
@@ -854,18 +861,19 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 ) {
                                         inputs->keyboard.space = 0;
                                         playerMovement.y = -0.1;
-                                        goto label208;
+                                        goto stopCheck;
                                 }
                                 playerMovement.y = 0.0;
-                                goto label208;
+                                goto stopCheck;
                         }
+                        
                 }
 
                 player.pos.x = playerPosTry.x;
                 player.pos.y = playerPosTry.y;
                 player.pos.z = playerPosTry.z;
 
-                label208:;
+                stopCheck:;
         }
 
         // Swim in water

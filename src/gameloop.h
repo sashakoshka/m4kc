@@ -5,7 +5,7 @@
 #include "main.h"
 #include "player.h"
 
-#define PLAYER_POSITION_OFFSET 64
+#define PLAYER_POSITION_OFFSET 128
  
 int  gameLoop            (Inputs *inputs, SDL_Renderer *renderer);
 void gameLoop_resetGame  ();
