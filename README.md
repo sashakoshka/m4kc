@@ -44,6 +44,7 @@ This project is an attempt to translate the game into C in order to increase its
 
 ### On windows, you will need
 * Mingw-w64 installed
+* gcc in your PATH
 
 ## Build instructions
 
@@ -55,9 +56,10 @@ This project is an attempt to translate the game into C in order to increase its
 * To clean, run `./build.sh clean`
 
 ### Windows
-!!! NOTE !!! This doesn't work anymore. updated Windows build system coming soon.
 
-Run `win-build.bat`. Inside of the `win` directory, you will find `m4kc.exe` and `SDL2.dll`. In order for `m4kc.exe` to run, these two must be in the same folder.
+First, create the directories `win/bin` and `win/o`
+
+Run `win-build.bat`. Inside of the `win/bin` directory, you will find `m4kc.exe` and `SDL2.dll`. In order for `m4kc.exe` to run, these two must be in the same folder. If it doesn't work, [open an issue](https://github.com/sashakoshka/m4kc/issues).
 
 ## Places
 
