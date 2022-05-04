@@ -3,6 +3,7 @@
 /win/bin/m4kc.exe
 /o/*
 /win/o/*
+/win/bin/*
 
 # Just in case
 screenshot.bmp
