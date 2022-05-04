@@ -31,7 +31,10 @@
 static int controlLoop(Inputs *, const uint8_t *);
 static int handleEvent(Inputs *, const uint8_t *, SDL_Event);
 
-int main (/*int argc, char *argv[]*/) {
+int main (int argc, char *argv[]) {
+        (void)(argc);
+        (void)(argv);
+
         //----  initializing SDL  ----//
 
         SDL_Window   *window   = NULL;
