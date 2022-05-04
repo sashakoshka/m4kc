@@ -37,7 +37,7 @@ static void gameLoop_gameplay        (SDL_Renderer *, Inputs *);
 static void gameLoop_drawPopup       (SDL_Renderer *, Inputs *);
 static void gameLoop_processMovement (Inputs *, int);
 
-static u_int32_t
+static uint32_t
         fps_lastmil = 0,
         fps_count   = 0,
         fps_now     = 0;
@@ -493,7 +493,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             lookup_now.y <<= 10;
             lookup_now.z <<= 20;
             
-            u_int32_t lookup_hash = lookup_now.x | lookup_now.y | lookup_now.z;
+            uint32_t lookup_hash = lookup_now.x | lookup_now.y | lookup_now.z;
             lookup_hash++;
             
             int lookup_first  = 0,

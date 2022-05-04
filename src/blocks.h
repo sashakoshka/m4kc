@@ -1,7 +1,7 @@
 #pragma once
-#include <stdlib.h>
+#include <stdint.h>
 
-typedef u_int8_t Block;
+typedef uint8_t Block;
 
 #define NUMBER_OF_BLOCKS 16
 
