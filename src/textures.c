@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "textures.h"
 
 int textures[TEXTURES_SIZE] = { 0 };

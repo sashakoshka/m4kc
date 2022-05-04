@@ -93,7 +93,13 @@ int data_ensureDirectoryExists (const char *path) {
                 }
 
                 if (!data_directoryExists(currentDirectory)) {
-                        if (mkdir(currentDirectory, 0755) != 0) {
+                        int status;
+                        #ifdef _WIN32
+                        status = mkdir(currentDirectory);
+                        #else
+                        status = mkdir(currentDirectory, 0755);
+                        #endif
+                        if (status != 0) {
                                 return 1;
                         }
                 }
