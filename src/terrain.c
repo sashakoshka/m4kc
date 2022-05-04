@@ -61,7 +61,7 @@ int World_save (World *world) {
         data_getWorldPlayerPath (
                 playerPath, world->path,
                 data_options.username.buffer);
-        Player_save(&world->player, playerPath);
+        if (Player_save(&world->player, playerPath)) { return 3; }
         return 0;
 }
 
@@ -110,11 +110,19 @@ int World_load (World *world, const char *name) {
         
         fclose(metadata);
 
-        world->player = (const Player) { 0 };
-        world->player.pos.x = 32.5;
-        world->player.pos.y = 16;
-        world->player.pos.z = 32.5;
-        
+        char playerPath[PATH_MAX];
+        data_getWorldPlayerPath (
+                playerPath, world->path,
+                data_options.username.buffer);
+        if (data_fileExists(playerPath)) {
+                Player_load(&world->player, playerPath);
+        } else {
+                world->player = (const Player) { 0 };
+                world->player.pos.x = 32.5;
+                world->player.pos.y = 64;
+                world->player.pos.z = 32.5;
+        }
+
         return 0;
 }
 

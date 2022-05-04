@@ -6,7 +6,7 @@
  * Saves a player file to the specified path. Returns 0 on success, non-zero on
  * failure.
  */
-int Player_save (Player *player, char *path) {
+int Player_save (Player *player, const char *path) {
         FILE *file = fopen(path, "w");
         if (file == NULL) { return 1; }
 
@@ -16,15 +16,45 @@ int Player_save (Player *player, char *path) {
                 "%a %a %a\n"
                 "%a %a\n"
                 "%hhu %hhu %hhu\n"
-                "%i\n",
+                "%hu\n",
                 0,
                 player->pos.x, player->pos.y, player->pos.z,
                 player->hRot, player->vRot,
                 player->health, player->hunger, player->breath,
-                player->xp
-                );
+                player->xp);
 
         // TODO: save inventory
+        
+        fclose(file);
+
+        return 0;
+}
+
+/* Player_save
+ * Loads a player from the specified file. Returns 0 on success, non-zero on
+ * failure.
+ */
+int Player_load (Player *player, const char *path) {
+        FILE *file = fopen(path, "r");
+        if (file == NULL) { return 1; }
+        
+        int version;
+        fscanf(file, "%i", &version);
+        if (version != 0) { return 2; }
+
+        fscanf (
+                file,
+                "%a %a %a "
+                "%a %a "
+                "%hhu %hhu %hhu "
+                "%hu",
+                &player->pos.x, &player->pos.y, &player->pos.z,
+                &player->hRot, &player->vRot,
+                &player->health, &player->hunger, &player->breath,
+                &player->xp
+                );
+
+        // TODO: load inventory
         
         fclose(file);
 

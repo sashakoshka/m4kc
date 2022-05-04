@@ -56,4 +56,5 @@ typedef struct Player {
         float LRVelocity;
 } Player;
 
-int Player_save (Player *, char *);
+int Player_save (Player *, const char *);
+int Player_load (Player *, const char *);
