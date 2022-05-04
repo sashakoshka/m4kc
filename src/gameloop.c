@@ -815,6 +815,10 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                         player->pos.y + playerMovement.y * (float)((axis + 1) % 3 / 2),
                         player->pos.z + playerMovement.z * (float)((axis + 3) % 3 / 2),
                 };
+
+                playerPosTry.x += PLAYER_POSITION_OFFSET;
+                playerPosTry.y += PLAYER_POSITION_OFFSET;
+                playerPosTry.z += PLAYER_POSITION_OFFSET;
                 
                 for (int step = 0; step < 12; step++) {
                         int blockX = playerPosTry.x +
@@ -825,15 +829,15 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 ((step >> 1) & 0b0001) * 0.6 - 0.3;
 
                         // Very ad-hoc. TODO: look into a deeper fix than this.
-                        blockX -= (blockX < 0);
-                        blockY -= (blockY < 0);
-                        blockZ -= (blockZ < 0);
+                        // blockX -= (blockX < 0);
+                        // blockY -= (blockY < 0);
+                        // blockZ -= (blockZ < 0);
                         // ---
 
                         Block block = World_getBlock (&world,
-                                blockX,
-                                blockY,
-                                blockZ);
+                                blockX - PLAYER_POSITION_OFFSET,
+                                blockY - PLAYER_POSITION_OFFSET,
+                                blockZ - PLAYER_POSITION_OFFSET);
 
                         int shouldCollide = 1;
                         // Blocks that have collision disabled
@@ -859,8 +863,11 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 playerMovement.y = 0.0;
                                 goto stopCheck;
                         }
-                        
                 }
+
+                playerPosTry.x -= PLAYER_POSITION_OFFSET;
+                playerPosTry.y -= PLAYER_POSITION_OFFSET;
+                playerPosTry.z -= PLAYER_POSITION_OFFSET;
 
                 player->pos.x = playerPosTry.x;
                 player->pos.y = playerPosTry.y;
