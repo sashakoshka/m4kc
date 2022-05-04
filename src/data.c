@@ -110,13 +110,16 @@ int data_ensureDirectoryExists (const char *path) {
 
 /* data_findDirectoryName
  * Concatenates the user's home directory with the specified path. subDirectory
- * must begin with a '/'.
+ * must begin with a '/'. Uses %APPDATA% instead of home on windows.
  */
 int data_findDirectoryName (char *path, const char *subDirectory) {
         if (subDirectory[0] != '/') { return 2; }
         
-        // TODO: make this work cross platform
+        #ifdef _WIN32
+        char *homeDirectory = getenv("APPDATA");
+        #else
         char *homeDirectory = getenv("HOME");
+        #endif
         if (homeDirectory == NULL) { return 3; }
 
         snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);
