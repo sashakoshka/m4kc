@@ -79,8 +79,8 @@ int data_fileExists (const char *path) {
  * if they don't exist.
  */
 int data_ensureDirectoryExists (const char *path) {
-        char currentDirectory[PATH_MAX] = "/";
-        int index = 1;
+        char currentDirectory[PATH_MAX] = "";
+        int index = 0;
         
         while (path[index] != 0) {
                 while (path[index] != 0) {
