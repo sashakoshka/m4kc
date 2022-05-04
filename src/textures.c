@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include "textures.h"
 
 int textures[TEXTURES_SIZE] = { 0 };
@@ -47,24 +48,8 @@ static void genTexture (Block blockId) {
                 int noiseFloor = 255;
                 int noiseScale = 96;
 
-                if (blockId == BLOCK_SAND) {
-                        baseColor = 0xd8ce9b;
-                        noiseScale = 48;
-                }
-
-                if (blockId == BLOCK_STONE)
-                        baseColor = 0x7F7F7F;
-
-                if (blockId == BLOCK_GRAVEL) {
-                        baseColor = 0xAAAAAA;
-                        noiseScale = 140;
-                }
-
-                int needAltNoise =
-                        blockId == BLOCK_STONE ||
-                        blockId == BLOCK_WATER;
-                if (!needAltNoise || randm(3) == 0)
-                        brightness = noiseFloor - randm(noiseScale);
+                if (blockId == BLOCK_SAND)   { noiseScale = 48;  }
+                if (blockId == BLOCK_GRAVEL) { noiseScale = 140; }
 
                 if (
                         blockId == BLOCK_GRASS &&
@@ -78,6 +63,12 @@ static void genTexture (Block blockId) {
                         brightness = brightness * 2 / 3;
                 }
 
+                int needAltNoise =
+                        blockId == BLOCK_STONE ||
+                        blockId == BLOCK_WATER;
+                if (!needAltNoise || randm(3) == 0) {
+                        brightness = noiseFloor - randm(noiseScale);
+                }
 
                 if (blockId == BLOCK_WOOD) {
                         baseColor = 0x675231;
@@ -102,6 +93,18 @@ static void genTexture (Block blockId) {
                 }
 
                 switch (blockId) {
+                case BLOCK_STONE:
+                        baseColor = 0x7F7F7F;
+                        break;
+                        
+                case BLOCK_SAND:
+                        baseColor = 0xD8CE9B;
+                        break;
+                        
+                case BLOCK_GRAVEL:
+                        baseColor = 0xAAAAAA;
+                        break;
+                        
                 case BLOCK_BRICKS:
                         baseColor = 0xB53A15;
                         if ((x + y / 4 * 4) % 8 == 0 || y % 4 == 0)
@@ -161,6 +164,7 @@ static void genTexture (Block blockId) {
                         
                 case BLOCK_TALL_GRASS:
                         baseColor = 0x50D937;
+                        brightness = 2;
 
                         // Make transparent gaps between blades of grass, and
                         // make top transparent
@@ -175,16 +179,18 @@ static void genTexture (Block blockId) {
                         break;
                 }
 
-                // Darken bottom of blocks
+                // Darken bottom of blocks. We need finalBrightness because
+                // brightness can carry over between pixels.
+                int finalBrightness = brightness;
                 if (y >= BLOCK_TEXTURE_H * 2) {
-                        brightness /= 2;
+                        finalBrightness /= 2;
                 }
 
                 // Apply brightness value
                 int finalColor =
-                        (baseColor >> 16 & 0xFF) * brightness / 255 << 16 |
-                        (baseColor >> 8  & 0xFF) * brightness / 255 << 8  |
-                        (baseColor       & 0xFF) * brightness / 255;
+                        (baseColor >> 16 & 0xFF) * finalBrightness / 255 << 16 |
+                        (baseColor >> 8  & 0xFF) * finalBrightness / 255 << 8  |
+                        (baseColor       & 0xFF) * finalBrightness / 255;
                 
                 textures [
                         x +
