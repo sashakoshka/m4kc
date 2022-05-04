@@ -4,7 +4,8 @@
 #include "coords.h"
 #include "blocks.h"
 
-#define HOTBAR_SIZE 9
+#define HOTBAR_SIZE    9
+#define ARMOR_SIZE     4
 #define INVENTORY_ROWS 3
 #define INVENTORY_SIZE HOTBAR_SIZE * INVENTORY_ROWS
 
@@ -13,9 +14,9 @@
  * inventory.
  */
 typedef struct InvSlot {
-        float durability;
-        u_int8_t amount;
-        Block blockid;
+        Block     blockid;
+        u_int8_t  amount;
+        u_int16_t durability;
 } InvSlot;
 
 int  InvSlot_transfer (InvSlot *, InvSlot *);
@@ -25,10 +26,10 @@ void InvSlot_swap     (InvSlot *, InvSlot *);
  * This will be used to store the player's inventory.
  */
 typedef struct Inventory {
-        InvSlot slots[INVENTORY_SIZE];
-        InvSlot hotbar[HOTBAR_SIZE];
-        InvSlot armor[4];
         InvSlot offhand;
+        InvSlot hotbar[HOTBAR_SIZE];
+        InvSlot slots[INVENTORY_SIZE];
+        InvSlot armor[ARMOR_SIZE];
         int hotbarSelect;
 } Inventory;
 
