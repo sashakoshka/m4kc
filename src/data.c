@@ -87,7 +87,8 @@ int data_ensureDirectoryExists (const char *path) {
                         currentDirectory[index] = path[index];
                         currentDirectory[index + 1] = 0;
                         index ++;
-                        if (currentDirectory[index - 1] == '/') {
+                        char ch = currentDirectory[index - 1];
+                        if (ch == '/' || ch == '\\') {
                                 break;
                         }
                 }
@@ -123,6 +124,11 @@ int data_findDirectoryName (char *path, const char *subDirectory) {
         if (homeDirectory == NULL) { return 3; }
 
         snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);
+        
+        // Normalize path
+        for (char *ch = path; *ch; ch ++) {
+                if (*ch == '\\') { *ch = '/'; }
+        }
         return 0;
 }
 
