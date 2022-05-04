@@ -56,6 +56,12 @@ int World_save (World *world) {
                 world->time);
         
         fclose(metadata);
+
+        char playerPath[PATH_MAX];
+        data_getWorldPlayerPath (
+                playerPath, world->path,
+                data_options.username.buffer);
+        Player_save(&world->player, playerPath);
         return 0;
 }
 

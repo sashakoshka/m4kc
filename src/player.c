@@ -1,4 +1,35 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "player.h"
+
+/* Player_save
+ * Saves a player file to the specified path. Returns 0 on success, non-zero on
+ * failure.
+ */
+int Player_save (Player *player, char *path) {
+        FILE *file = fopen(path, "w");
+        if (file == NULL) { return 1; }
+
+        fprintf (
+                file,
+                "%i\n"
+                "%a %a %a\n"
+                "%a %a\n"
+                "%hhu %hhu %hhu\n"
+                "%i\n",
+                0,
+                player->pos.x, player->pos.y, player->pos.z,
+                player->hRot, player->vRot,
+                player->health, player->hunger, player->breath,
+                player->xp
+                );
+
+        // TODO: save inventory
+        
+        fclose(file);
+
+        return 0;
+}
 
 /* Inventory_transferIn
  * Transfers items from src int dest. This will transfer as many items as it
