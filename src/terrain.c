@@ -163,7 +163,7 @@ static int Chunk_save (World *world, Chunk *chunk) {
  * Produces a chunk hash from the specified coordinates. Expects coordinates to
  * be by chunk, not by block.
  */
-u_int32_t chunkHash (int x, int y, int z) {
+uint32_t chunkHash (int x, int y, int z) {
         // Modulo-like operation by bitmasking
         x &= 0b1111111111;
         y &= 0b1111111111;
@@ -212,7 +212,7 @@ Chunk *chunkLookup (World *world, int x, int y, int z) {
                 ago.y = y;
                 ago.z = z;
 
-                u_int32_t hash = chunkHash(x, y, z);
+                uint32_t hash = chunkHash(x, y, z);
 
                 // Look up chunk using a binary search
                 int first, middle, last;

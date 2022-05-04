@@ -407,7 +407,7 @@ int state_err (SDL_Renderer *renderer, Inputs *inputs, char *message) {
  */
 void popup_hud (
         SDL_Renderer *renderer, Inputs *inputs, World *world,
-        int *debugOn, u_int32_t *fps_now,
+        int *debugOn, uint32_t *fps_now,
         Player *player
 ) {
         int i;
@@ -685,7 +685,7 @@ void popup_inventory (
  * Allows the user to type in chat, and view farther back in the message
  * history. Capable of closing itself.
  */
-void popup_chat (SDL_Renderer *renderer, Inputs *inputs, u_int64_t gameTime) {
+void popup_chat (SDL_Renderer *renderer, Inputs *inputs, uint64_t gameTime) {
         static char buffer[64] = { 0 };
         static InputBuffer chatBox = {
                 .buffer = buffer,

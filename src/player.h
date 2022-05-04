@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdlib.h>
+#include <stdint.h>
 #include "coords.h"
 #include "blocks.h"
 
@@ -15,8 +15,8 @@
  */
 typedef struct InvSlot {
         Block     blockid;
-        u_int8_t  amount;
-        u_int16_t durability;
+        uint8_t  amount;
+        uint16_t durability;
 } InvSlot;
 
 int  InvSlot_transfer (InvSlot *, InvSlot *);
@@ -45,10 +45,10 @@ typedef struct Player {
         double vRot;
 
         Inventory inventory;
-        u_int8_t  health;
-        u_int8_t  hunger;
-        u_int8_t  breath;
-        u_int16_t xp;
+        uint8_t  health;
+        uint8_t  hunger;
+        uint8_t  breath;
+        uint16_t xp;
 
         Vector2D vectorH;
         Vector2D vectorV;

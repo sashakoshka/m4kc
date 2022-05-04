@@ -5,7 +5,7 @@
   eight 8bit ints for each row of pixels.
 */
 
-u_int8_t font[][9] = {
+uint8_t font[][9] = {
         {0},
         {0},
         {0},

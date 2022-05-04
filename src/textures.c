@@ -1,9 +1,9 @@
 #include <math.h>
-#include <stdio.h>
+#include <stdint.h>
 #include "textures.h"
 
 int textures[TEXTURES_SIZE] = { 0 };
-const u_int16_t cobbleCracks[BLOCK_TEXTURE_H] = {
+const uint16_t cobbleCracks[BLOCK_TEXTURE_H] = {
         0b0000001110000100,
         0b0010110010000110,
         0b1011100011001110,

@@ -1,8 +1,7 @@
 #pragma once
 
-#include <stdlib.h>
+#include <stdint.h>
 #include <limits.h>
-#include <stdio.h>
 #include <math.h>
 #include "blocks.h"
 #include "coords.h"
@@ -25,7 +24,7 @@ int   World_load     (World *, const char *path);
 int   World_setBlock (World *, int, int, int, Block, int);
 Block World_getBlock (World *, int, int, int);
 
-u_int32_t chunkHash (int, int, int);
+uint32_t chunkHash  (int, int, int);
 Chunk *chunkLookup  (World *, int, int, int);
 int    genChunk     (World *, unsigned int, int, int, int, int, int, Coords);
 void   genStructure (Block *, int, int, int, int);
@@ -51,7 +50,7 @@ void ch_genDev     (Block *, int, int, int);
  */
 struct _Chunk {
         IntCoords center;
-        u_int32_t coordHash;
+        uint32_t coordHash;
         int loaded;
         Block *blocks;
 };
@@ -62,9 +61,9 @@ struct _Chunk {
 struct _World {
         Player    player;
         int       type;
-        u_int64_t seed;
+        uint64_t  seed;
         int       dayNightMode;
-        u_int64_t time;
+        uint64_t  time;
         char      path[PATH_MAX];
         Chunk chunk[CHUNKARR_SIZE];
 };

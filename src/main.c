@@ -28,15 +28,15 @@
 #define MAX_FPS 60
 #define MIN_FRAME_MILLISECONDS 1000 / MAX_FPS
 
-static int controlLoop(Inputs *, const u_int8_t *);
-static int handleEvent(Inputs *, const u_int8_t *, SDL_Event);
+static int controlLoop(Inputs *, const uint8_t *);
+static int handleEvent(Inputs *, const uint8_t *, SDL_Event);
 
 int main (/*int argc, char *argv[]*/) {
         //----  initializing SDL  ----//
 
         SDL_Window   *window   = NULL;
         SDL_Renderer *renderer = NULL;
-        const u_int8_t  *keyboard = SDL_GetKeyboardState(NULL);
+        const uint8_t  *keyboard = SDL_GetKeyboardState(NULL);
 
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
                 printf("cant make window\n");
@@ -79,7 +79,7 @@ int main (/*int argc, char *argv[]*/) {
         Inputs inputs = {0};
         int running = 1;
         while (running) {
-                u_int32_t frameStartTime = SDL_GetTicks();
+                uint32_t frameStartTime = SDL_GetTicks();
                 
                 running &= controlLoop(&inputs, keyboard);
                 running &= gameLoop(&inputs, renderer);
@@ -92,7 +92,7 @@ int main (/*int argc, char *argv[]*/) {
                 inputs.keySym   = 0;
 
                 // Limit FPS
-                u_int32_t frameDuration = SDL_GetTicks() - frameStartTime;
+                uint32_t frameDuration = SDL_GetTicks() - frameStartTime;
                 if (frameDuration < MIN_FRAME_MILLISECONDS) {
                         SDL_Delay(MIN_FRAME_MILLISECONDS - frameDuration);
                 }
@@ -130,7 +130,7 @@ static int controlLoop (Inputs *inputs, const Uint8 *keyboard) {
         return 1;
 }
 
-static int handleEvent (Inputs *inputs, const u_int8_t *keyboard, SDL_Event event) {
+static int handleEvent (Inputs *inputs, const uint8_t *keyboard, SDL_Event event) {
         switch (event.type) {
         case SDL_QUIT:
                 return 0;

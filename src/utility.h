@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdlib.h>
-#include <math.h>
-
 int    randm    (int);
 int    nmod     (int, int);
 double perlin2d (int, double, double, double);

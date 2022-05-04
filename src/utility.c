@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <stdlib.h>
+#include <math.h>
 #include "utility.h"
 
 /* randm
@@ -20,7 +23,7 @@ int nmod (int left, int right) {
         return left;
 }
 
-int perlin2d_noise2 (int x, int y, u_int8_t *hash, int seed) {
+int perlin2d_noise2 (int x, int y, uint8_t *hash, int seed) {
         static int tmp;
         tmp = hash[(y + seed) % 256];
         return hash[(tmp + x) % 256];
@@ -38,7 +41,7 @@ double perlin2d (
         double x, double y,
         double freq
 ) {
-        static u_int8_t hash[256] =
+        static uint8_t hash[256] =
 
         {208,34,231,213,32,248,233,56,161,78,24,140,
         71,48,140,254,245,255,247,247,40,185,248,251,245,28,124,204,

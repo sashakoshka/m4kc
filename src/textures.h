@@ -1,7 +1,5 @@
 #pragma once
 
-#include <math.h>
-#include <stdlib.h>
 #include "utility.h"
 #include "blocks.h"
 

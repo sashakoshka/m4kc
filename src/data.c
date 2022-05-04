@@ -20,7 +20,7 @@ char screenshotsDirectoryName [PATH_MAX] = { 0 };
 
 char username[8] = "guest";
 
-static u_int32_t getSurfacePixel (SDL_Surface *, int, int);
+static uint32_t getSurfacePixel (SDL_Surface *, int, int);
 
 /* data_init
  * Initializes the data module. Returns zero on success, nonzero on failure.
@@ -253,8 +253,8 @@ int data_refreshWorldList () {
 /* getSurfacePixel
  * Gets a pixel value from an SDL surface at the specified coordinates.
  */
-static u_int32_t getSurfacePixel (SDL_Surface *surface, int x, int y) {
-        return *((u_int32_t *) ((u_int8_t *) surface->pixels
+static uint32_t getSurfacePixel (SDL_Surface *surface, int x, int y) {
+        return *((uint32_t *) ((uint8_t *) surface->pixels
                 + y * surface->pitch
                 + x * surface->format->BytesPerPixel));
 }

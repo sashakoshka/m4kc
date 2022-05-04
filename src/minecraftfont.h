@@ -1,4 +1,4 @@
 #pragma once
-#include <stdlib.h>
+#include <stdint.h>
 
-extern u_int8_t font[256][9];
+extern uint8_t font[256][9];
