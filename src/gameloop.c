@@ -49,13 +49,6 @@ static u_int32_t
 void gameLoop_resetGame () {
         l = SDL_GetTicks();
 
-        *player = (const Player) { 0 };
-        player->pos.x = 40;
-        // player.pos.x = 32.5;
-        player->pos.y = 16;
-        player->pos.z = -4;
-        // player.pos.z = 32.5;
-
         gamePopup = 0;
         
         guiOn   = 1;

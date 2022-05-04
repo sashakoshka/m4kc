@@ -109,6 +109,12 @@ int World_load (World *world, const char *name) {
                 &world->time);
         
         fclose(metadata);
+
+        world->player = (const Player) { 0 };
+        world->player.pos.x = 32.5;
+        world->player.pos.y = 16;
+        world->player.pos.z = 32.5;
+        
         return 0;
 }
 
