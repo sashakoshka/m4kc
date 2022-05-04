@@ -164,7 +164,6 @@ static void genTexture (Block blockId) {
                         
                 case BLOCK_TALL_GRASS:
                         baseColor = 0x50D937;
-                        brightness = 2;
 
                         // Make transparent gaps between blades of grass, and
                         // make top transparent
