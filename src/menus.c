@@ -1110,7 +1110,14 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                 }
                 break;
         case 1:
-                ;static char drawDistanceText[] = "Draw distance: 20\0";
+                ;static char drawDistanceText[20] = { 0 };
+                if (!drawDistanceText[0]) {
+                        snprintf (
+                                drawDistanceText, 20,
+                                "Draw distance: %i",
+                                options.drawDistance);
+                }
+                
                 if (button(renderer, drawDistanceText,
                         BUFFER_HALF_W - 64, 20, 128,
                         inputs->mouse.x, inputs->mouse.y) &&
