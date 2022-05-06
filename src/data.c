@@ -17,8 +17,6 @@ char optionsFileName          [PATH_MAX] = { 0 };
 char worldsDirectoryName      [PATH_MAX] = { 0 };
 char screenshotsDirectoryName [PATH_MAX] = { 0 };
 
-char username[8] = "guest";
-
 static uint32_t getSurfacePixel (SDL_Surface *, int, int);
 
 /* data_init
@@ -39,18 +37,6 @@ int data_init (void) {
         err = data_findDirectoryName (
                 screenshotsDirectoryName, "/.m4kc/screenshots");
         if (err) { return err; }
-
-        data_options = (const data_Options) {
-                .fogType      = 0,
-                .drawDistance = 20,
-                .trapMouse    = 0,
-                .fov          = 90.0,
-                .username     = (const InputBuffer){
-                        .buffer = username,
-                        .len    = 8,
-                        .cursor = 5
-                }
-        };
         
         return 0;
 }

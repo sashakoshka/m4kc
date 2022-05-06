@@ -15,16 +15,6 @@ typedef struct data_WorldListItem {
 
 extern data_WorldListItem *data_worldList;
 
-typedef struct {
-        int    fogType;
-        int    drawDistance;
-        int    trapMouse;
-        double fov;
-        InputBuffer username;
-} data_Options;
-
-extern data_Options data_options;
-
 int data_init                  (void);
 int data_directoryExists       (const char *);
 int data_fileExists            (const char *);
