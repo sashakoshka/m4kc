@@ -13,3 +13,4 @@ extern Options options;
 
 int options_init (void);
 int options_load (void);
+int options_save (void);

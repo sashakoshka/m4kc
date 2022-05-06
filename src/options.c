@@ -64,3 +64,24 @@ int options_load (void) {
         fclose(file);
         return 0;
 }
+
+/* options_save
+ * Saves options from the options struct to the configuration file. Returns 0 on
+ * success, non-zero on failure.
+ */
+int options_save (void) {
+        const char *path = data_getOptionsFileName();
+
+        FILE *file = fopen(path, "w");
+        if (file == NULL) { return 1; }
+
+        fprintf(file, "%i\n", 0);
+        fprintf(file, "fogType %i\n",      options.fogType);
+        fprintf(file, "drawDistance %i\n", options.drawDistance);
+        fprintf(file, "trapMouse %i\n",    options.trapMouse);
+        fprintf(file, "fov %lf\n",         options.fov);
+        fprintf(file, "username %s\n",     username);
+
+        fclose(file);
+        return 0;
+}

@@ -1208,6 +1208,11 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
+                int err = options_save();
+                if (err) {
+                        gameLoop_error("Could not save options");
+                }
+        
                 page = 0;
                 return 1;
         }
