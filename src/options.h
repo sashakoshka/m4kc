@@ -12,3 +12,4 @@ typedef struct {
 extern Options options;
 
 int options_init (void);
+int options_load (void);
