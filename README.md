@@ -10,12 +10,6 @@ Being so small, the game proved somewhat easy to de-compile and edit. [Multiple 
 
 This project is an attempt to translate the game into C in order to increase its performance, and to provide a platform upon which to add new features.
 
-## Bug list
-
-* Raycaster breaks at -64 along any axis
-* Infinite terrain generation is not fully functional, issues such as chunks flashing in and out of existence are common
-* Structure generation does not work in some chunks
-
 ## Some goals for this project
 
 * Maintaining the original look and feel as closely as possible. ✅️
