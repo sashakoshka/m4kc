@@ -17,7 +17,8 @@ char optionsFileName          [PATH_MAX] = { 0 };
 char worldsDirectoryName      [PATH_MAX] = { 0 };
 char screenshotsDirectoryName [PATH_MAX] = { 0 };
 
-static uint32_t getSurfacePixel (SDL_Surface *, int, int);
+static uint32_t getSurfacePixel   (SDL_Surface *, int, int);
+static int      findDirectoryName (char *, const char *);
 
 /* data_init
  * Initializes the data module. Returns zero on success, nonzero on failure.
@@ -25,16 +26,16 @@ static uint32_t getSurfacePixel (SDL_Surface *, int, int);
 int data_init (void) {
         int err = 0;
 
-        err = data_findDirectoryName(directoryName, "/.m4kc");
+        err = findDirectoryName(directoryName, "/.m4kc");
         if (err) { return err; }
         
-        err = data_findDirectoryName(optionsFileName, "/.m4kc/m4kc.conf");
+        err = findDirectoryName(optionsFileName, "/.m4kc/m4kc.conf");
         if (err) { return err; }
         
-        err = data_findDirectoryName(worldsDirectoryName, "/.m4kc/worlds");
+        err = findDirectoryName(worldsDirectoryName, "/.m4kc/worlds");
         if (err) { return err; }
         
-        err = data_findDirectoryName (
+        err = findDirectoryName (
                 screenshotsDirectoryName, "/.m4kc/screenshots");
         if (err) { return err; }
         
@@ -91,29 +92,6 @@ int data_ensureDirectoryExists (const char *path) {
                 }
         }
 
-        return 0;
-}
-
-/* data_findDirectoryName
- * Concatenates the user's home directory with the specified path. subDirectory
- * must begin with a '/'. Uses %APPDATA% instead of home on windows.
- */
-int data_findDirectoryName (char *path, const char *subDirectory) {
-        if (subDirectory[0] != '/') { return 2; }
-        
-        #ifdef _WIN32
-        char *homeDirectory = getenv("APPDATA");
-        #else
-        char *homeDirectory = getenv("HOME");
-        #endif
-        if (homeDirectory == NULL) { return 3; }
-
-        snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);
-        
-        // Normalize path
-        for (char *ch = path; *ch; ch ++) {
-                if (*ch == '\\') { *ch = '/'; }
-        }
         return 0;
 }
 
@@ -264,4 +242,27 @@ static uint32_t getSurfacePixel (SDL_Surface *surface, int x, int y) {
         return *((uint32_t *) ((uint8_t *) surface->pixels
                 + y * surface->pitch
                 + x * surface->format->BytesPerPixel));
+}
+
+/* findDirectoryName
+ * Concatenates the user's home directory with the specified path. subDirectory
+ * must begin with a '/'. Uses %APPDATA% instead of home on windows.
+ */
+static int findDirectoryName (char *path, const char *subDirectory) {
+        if (subDirectory[0] != '/') { return 2; }
+        
+        #ifdef _WIN32
+        char *homeDirectory = getenv("APPDATA");
+        #else
+        char *homeDirectory = getenv("HOME");
+        #endif
+        if (homeDirectory == NULL) { return 3; }
+
+        snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);
+        
+        // Normalize path
+        for (char *ch = path; *ch; ch ++) {
+                if (*ch == '\\') { *ch = '/'; }
+        }
+        return 0;
 }

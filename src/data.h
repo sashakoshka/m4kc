@@ -20,7 +20,6 @@ int data_directoryExists       (const char *);
 int data_fileExists            (const char *);
 int data_ensureDirectoryExists (const char *);
 
-int  data_findDirectoryName   (char *, const char *);
 char *data_getOptionsFileName (void);
 int  data_getWorldPath        (char *, const char *);
 void data_getWorldMetaPath    (char *, const char *);
