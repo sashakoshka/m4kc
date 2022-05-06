@@ -10,48 +10,34 @@
 #include "data.h"
 #include "textures.h"
 
-data_Options data_options          = { 0 };
 data_WorldListItem *data_worldList = NULL;
 
 char directoryName            [PATH_MAX] = { 0 };
-char settingsFileName         [PATH_MAX] = { 0 };
+char optionsFileName          [PATH_MAX] = { 0 };
 char worldsDirectoryName      [PATH_MAX] = { 0 };
 char screenshotsDirectoryName [PATH_MAX] = { 0 };
 
-char username[8] = "guest";
-
-static uint32_t getSurfacePixel (SDL_Surface *, int, int);
+static uint32_t getSurfacePixel   (SDL_Surface *, int, int);
+static int      findDirectoryName (char *, const char *);
 
 /* data_init
  * Initializes the data module. Returns zero on success, nonzero on failure.
  */
-int data_init () {
+int data_init (void) {
         int err = 0;
 
-        err = data_findDirectoryName(directoryName, "/.m4kc");
+        err = findDirectoryName(directoryName, "/.m4kc");
         if (err) { return err; }
         
-        err = data_findDirectoryName(settingsFileName, "/.m4kc/m4kc.conf");
+        err = findDirectoryName(optionsFileName, "/.m4kc/m4kc.conf");
         if (err) { return err; }
         
-        err = data_findDirectoryName(worldsDirectoryName, "/.m4kc/worlds");
+        err = findDirectoryName(worldsDirectoryName, "/.m4kc/worlds");
         if (err) { return err; }
         
-        err = data_findDirectoryName (
+        err = findDirectoryName (
                 screenshotsDirectoryName, "/.m4kc/screenshots");
         if (err) { return err; }
-
-        data_options = (const data_Options) {
-                .fogType      = 0,
-                .drawDistance = 20,
-                .trapMouse    = 0,
-                .fov          = 90.0,
-                .username     = (const InputBuffer){
-                        .buffer = username,
-                        .len    = 8,
-                        .cursor = 5
-                }
-        };
         
         return 0;
 }
@@ -109,52 +95,11 @@ int data_ensureDirectoryExists (const char *path) {
         return 0;
 }
 
-/* data_findDirectoryName
- * Concatenates the user's home directory with the specified path. subDirectory
- * must begin with a '/'. Uses %APPDATA% instead of home on windows.
+/* data_getOptionsFileName
+ * Returns the file path of the configuration file.
  */
-int data_findDirectoryName (char *path, const char *subDirectory) {
-        if (subDirectory[0] != '/') { return 2; }
-        
-        #ifdef _WIN32
-        char *homeDirectory = getenv("APPDATA");
-        #else
-        char *homeDirectory = getenv("HOME");
-        #endif
-        if (homeDirectory == NULL) { return 3; }
-
-        snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);
-        
-        // Normalize path
-        for (char *ch = path; *ch; ch ++) {
-                if (*ch == '\\') { *ch = '/'; }
-        }
-        return 0;
-}
-
-/* data_getScreenshotPath
- * Writes into path the path for a new screenshot. The name will take the form
- * of: snip_YYYY-MM-DD_HH:MM:SS.bmp
- * ... and will be located in the path stored in screenshotsDirectoryName. If
- * the screenshots directory doesn't exist, this function will create it.
- */
-int data_getScreenshotPath (char *path) {
-        if (data_ensureDirectoryExists(screenshotsDirectoryName)) { return 1; }
-
-        time_t unixTime = time(0);
-        struct tm *timeInfo = localtime(&unixTime);
-        
-        snprintf (
-                path, PATH_MAX,
-                "%s/snip_%04i-%02i-%02i_%02i-%02i-%02i.bmp",
-                screenshotsDirectoryName,
-                timeInfo->tm_year + 1900,
-                timeInfo->tm_mon  + 1,
-                timeInfo->tm_mday,
-                timeInfo->tm_hour,
-                timeInfo->tm_min,
-                timeInfo->tm_sec);
-        return 0;
+char *data_getOptionsFileName (void) {
+        return optionsFileName;
 }
 
 /* data_getWorldPath
@@ -186,11 +131,36 @@ void data_getWorldPlayerPath (
         snprintf(path, PATH_MAX, "%s/%s.player", worldPath, name);
 }
 
+/* data_getScreenshotPath
+ * Writes into path the path for a new screenshot. The name will take the form
+ * of: snip_YYYY-MM-DD_HH:MM:SS.bmp
+ * ... and will be located in the path stored in screenshotsDirectoryName. If
+ * the screenshots directory doesn't exist, this function will create it.
+ */
+int data_getScreenshotPath (char *path) {
+        if (data_ensureDirectoryExists(screenshotsDirectoryName)) { return 1; }
+
+        time_t unixTime = time(0);
+        struct tm *timeInfo = localtime(&unixTime);
+        
+        snprintf (
+                path, PATH_MAX,
+                "%s/snip_%04i-%02i-%02i_%02i-%02i-%02i.bmp",
+                screenshotsDirectoryName,
+                timeInfo->tm_year + 1900,
+                timeInfo->tm_mon  + 1,
+                timeInfo->tm_mday,
+                timeInfo->tm_hour,
+                timeInfo->tm_min,
+                timeInfo->tm_sec);
+        return 0;
+}
+
 /* data_refreshWorldList
  * Regreshes the world list, clearing the previous one. Reads world names and
  * thumbnails from ~/.m4kc/worlds
  */
-int data_refreshWorldList () {
+int data_refreshWorldList (void) {
         // Free previous list
         data_WorldListItem *item = data_worldList;
         while (item != NULL) {
@@ -272,4 +242,27 @@ static uint32_t getSurfacePixel (SDL_Surface *surface, int x, int y) {
         return *((uint32_t *) ((uint8_t *) surface->pixels
                 + y * surface->pitch
                 + x * surface->format->BytesPerPixel));
+}
+
+/* findDirectoryName
+ * Concatenates the user's home directory with the specified path. subDirectory
+ * must begin with a '/'. Uses %APPDATA% instead of home on windows.
+ */
+static int findDirectoryName (char *path, const char *subDirectory) {
+        if (subDirectory[0] != '/') { return 2; }
+        
+        #ifdef _WIN32
+        char *homeDirectory = getenv("APPDATA");
+        #else
+        char *homeDirectory = getenv("HOME");
+        #endif
+        if (homeDirectory == NULL) { return 3; }
+
+        snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);
+        
+        // Normalize path
+        for (char *ch = path; *ch; ch ++) {
+                if (*ch == '\\') { *ch = '/'; }
+        }
+        return 0;
 }

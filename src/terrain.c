@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include "gameloop.h"
-#include "terrain.h"
-#include "blocks.h"
 #include "data.h"
+#include "blocks.h"
+#include "terrain.h"
+#include "options.h"
+#include "gameloop.h"
 
 static void chunkFilePath (World *, char *, int, int, int);
 static int  Chunk_save    (World *, Chunk *);
@@ -60,7 +61,7 @@ int World_save (World *world) {
         char playerPath[PATH_MAX];
         data_getWorldPlayerPath (
                 playerPath, world->path,
-                data_options.username.buffer);
+                options.username.buffer);
         if (Player_save(&world->player, playerPath)) { return 3; }
         return 0;
 }
@@ -113,7 +114,7 @@ int World_load (World *world, const char *name) {
         char playerPath[PATH_MAX];
         data_getWorldPlayerPath (
                 playerPath, world->path,
-                data_options.username.buffer);
+                options.username.buffer);
         if (data_fileExists(playerPath)) {
                 Player_load(&world->player, playerPath);
         } else {

@@ -2,6 +2,7 @@
 #include "gameloop.h"
 #include "textures.h"
 #include "utility.h"
+#include "options.h"
 #include "blocks.h"
 #include "menus.h"
 #include "data.h"
@@ -199,7 +200,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
     player->pos.y + 1,
     player->pos.z) == BLOCK_WATER;
 
-  int effectDrawDistance = data_options.drawDistance;
+  int effectDrawDistance = options.drawDistance;
   // Restrict view distance while in water
   if (headInWater) { effectDrawDistance = 10; }
 
@@ -409,7 +410,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   selected to the blockSelected variable */
 
   // Decrease fov when in water
-  double effectFov = data_options.fov;
+  double effectFov = options.fov;
   if (headInWater) { effectFov += 20; }
   
   selectedPass = 0;
@@ -572,11 +573,11 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             if (
               f33 < f26 && (
                 (
-                   ! data_options.trapMouse
+                   ! options.trapMouse
                   && pixelX == inputs->mouse.x / BUFFER_SCALE
                   && pixelY == inputs->mouse.y / BUFFER_SCALE
                 ) || (
-                     data_options.trapMouse
+                     options.trapMouse
                   && pixelX == BUFFER_HALF_W
                   && pixelY == BUFFER_HALF_H
                 )
@@ -612,7 +613,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
       }
       
       // Draw inverted color crosshair
-      if (data_options.trapMouse && (
+      if (options.trapMouse && (
         (pixelX == BUFFER_HALF_W
           && abs(BUFFER_HALF_H - pixelY) < 4) ||
         (pixelY == BUFFER_HALF_H
@@ -627,7 +628,7 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
           ((finalPixelColor >> 16 & 0xFF) * pixelShade) >> 8,
           ((finalPixelColor >> 8  & 0xFF) * pixelShade) >> 8,
           ((finalPixelColor       & 0xFF) * pixelShade) >> 8,
-          data_options.fogType ? sqrt(pixelMist) * 16 : pixelMist
+          options.fogType ? sqrt(pixelMist) * 16 : pixelMist
         );
         
         SDL_RenderDrawPoint(renderer, pixelX, pixelY);
@@ -669,7 +670,7 @@ void gameLoop_drawPopup (SDL_Renderer *renderer, Inputs *inputs) {
         switch (gamePopup) {
         case POPUP_HUD:
                 // HUD
-                if (data_options.trapMouse) SDL_SetRelativeMouseMode(1);
+                if (options.trapMouse) SDL_SetRelativeMouseMode(1);
                 if (guiOn) popup_hud (
                 renderer, inputs, &world,
                 &debugOn, &fps_now, player
@@ -741,7 +742,7 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
         // Only process movement controls if there are no active popup
         if (gamePopup == 0) {
                 // Looking around
-                if (data_options.trapMouse) {
+                if (options.trapMouse) {
                         player->hRot += (double)inputs->mouse.x / 64;
                         player->vRot -= (double)inputs->mouse.y / 64;
                 } else {

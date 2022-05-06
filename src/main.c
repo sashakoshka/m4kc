@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "terrain.h"
 #include "textures.h"
-#include "gui.h"
 #include "gameloop.h"
-#include "main.h"
+#include "options.h"
+#include "terrain.h"
 #include "data.h"
+#include "main.h"
+#include "gui.h"
 
 /* Minecraft 4k, C edition. Version 0.7
  * 
@@ -68,9 +69,17 @@ int main (int argc, char *argv[]) {
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
         //--- initializing modules ---//
-        int dataInitFailed = data_init();
-        if (dataInitFailed) {
+        
+        int err = 0;
+        
+        err = data_init();
+        if (err) {
                 gameLoop_error("Cannot initialize data module.");
+        }
+        
+        err = options_init();
+        if (err) {
+                gameLoop_error("Cannot initialize options module.");
         }
 
         //---- generating assets  ----//

@@ -2,6 +2,7 @@
 #include "menus.h"
 #include "data.h"
 #include "blocks.h"
+#include "options.h"
 #include "gameloop.h"
 
 static int menu_optionsMain (SDL_Renderer *, Inputs *);
@@ -714,7 +715,7 @@ void popup_chat (SDL_Renderer *renderer, Inputs *inputs, uint64_t gameTime) {
                 // 1:  null
                 static char chatNameConcat[63 + 7 + 2 + 1];
                 snprintf (chatNameConcat,  63 + 7 + 2, "%s: %s",
-                        data_options.username.buffer, chatBox.buffer);
+                        options.username.buffer, chatBox.buffer);
                 
                 // Add input to chat
                 chatAdd(chatNameConcat);
@@ -1091,8 +1092,8 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
 
         switch (page) {
         case 0:
-                manageInputBuffer(&data_options.username, inputs);
-                input (renderer, "Username", data_options.username.buffer,
+                manageInputBuffer(&options.username, inputs);
+                input (renderer, "Username", options.username.buffer,
                         BUFFER_HALF_W - 64, 20, 128,
                         inputs->mouse.x, inputs->mouse.y, 1);
 
@@ -1100,48 +1101,57 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                         "Capture Mouse: OFF",
                         "Capture Mouse: ON"
                 };
-                if (button(renderer, trapMouseTexts[data_options.trapMouse],
+                if (button(renderer, trapMouseTexts[options.trapMouse],
                         BUFFER_HALF_W - 64, 42, 128,
                         inputs->mouse.x, inputs->mouse.y) &&
                         inputs->mouse.left
                 ) {
-                        data_options.trapMouse = !data_options.trapMouse;
+                        options.trapMouse = !options.trapMouse;
                 }
                 break;
         case 1:
-                ;static char drawDistanceText[] = "Draw distance: 20\0";
+                ;static char drawDistanceText[20] = { 0 };
+                if (!drawDistanceText[0]) {
+                        snprintf (
+                                drawDistanceText, 20,
+                                "Draw distance: %i",
+                                options.drawDistance);
+                }
+                
                 if (button(renderer, drawDistanceText,
                         BUFFER_HALF_W - 64, 20, 128,
                         inputs->mouse.x, inputs->mouse.y) &&
                         inputs->mouse.left
                 ) {
-                        switch (data_options.drawDistance) {
+                        switch (options.drawDistance) {
                         case 20:
-                                data_options.drawDistance = 32;
+                                options.drawDistance = 32;
                                 break;
                         case 32:
-                                data_options.drawDistance = 64;
+                                options.drawDistance = 64;
                                 break;
                         case 64:
-                                data_options.drawDistance = 96;
+                                options.drawDistance = 96;
                                 break;
                         case 96:
-                                data_options.drawDistance = 128;
+                                options.drawDistance = 128;
                                 break;
                         default:
-                                data_options.drawDistance = 20;
+                                options.drawDistance = 20;
                                 break;
                         }
-                        strnum(drawDistanceText, 15, data_options.drawDistance);
+                        strnum(drawDistanceText, 15, options.drawDistance);
                 }
 
                 static char *fovTexts[] = {
                         "FOV: Low",
                         "FOV: Medium",
                         "FOV: High",
+                        "FOV: ?"
                 };
                 char *fovText = NULL;
-                switch ((int)data_options.fov) {
+                switch ((int)options.fov) {
+                        default:  fovText = fovTexts[3]; break;
                         case 60:  fovText = fovTexts[2]; break;
                         case 90:  fovText = fovTexts[1]; break;
                         case 140: fovText = fovTexts[0]; break;
@@ -1152,10 +1162,10 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                         inputs->mouse.x, inputs->mouse.y) &&
                         inputs->mouse.left
                 ) {
-                        switch ((int)data_options.fov) {
-                                case 60:  data_options.fov = 140; break;
-                                case 90:  data_options.fov = 60;  break;
-                                default:  data_options.fov = 90;  break;
+                        switch ((int)options.fov) {
+                                case 60: options.fov = 140; break;
+                                case 90: options.fov = 60;  break;
+                                default: options.fov = 90;  break;
                         }
                         
                 }
@@ -1164,12 +1174,12 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                         "Fog: Gradual",
                         "Fog: Sharp"
                 };
-                if (button(renderer, fogTexts[data_options.fogType],
+                if (button(renderer, fogTexts[options.fogType],
                         BUFFER_HALF_W - 64, 64, 128,
                         inputs->mouse.x, inputs->mouse.y) &&
                         inputs->mouse.left
                 ) {
-                        data_options.fogType = !data_options.fogType;
+                        options.fogType = !options.fogType;
                 }
                 
                 break;
@@ -1198,6 +1208,11 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                 inputs->mouse.x, inputs->mouse.y) &&
                 inputs->mouse.left
         ) {
+                int err = options_save();
+                if (err) {
+                        gameLoop_error("Could not save options");
+                }
+        
                 page = 0;
                 return 1;
         }
