@@ -17,7 +17,8 @@ typedef uint8_t Block;
 #define BLOCK_COBBLESTONE 9
 #define BLOCK_WATER       10
 #define BLOCK_TALL_GRASS  11
-#define BLOCK_NIL         255
 
 #define BLOCK_PLAYER_HEAD 14
 #define BLOCK_PLAYER_BODY 15
+
+#define BLOCK_NIL         255

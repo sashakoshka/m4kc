@@ -791,8 +791,11 @@ void ch_genDev (Block *blocks, int xOffset, int yOffset, int zOffset) {
 
         for (int x = 0; x < CHUNK_SIZE; x ++)
         for (int z = 0; z < CHUNK_SIZE; z ++) {
-                for (Block block = 0; block < NUMBER_OF_BLOCKS; block ++) {
-                        ch_setBlock(blocks, x, 4 + block, z, block, 1);       
-                }
+                ch_setBlock (
+                        blocks,
+                        x, 4, z,
+                        (x + 1) % (NUMBER_OF_BLOCKS - 1),
+                        1);       
+                ch_setBlock(blocks, x, 5, z, BLOCK_STONE, 1);       
         }
 }
