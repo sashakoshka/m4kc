@@ -59,6 +59,7 @@ int options_load (void) {
         }
 
         options.username.cursor = strlen(username);
+        if (options.fogType > 1 || options.fogType < 0) { options.fogType = 0; }
 
         fclose(file);
         return 0;

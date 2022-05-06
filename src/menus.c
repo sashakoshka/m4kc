@@ -1140,9 +1140,11 @@ static int menu_optionsMain (SDL_Renderer *renderer, Inputs *inputs) {
                         "FOV: Low",
                         "FOV: Medium",
                         "FOV: High",
+                        "FOV: ?"
                 };
                 char *fovText = NULL;
                 switch ((int)options.fov) {
+                        default:  fovText = fovTexts[3]; break;
                         case 60:  fovText = fovTexts[2]; break;
                         case 90:  fovText = fovTexts[1]; break;
                         case 140: fovText = fovTexts[0]; break;
