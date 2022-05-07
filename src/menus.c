@@ -124,13 +124,12 @@ void state_selectWorld (
                 item = item->next;
         }
 
-        // TODO: show it whenever length is too bigssssssssssssssss
         if (6 + index * 22 > yLimit) {
                 scrollbar (
                         renderer,
                         BUFFER_HALF_W + 65, 0, BUFFER_H - 29,
-                        inputs->mouse.x, inputs->mouse.y,
-                        scroll, data_worldListLength);
+                        inputs->mouse.x, inputs->mouse.y, inputs->mouse.left,
+                        &scroll, data_worldListLength); 
         }
 
         if (index == 0) {

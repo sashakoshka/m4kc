@@ -263,20 +263,16 @@ int input (
 }
 
 /* scrollbar
- * Draws a scrollbar of the specified length at the specified coordinates. As of
- * now, this scrollbar cannot be interacted with, it is useful for display only.
+ * Draws a scrollbar of the specified length at the specified coordinates.
+ * Able to modify the level value when the user interacts with it.
  */
 void scrollbar (
         SDL_Renderer *renderer,
         int x, int y, int length,
         int mouseX, int mouseY,
-        int level, int max
+        int mouseLeft,
+        int *level, int max
 ) {
-        (void)(mouseX);
-        (void)(mouseY);
-        (void)(level);
-        (void)(max);
-
         float sectionLength = (float)length / (float)max;
 
         SDL_Rect background = {
@@ -288,10 +284,19 @@ void scrollbar (
 
         SDL_Rect foreground = {
                 .x = x,
-                .y = round((float)level * sectionLength),
+                .y = ceil((float)*level * sectionLength),
                 .w = 4,
                 .h = sectionLength
         };
+
+        int hover = mouseX >= background.x                &&
+                    mouseY >= background.y                &&
+                    mouseX <  background.x + background.w &&
+                    mouseY <  background.y + background.h;
+
+        if (hover && mouseLeft) {
+                *level = (mouseY - background.y) / sectionLength;
+        }
 
         tblack(renderer);
         SDL_RenderFillRect(renderer, &background);
