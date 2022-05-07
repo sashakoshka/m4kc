@@ -69,6 +69,18 @@ void state_selectWorld (
         int *gameState,
         World *world
 ) {
+        static int scroll = 0;
+
+        if (inputs->mouse.wheel != 0) {
+                scroll -= inputs->mouse.wheel;
+                inputs->mouse.wheel = 0;
+        }
+
+        if (scroll < 0) { scroll = 0; }
+        if (scroll > data_worldListLength - 1) {
+                scroll = data_worldListLength - 1;
+        }
+
         SDL_Rect listBackground;
         listBackground.x = 0;
         listBackground.y = 0;
@@ -85,14 +97,18 @@ void state_selectWorld (
                 0,        BUFFER_H - 29,
                 BUFFER_W, BUFFER_H - 29);
 
-        white(renderer);
-        int y = 6;
+        int index = 0;
+        int y     = 6;
         data_WorldListItem *item = data_worldList;
         while (item != NULL) {
-                if (drawWorldListItem(renderer, item,
-                        BUFFER_HALF_W - 64, y,
-                        inputs->mouse.x,
-                        inputs->mouse.y) && inputs->mouse.left) {
+                if (y > BUFFER_H - 44) { break; }
+
+                if (index >= scroll) {
+                        if (drawWorldListItem(renderer, item,
+                                BUFFER_HALF_W - 64, y,
+                                inputs->mouse.x,
+                                inputs->mouse.y) && inputs->mouse.left
+                        ) {
                                 if (World_load(world, item->name)) {
                                         gameLoop_error("Could not load world");
                                 } else {
@@ -100,11 +116,14 @@ void state_selectWorld (
                                 }
                                 return;
                         }
-                y += 22;
+                        y += 21;
+                }
+                
+                index ++;
                 item = item->next;
         }
 
-        if (y == 6) {
+        if (index == 0) {
                 shadowCenterStr (renderer, "No worlds",
                         BUFFER_HALF_W, BUFFER_HALF_H - 15);
         }
@@ -115,6 +134,7 @@ void state_selectWorld (
                 inputs->mouse.left
         ) {
                 *gameState = STATE_TITLE;
+                scroll = 0;
         }
 
         if (button(renderer, "New",
@@ -123,6 +143,7 @@ void state_selectWorld (
                 inputs->mouse.left
         ) {
                 *gameState = STATE_NEW_WORLD;
+                scroll = 0;
         }
 }
 

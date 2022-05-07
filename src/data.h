@@ -14,6 +14,7 @@ typedef struct data_WorldListItem {
 } data_WorldListItem;
 
 extern data_WorldListItem *data_worldList;
+extern int data_worldListLength;
 
 int data_init                  (void);
 int data_directoryExists       (const char *);

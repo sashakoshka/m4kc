@@ -11,6 +11,7 @@
 #include "textures.h"
 
 data_WorldListItem *data_worldList = NULL;
+int data_worldListLength = 0;
 
 char directoryName            [PATH_MAX] = { 0 };
 char optionsFileName          [PATH_MAX] = { 0 };
@@ -176,6 +177,7 @@ int data_refreshWorldList (void) {
         DIR *directory = opendir(worldsDirectoryName);
         if (!directory) { return 2; }
 
+        data_worldListLength = 0;
         data_WorldListItem *last = NULL;
         while ((directoryEntry = readdir(directory)) != NULL) {
                 if (directoryEntry->d_name[0] == '.') { continue; }
@@ -228,6 +230,8 @@ int data_refreshWorldList (void) {
                 }
 
                 SDL_FreeSurface(image);
+
+                data_worldListLength ++;
         }
         
         closedir(directory);
