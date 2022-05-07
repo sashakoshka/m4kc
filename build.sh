@@ -22,6 +22,8 @@ FLAGS_WARN="-Wall -Wextra"
 FLAGS_DEBUG="-g"
 FLAGS_LIBS="-L/usr/local/lib -lSDL2 -lm"
 
+INSTALL_LOCATION="/usr/local"
+
 # do specific things if we are on windows
 
 if [ ! -z "$MSYSTEM" ]; then
@@ -154,21 +156,21 @@ case $1 in
     
   install)
     clean
-    buildAll small                                                      \
-    && echo "... installing"                                            \
-    && install -d /usr/games/                                           \
-    && install -d /usr/share/applications/                              \
-    && install -d /usr/share/icons/                                     \
-    && install -m 644 m4kc.desktop /usr/share/applications/m4kc.desktop \
-    && install -m 644 icons/icon.png /usr/share/icons/m4kc.png          \
-    && install -m 755 "./$SMALL_PATH" /usr/games/m4kc                   \
+    buildAll small                                                                                 \
+    && echo "... installing"                                                                       \
+    && install -d "$INSTALL_LOCATION/games/"                                                       \
+    && install -d "$INSTALL_LOCATION/share/applications/"                                          \
+    && install -d "$INSTALL_LOCATION/share/icons/hicolor/256x256/apps/"                            \
+    && install -m 644 m4kc.desktop "$INSTALL_LOCATION/share/applications/m4kc.desktop"             \
+    && install -m 644 icons/icon.png "$INSTALL_LOCATION/share/icons/hicolor/256x256/apps/m4kc.png" \
+    && install -m 755 "./$SMALL_PATH" "$INSTALL_LOCATION/games/m4kc"                               \
     && echo ".// installed"
     ;;
     
   uninstall)
-    rm "/usr/games/m4kc"
-    rm "/usr/share/applications/m4kc.desktop"
-    rm "/usr/share/icons/m4kc.png"
+    rm "$INSTALL_LOCATION/m4kc"
+    rm "$INSTALL_LOCATION/share/applications/m4kc.desktop"
+    rm "$INSTALL_LOCATION/share/icons/hicolor/256x256/apps/m4kc.png"
     ;;
     
   release)

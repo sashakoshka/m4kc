@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=m4kc
-Comment=An implementation of Minecraft 4K in C
+Comment=Minecraft 4k: decompiled, translated to C, and improved upon 
 Exec=m4kc
-Icon=/usr/share/icons/m4kc.png
+Icon=/usr/share/icons/hicolor/256x256/apps/m4kc.png
 Terminal=false
 Type=Application
 Categories=Game
