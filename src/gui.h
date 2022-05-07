@@ -21,6 +21,7 @@ int  drawBGStr         (SDL_Renderer *, const char *, int, int);
 int  button            (SDL_Renderer *, const char *, int, int, int, int, int);
 int  input             (SDL_Renderer *, const char *, const char *, int, int,
                         int, int, int, int);
+void scrollbar         (SDL_Renderer *, int, int, int, int, int, int, int);
 int  drawSlot          (SDL_Renderer *, InvSlot *, int, int, int, int);
 int  drawWorldListItem (SDL_Renderer *, data_WorldListItem *, int, int, int,
                         int);

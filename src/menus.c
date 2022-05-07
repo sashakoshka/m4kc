@@ -97,11 +97,12 @@ void state_selectWorld (
                 0,        BUFFER_H - 29,
                 BUFFER_W, BUFFER_H - 29);
 
-        int index = 0;
-        int y     = 6;
+        int index  = 0;
+        int y      = 6;
+        int yLimit = BUFFER_H - 44;
         data_WorldListItem *item = data_worldList;
         while (item != NULL) {
-                if (y > BUFFER_H - 44) { break; }
+                if (y > yLimit) { break; }
 
                 if (index >= scroll) {
                         if (drawWorldListItem(renderer, item,
@@ -121,6 +122,15 @@ void state_selectWorld (
                 
                 index ++;
                 item = item->next;
+        }
+
+        // TODO: show it whenever length is too bigssssssssssssssss
+        if (6 + index * 22 > yLimit) {
+                scrollbar (
+                        renderer,
+                        BUFFER_HALF_W + 65, 0, BUFFER_H - 29,
+                        inputs->mouse.x, inputs->mouse.y,
+                        scroll, data_worldListLength);
         }
 
         if (index == 0) {

@@ -262,6 +262,50 @@ int input (
         return hover;
 }
 
+/* scrollbar
+ * Draws a scrollbar of the specified length at the specified coordinates. As of
+ * now, this scrollbar cannot be interacted with, it is useful for display only.
+ */
+void scrollbar (
+        SDL_Renderer *renderer,
+        int x, int y, int length,
+        int mouseX, int mouseY,
+        int level, int max
+) {
+        (void)(mouseX);
+        (void)(mouseY);
+        (void)(level);
+        (void)(max);
+
+        float sectionLength = (float)length / (float)max;
+
+        SDL_Rect background = {
+                .x = x,
+                .y = y,
+                .w = 4,
+                .h = length
+        };
+
+        SDL_Rect foreground = {
+                .x = x,
+                .y = round((float)level * sectionLength),
+                .w = 4,
+                .h = sectionLength
+        };
+
+        tblack(renderer);
+        SDL_RenderFillRect(renderer, &background);
+        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+        SDL_RenderFillRect(renderer, &foreground);
+        SDL_SetRenderDrawColor(renderer, 139, 139, 139, 255);
+        SDL_RenderDrawLine (
+                renderer,
+                foreground.x + foreground.w - 1,
+                foreground.y,
+                foreground.x + foreground.w - 1,
+                foreground.y + foreground.h - 1);
+}
+
 /* drawSlot
  * Takes in a pointer to a renderer, an InvSlot, draws the item
  * with the specified x and y coordinates and width, and then 
