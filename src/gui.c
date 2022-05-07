@@ -361,7 +361,8 @@ int drawSlot (
 }
 
 /* drawWorldListItem
- * Draws a world list item and reurns whether the mouse is inside of it.
+ * Draws a world list item and reurns whether the mouse is inside of it or one
+ * of its buttons.
  */
 int drawWorldListItem (
         SDL_Renderer *renderer, data_WorldListItem *item,
@@ -406,7 +407,14 @@ int drawWorldListItem (
 
         shadowStr(renderer, item->name, x + 20, y + 4);
 
-        if (hover) {
+        if (button(renderer, "x",
+                x + 128 - 16, y, 16,
+                mouseX, mouseY)
+        ) {
+                hover = 2;
+        }
+
+        if (hover == 1) {
                 white(renderer);
                 SDL_RenderDrawRect(renderer, &rect);
         }
