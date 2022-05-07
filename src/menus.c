@@ -70,6 +70,7 @@ void state_selectWorld (
         World *world
 ) {
         static int scroll = 0;
+        int needRefresh   = 0;
 
         if (inputs->mouse.wheel != 0) {
                 scroll -= inputs->mouse.wheel;
@@ -121,6 +122,15 @@ void state_selectWorld (
                         }
                         return;
                 case 2:
+                        ;char deletePath[PATH_MAX];
+                        if (data_getWorldPath(deletePath, item->name)) {
+                                gameLoop_error("Could not delete world");
+                                return;
+                        }
+
+                        data_removeDirectory(deletePath);
+                        needRefresh = 1;
+                        
                         break;
                 }
 
@@ -158,6 +168,10 @@ void state_selectWorld (
         ) {
                 *gameState = STATE_NEW_WORLD;
                 scroll = 0;
+        }
+
+        if (needRefresh) {
+                data_refreshWorldList();
         }
 }
 

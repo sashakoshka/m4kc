@@ -96,6 +96,59 @@ int data_ensureDirectoryExists (const char *path) {
         return 0;
 }
 
+/* data_removeDirectory
+ * Equivalent of rm -r. Removes a directory and its contents recursively.
+ */
+int data_removeDirectory (const char *path) {
+        DIR *directory = opendir(path);
+        size_t pathLength = strlen(path);
+
+        if (!directory) { return 1; }
+        
+        struct dirent *directoryEntry;
+
+        int err = 0;
+        while (!err) {
+                directoryEntry = readdir(directory);
+                if (directoryEntry == NULL) {
+                        err = 2;
+                        break;
+                }
+        
+                if (
+                        !strcmp(directoryEntry->d_name, ".") ||
+                        !strcmp(directoryEntry->d_name, "..")
+                ) {
+                        continue;
+                }
+
+                size_t newLength =
+                        pathLength +
+                        strlen(directoryEntry->d_name) + 2;
+                        
+                char *newPath = malloc(newLength);
+                if (newPath == NULL) { return 3; }
+
+                snprintf (
+                        newPath, newLength, "%s/%s",
+                        path, directoryEntry->d_name);
+                
+                struct stat fileInfo;
+                if (!stat(newPath, &fileInfo)) {
+                        if (S_ISDIR(fileInfo.st_mode)) {
+                                err = data_removeDirectory(newPath);
+                        } else {
+                                err = unlink(newPath);
+                        }
+                }
+                free(newPath);
+        }
+        
+        closedir(directory);
+        if (rmdir(path)) { return 4; }
+        return 0;
+}
+
 /* data_getOptionsFileName
  * Returns the file path of the configuration file.
  */
