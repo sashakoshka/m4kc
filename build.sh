@@ -8,6 +8,10 @@ OBJ_PATH="o"
 OUT_PATH="bin"
 SRC_PATH="src"
 
+SMALL_PATH="$OUT_PATH/m4kc"
+DEBUG_PATH="$OUT_PATH/m4kc-debug"
+GZEXE_CMD="gzexe $SMALL_PATH"
+
 FLAGS_SMALL="-Os -g0 -fno-stack-protector -fno-unwind-tables \
 -fno-asynchronous-unwind-tables -Dsmall"
 FLAGS_WARN="-Wall -Wextra"
@@ -23,10 +27,10 @@ if [ ! -z "$MSYSTEM" ]; then
   
   OBJ_PATH="win/o"
   OUT_PATH="win/bin"
+  
+  SMALL_PATH="$OUT_PATH/m4kc.exe"
+  DEBUG_PATH="$OUT_PATH/m4kc-debug.exe"
 fi
-
-SMALL_PATH="$OUT_PATH/m4kc"
-DEBUG_PATH="$OUT_PATH/m4kc-debug"
 
 # build a single module from src
 
@@ -47,11 +51,11 @@ buildModule () {
   fi
   
   if [ ! -f "$modIn" ]; then
-  echo "!!! module $1 does not exist, skipping" >&2; return
+    echo "!!! module $1 does not exist, skipping" >&2; return
   fi
   
   if [ "$modOut" -nt "$modIn" ] && [ "$modOut" -nt "$modHead" ]; then
-  echo "(i) skipping module $1, already built"; return
+    echo "(i) skipping module $1, already built"; return
   fi
   
   echo "... building module $1: $1.c ---> $1.o"
@@ -92,14 +96,14 @@ buildAll () {
   if [ "$1" = "small" ]; then
     echo "... compressing executable"
 
-  	if strip "$SMALL_PATH" -S --strip-unneeded \
-  	     --remove-section=.note.gnu.gold-version --remove-section=.comment \
-  	     --remove-section=.note --remove-section=.note.gnu.build-id \
-  	     --remove-section=.note.ABI-tag & \
-  	   gzexe "$SMALL_PATH"
-  	then
-  	  ls -l "$SMALL_PATH"
-      echo ".// compressed executable"
+    if strip "$SMALL_PATH" -S --strip-unneeded \
+      --remove-section=.note.gnu.gold-version --remove-section=.comment \
+      --remove-section=.note --remove-section=.note.gnu.build-id \
+      --remove-section=.note.ABI-tag & \
+      $GZEXE_CMD
+    then
+        ls -l "$SMALL_PATH"
+        echo ".// compressed executable"
     else
       echo "ERR could not compress executable" >&2
     fi
