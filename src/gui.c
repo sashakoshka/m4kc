@@ -284,9 +284,9 @@ void scrollbar (
 
         SDL_Rect foreground = {
                 .x = x,
-                .y = ceil((float)*level * sectionLength),
+                .y = (float)*level * sectionLength,
                 .w = 4,
-                .h = sectionLength
+                .h = ceil(sectionLength)
         };
 
         int hover = mouseX >= background.x                &&

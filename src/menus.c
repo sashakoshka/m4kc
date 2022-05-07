@@ -102,24 +102,29 @@ void state_selectWorld (
         int yLimit = BUFFER_H - 44;
         data_WorldListItem *item = data_worldList;
         while (item != NULL) {
-                if (y > yLimit) { break; }
-
-                if (index >= scroll) {
-                        if (drawWorldListItem(renderer, item,
-                                BUFFER_HALF_W - 64, y,
-                                inputs->mouse.x,
-                                inputs->mouse.y) && inputs->mouse.left
-                        ) {
-                                if (World_load(world, item->name)) {
-                                        gameLoop_error("Could not load world");
-                                } else {
-                                        *gameState = STATE_LOADING;
-                                }
-                                return;
-                        }
-                        y += 21;
-                }
+                if (y > yLimit)     { break;}
+                if (index < scroll) { goto nextItem; }
                 
+                int hover = drawWorldListItem(renderer, item,
+                        BUFFER_HALF_W - 64, y,
+                        inputs->mouse.x,
+                        inputs->mouse.y);
+                y += 21;
+                if (!inputs->mouse.left) { goto nextItem; }
+
+                switch (hover) {
+                case 1:
+                        if (World_load(world, item->name)) {
+                                gameLoop_error("Could not load world");
+                        } else {
+                                *gameState = STATE_LOADING;
+                        }
+                        return;
+                case 2:
+                        break;
+                }
+
+                nextItem:
                 index ++;
                 item = item->next;
         }
