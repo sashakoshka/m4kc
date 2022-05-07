@@ -178,7 +178,8 @@ case $1 in
     buildAll small
     echo "... packaging release"
     mkdir -p "$RELEASE_PATH"
-    zip $ZIP_PATH $ZIP_FILES
+    rm $ZIP_PATH
+    zip $ZIP_PATH $ZIP_FILES -j
     echo ".// packaged"
     ;;
     
