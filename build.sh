@@ -3,14 +3,18 @@
 # m4kc build system
 # please keep this posix compliant!
 
+VERSION="0.7"
+PLATFORM="linux64"
 CC="clang"
 OBJ_PATH="o"
 OUT_PATH="bin"
 SRC_PATH="src"
+RELEASE_PATH="release"
 
 SMALL_PATH="$OUT_PATH/m4kc"
 DEBUG_PATH="$OUT_PATH/m4kc-debug"
 GZEXE_CMD="gzexe $SMALL_PATH"
+ZIP_FILES="$SMALL_PATH"
 
 FLAGS_SMALL="-Os -g0 -fno-stack-protector -fno-unwind-tables \
 -fno-asynchronous-unwind-tables -Dsmall"
@@ -21,6 +25,8 @@ FLAGS_LIBS="-L/usr/local/lib -lSDL2 -lm"
 # do specific things if we are on windows
 
 if [ ! -z "$MSYSTEM" ]; then
+  PLATFORM="win64"
+
   FLAGS_INCLUDE="-mwindows -Iwin\SDL2\include"
   FLAGS_LIBS="-mwindows -Lwin\SDL2\lib -lmingw32 -lSDL2main -lSDL2"
   CC="gcc"
@@ -30,7 +36,11 @@ if [ ! -z "$MSYSTEM" ]; then
   
   SMALL_PATH="$OUT_PATH/m4kc.exe"
   DEBUG_PATH="$OUT_PATH/m4kc-debug.exe"
+  GZEXE_CMD=":"
+  ZIP_FILES="$SMALL_PATH $OUT_PATH/SDL2.dll"
 fi
+
+ZIP_PATH="$RELEASE_PATH/M4KC-$VERSION-$PLATFORM.zip"
 
 # build a single module from src
 
@@ -159,6 +169,14 @@ case $1 in
     rm "/usr/games/m4kc"
     rm "/usr/share/applications/m4kc.desktop"
     rm "/usr/share/icons/m4kc.png"
+    ;;
+    
+  release)
+    buildAll small
+    echo "... packaging release"
+    mkdir -p "$RELEASE_PATH"
+    zip $ZIP_PATH $ZIP_FILES
+    echo ".// packaged"
     ;;
     
   *) buildModule $1 $2 ;;
