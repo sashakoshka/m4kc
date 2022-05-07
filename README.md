@@ -37,8 +37,8 @@ This project is an attempt to translate the game into C in order to increase its
 * gzexe
 
 ### On windows, you will need
-* Mingw-w64 installed
-* gcc in your PATH
+* MSYS2 installed
+* mingw-w64-x86_64-gcc installed through MSYS2
 
 ## Build instructions
 
@@ -52,10 +52,7 @@ Visit [the wiki](https://github.com/sashakoshka/m4kc/wiki/Building-From-Source) 
 * To clean, run `./build.sh clean`
 
 ### Windows
-
-First, create the directories `win/bin` and `win/o`
-
-Run `win-build.bat`. Inside of the `win/bin` directory, you will find `m4kc.exe` and `SDL2.dll`. In order for `m4kc.exe` to run, these two must be in the same folder. If it doesn't work, [open an issue](https://github.com/sashakoshka/m4kc/issues).
+The exact same as above, but you need to do it within an MSYS2/MINGW64 shell. Instructions on how to do this can be found [here](https://www.msys2.org/docs/terminals/).
 
 ## Places
 
