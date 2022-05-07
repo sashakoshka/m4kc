@@ -172,6 +172,7 @@ case $1 in
     ;;
     
   release)
+    clean
     buildAll small
     echo "... packaging release"
     mkdir -p "$RELEASE_PATH"
