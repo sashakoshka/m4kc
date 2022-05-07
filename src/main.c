@@ -170,6 +170,8 @@ static int handleEvent (Inputs *inputs, const uint8_t *keyboard, SDL_Event event
                 break;
 
         case SDL_KEYDOWN:
+                inputs->keySym = event.key.keysym.sym;
+        case SDL_KEYUP:
                 if (event.key.repeat == 0) {
                         // Detect UI hotkeys
                         inputs->keyboard.esc = keyboard[SDL_SCANCODE_ESCAPE];
@@ -193,7 +195,6 @@ static int handleEvent (Inputs *inputs, const uint8_t *keyboard, SDL_Event event
                         inputs->keyboard.num9 = keyboard[SDL_SCANCODE_9];
                 }
                 
-                inputs->keySym = event.key.keysym.sym;
                 break;
 
         case SDL_MOUSEWHEEL:
