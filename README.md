@@ -42,6 +42,8 @@ This project is an attempt to translate the game into C in order to increase its
 
 ## Build instructions
 
+Visit [the wiki](https://github.com/sashakoshka/m4kc/wiki/Building-From-Source) for more detailed build instructions.
+
 ### Linux, unix, etc
 * To just get a binary, run `./build.sh small` or `./build.sh all small`
 * To run an uncompressed version, run `./build.sh` or `./build.sh all`
