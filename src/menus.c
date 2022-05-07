@@ -142,7 +142,7 @@ void state_selectWorld (
         if (6 + index * 22 > yLimit) {
                 scrollbar (
                         renderer,
-                        BUFFER_HALF_W + 65, 0, BUFFER_H - 29,
+                        BUFFER_HALF_W + 70, 0, BUFFER_H - 29,
                         inputs->mouse.x, inputs->mouse.y, inputs->mouse.left,
                         &scroll, data_worldListLength); 
         }

@@ -176,7 +176,7 @@ int button (
         }
         SDL_RenderFillRect(renderer, &rect);
 
-        x += w / 2;
+        x += w / 2 + 1;
         y += 5;
 
         if (hover) {
