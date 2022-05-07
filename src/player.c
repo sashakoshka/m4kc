@@ -17,10 +17,10 @@ int Player_save (Player *player, const char *path) {
         fprintf (
                 file,
                 "%i\n"
-                "%a %a %a\n"
-                "%a %a\n"
-                "%hhu %hhu %hhu\n"
-                "%hu\n\n",
+                "%16.4lf %16.4lf %16.4lf\n"
+                "%16.4lf %16.4lf\n"
+                "%i %i %i\n"
+                "%i\n\n",
                 0,
                 player->pos.x, player->pos.y, player->pos.z,
                 player->hRot, player->vRot,
@@ -45,16 +45,20 @@ int Player_load (Player *player, const char *path) {
         fscanf(file, "%i", &version);
         if (version != 0) { return 2; }
 
+        int health, hunger, breath, xp;
         fscanf (
                 file,
                 "%lf %lf %lf "
                 "%lf %lf "
-                "%hhu %hhu %hhu "
-                "%hu",
+                "%i %i %i "
+                "%i",
                 &player->pos.x, &player->pos.y, &player->pos.z,
                 &player->hRot, &player->vRot,
-                &player->health, &player->hunger, &player->breath,
-                &player->xp);
+                &health, &hunger, &breath, &xp);
+        player->health = health;
+        player->hunger = hunger;
+        player->breath = breath;
+        player->xp     = xp;
 
         Inventory_load(file, &player->inventory);
         
@@ -154,7 +158,7 @@ static void Inventory_load (FILE *file, Inventory *inventory) {
  * Inventory_save.
  */
 static void InvSlot_save (FILE *file, InvSlot *invSlot) {
-        fprintf (file, "%hhu %hhu %hu\n",
+        fprintf (file, "%i %i %i\n",
                 invSlot->blockid,
                 invSlot->amount,
                 invSlot->durability);
@@ -165,10 +169,12 @@ static void InvSlot_save (FILE *file, InvSlot *invSlot) {
  * use inside of Inventory_load.
  */
 static void InvSlot_load (FILE *file, InvSlot *invSlot) {
-        fscanf (file, "%hhu %hhu %hu\n",
-                &invSlot->blockid,
-                &invSlot->amount,
-                &invSlot->durability);
+        int blockid, amount, durability;
+        fscanf (file, "%i %i %i\n",
+                &blockid, &amount, &durability);
+        invSlot->blockid    = blockid;
+        invSlot->amount     = amount;
+        invSlot->durability = durability;
 }
 
 /* InvSlot_transfer
