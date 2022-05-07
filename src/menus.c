@@ -70,6 +70,7 @@ void state_selectWorld (
         World *world
 ) {
         static int scroll = 0;
+        int needRefresh   = 0;
 
         if (inputs->mouse.wheel != 0) {
                 scroll -= inputs->mouse.wheel;
@@ -102,24 +103,38 @@ void state_selectWorld (
         int yLimit = BUFFER_H - 44;
         data_WorldListItem *item = data_worldList;
         while (item != NULL) {
-                if (y > yLimit) { break; }
+                if (y > yLimit)     { break;}
+                if (index < scroll) { goto nextItem; }
+                
+                int hover = drawWorldListItem(renderer, item,
+                        BUFFER_HALF_W - 64, y,
+                        inputs->mouse.x,
+                        inputs->mouse.y);
+                y += 21;
+                if (!inputs->mouse.left) { goto nextItem; }
 
-                if (index >= scroll) {
-                        if (drawWorldListItem(renderer, item,
-                                BUFFER_HALF_W - 64, y,
-                                inputs->mouse.x,
-                                inputs->mouse.y) && inputs->mouse.left
-                        ) {
-                                if (World_load(world, item->name)) {
-                                        gameLoop_error("Could not load world");
-                                } else {
-                                        *gameState = STATE_LOADING;
-                                }
+                switch (hover) {
+                case 1:
+                        if (World_load(world, item->name)) {
+                                gameLoop_error("Could not load world");
+                        } else {
+                                *gameState = STATE_LOADING;
+                        }
+                        return;
+                case 2:
+                        ;char deletePath[PATH_MAX];
+                        if (data_getWorldPath(deletePath, item->name)) {
+                                gameLoop_error("Could not delete world");
                                 return;
                         }
-                        y += 21;
+
+                        data_removeDirectory(deletePath);
+                        needRefresh = 1;
+                        
+                        break;
                 }
-                
+
+                nextItem:
                 index ++;
                 item = item->next;
         }
@@ -153,6 +168,10 @@ void state_selectWorld (
         ) {
                 *gameState = STATE_NEW_WORLD;
                 scroll = 0;
+        }
+
+        if (needRefresh) {
+                data_refreshWorldList();
         }
 }
 
