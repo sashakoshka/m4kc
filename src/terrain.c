@@ -52,9 +52,9 @@ int World_save (World *world) {
                 metadata,
                 "%i\n%i\n%lu\n%i\n%lu\n", 0,
                 world->type,
-                world->seed,
+                (long unsigned int)world->seed,
                 world->dayNightMode,
-                world->time);
+                (long unsigned int)world->time);
         
         fclose(metadata);
 
@@ -101,13 +101,16 @@ int World_load (World *world, const char *name) {
         fscanf(metadata, "%i", &version);
         if (version != 0) { return 3; }
 
+        long unsigned int seed, time;
         fscanf (
                 metadata,
                 "%i %lu %i %lu",
                 &world->type,
-                &world->seed,
+                &seed,
                 &world->dayNightMode,
-                &world->time);
+                &time);
+        world->seed = seed;
+        world->time = time;
         
         fclose(metadata);
 
