@@ -7,13 +7,26 @@ CC="clang"
 OBJ_PATH="o"
 OUT_PATH="bin"
 SRC_PATH="src"
-SMALL_PATH="$OUT_PATH/m4kc"
-DEBUG_PATH="$OUT_PATH/m4kc-debug"
 
 FLAGS_SMALL="-Os -g0 -fno-stack-protector -fno-unwind-tables \
 -fno-asynchronous-unwind-tables -Dsmall"
+FLAGS_WARN="-Wall -Wextra"
 FLAGS_DEBUG="-g"
 FLAGS_LIBS="-L/usr/local/lib -lSDL2 -lm"
+
+# do specific things if we are on windows
+
+if [ ! -z "$MSYSTEM" ]; then
+  FLAGS_INCLUDE="-mwindows -Iwin\SDL2\include"
+  FLAGS_LIBS="-mwindows -Lwin\SDL2\lib -lmingw32 -lSDL2main -lSDL2"
+  CC="gcc"
+  
+  OBJ_PATH="win/o"
+  OUT_PATH="win/bin"
+fi
+
+SMALL_PATH="$OUT_PATH/m4kc"
+DEBUG_PATH="$OUT_PATH/m4kc-debug"
 
 # build a single module from src
 
@@ -25,7 +38,7 @@ buildModule () {
   modIn="$SRC_PATH/$1.c"
   modHead="$SRC_PATH/$1.h"
 
-  flags="-c"
+  flags="-c $FLAGS_WARN $FLAGS_INCLUDE"
   if [ "$2" = "small" ]
   then flags="$flags $FLAGS_SMALL"
        modOut="$OBJ_PATH/small/$1.o"
@@ -60,7 +73,7 @@ buildAll () {
 
   echo "... building entire executable"
   
-  flags="$FLAGS_LIBS"
+  flags="$FLAGS_LIBS $FLAGS_WARN"
   if [ "$1" = "small" ]
   then flags="$flags $FLAGS_SMALL -s"
        allIn="$OBJ_PATH/small/*.o"
@@ -90,6 +103,12 @@ buildAll () {
     else
       echo "ERR could not compress executable" >&2
     fi
+  fi
+  
+  # copy SDL2.dll on windows
+  if [ ! -z "$MSYSTEM" ]; then
+    cp "win/SDL2.dll" "$OUT_PATH/SDL2.dll"
+    echo "(i) copied SDL2.dll"
   fi
 }
 
