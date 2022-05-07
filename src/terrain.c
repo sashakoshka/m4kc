@@ -70,6 +70,13 @@ int World_save (World *world) {
  * Wipes a world, freeing all data inside of it. This does not save anything.
  */
 void World_wipe (World *world) {
+        // Reset player
+        world->player = (const Player) { 0};
+        world->player.pos.x = 32.5;
+        world->player.pos.y = 20;
+        world->player.pos.z = 32.5;
+        
+        // Clear chunks
         for (int index = 0; index < CHUNKARR_SIZE; index ++) {
                 Chunk *chunk = &world->chunk[index];
 
@@ -120,11 +127,6 @@ int World_load (World *world, const char *name) {
                 options.username.buffer);
         if (data_fileExists(playerPath)) {
                 Player_load(&world->player, playerPath);
-        } else {
-                world->player = (const Player) { 0 };
-                world->player.pos.x = 32.5;
-                world->player.pos.y = 64;
-                world->player.pos.z = 32.5;
         }
 
         return 0;
