@@ -74,6 +74,10 @@ A lot of this code is decompiled from the original java version, and those are n
 
 The game uses a 3D voxel raycaster to render things, which is a lot slower than more traditional methods of rendering. Luckily, C provides more powerful ways to optimize something like this than Java - and optimizations will keep coming.
 
+> Will you add in \_\_\_\_\_ from Minecraft?
+
+I plan to port over a lot of user interface features, controls, and gameplay mechanics from the official game. However, this game will be taken in its own direction content-wise. For example, crafting will be a part of the game eventually, but creepers will not. New features will be added if they fit with the aesthetic and feel of the game, and make sense from a technichal and gameplay perspective.
+
 ## Screenshots
 
 What this actually looks like.
