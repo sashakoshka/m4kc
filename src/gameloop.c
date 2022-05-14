@@ -487,9 +487,9 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             lookup_ago = lookup_now;
 
             // hash coordinates
-            lookup_now.x &= 0b1111111111;
-            lookup_now.y &= 0b1111111111;
-            lookup_now.z &= 0b1111111111;
+            lookup_now.x &= 0x3FF;
+            lookup_now.y &= 0x3FF;
+            lookup_now.z &= 0x3FF;
             
             lookup_now.y <<= 10;
             lookup_now.z <<= 20;
@@ -818,11 +818,11 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                 
                 for (int step = 0; step < 12; step++) {
                         int blockX = playerPosTry.x +
-                                ((step >> 0) & 0b0001) * 0.6 - 0.3;
+                                ((step >> 0) & 1) * 0.6 - 0.3;
                         int blockY = playerPosTry.y +
-                                ((step >> 2) - 1     ) * 0.8 + 0.65;
+                                ((step >> 2) - 1) * 0.8 + 0.65;
                         int blockZ = playerPosTry.z +
-                                ((step >> 1) & 0b0001) * 0.6 - 0.3;
+                                ((step >> 1) & 1) * 0.6 - 0.3;
 
                         // Very ad-hoc. TODO: look into a deeper fix than this.
                         // blockX -= (blockX < 0);
