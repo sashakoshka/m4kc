@@ -538,9 +538,9 @@ void popup_hud (
                         int stamp = world->chunk[i].loaded;
                         SDL_SetRenderDrawColor (
                                 renderer,
-                                (stamp & 0b000011) * 64,
-                                (stamp & 0b001100) * 16,
-                                (stamp & 0b110000) * 4,
+                                (stamp & 0x03) * 64,
+                                (stamp & 0x0C) * 16,
+                                (stamp & 0x30) * 4,
                                 0xFF
                         );
                         SDL_RenderFillRect(renderer, &chunkMonitorRect);

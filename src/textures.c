@@ -115,7 +115,7 @@ static void genTexture (Block blockId) {
                 case BLOCK_COBBLESTONE:
                         baseColor = 0x999999;
                         brightness -=
-                                ((cobbleCracks[y & 0xF] >> x) & 0b1) * 128;
+                                ((cobbleCracks[y & 0xF] >> x) & 1) * 128;
                         break;
 
                 case BLOCK_WATER:

@@ -171,9 +171,9 @@ static int Chunk_save (World *world, Chunk *chunk) {
  */
 uint32_t chunkHash (int x, int y, int z) {
         // Modulo-like operation by bitmasking
-        x &= 0b1111111111;
-        y &= 0b1111111111;
-        z &= 0b1111111111;
+        x &= 0x3FF;
+        y &= 0x3FF;
+        z &= 0x3FF;
 
         // Move these into their correct "slots"
         y <<= 10;
@@ -497,9 +497,9 @@ int genChunk (
         hashY = yOffset >> 6;
         hashZ = zOffset >> 6;
 
-        hashX &= 0b1111111111;
-        hashY &= 0b1111111111;
-        hashZ &= 0b1111111111;
+        hashX &= 0x3FF;
+        hashY &= 0x3FF;
+        hashZ &= 0x3FF;
 
         hashY <<= 10;
         hashZ <<= 20;
