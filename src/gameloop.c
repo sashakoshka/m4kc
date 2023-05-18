@@ -22,8 +22,6 @@
 World world = { 0 };
 Player *player = &world.player;
 
-static Coords playerOffsetPos = { 0.0, 0.0, 0.0 };
-
 int gameState = STATE_TITLE;
 int gamePopup;
 
@@ -210,11 +208,6 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
   player->vectorV.x = sin(player->vRot);
   player->vectorV.y = cos(player->vRot);
 
-  // Update offset player position
-  playerOffsetPos.x = player->pos.x + PLAYER_POSITION_OFFSET;
-  playerOffsetPos.y = player->pos.y + PLAYER_POSITION_OFFSET;
-  playerOffsetPos.z = player->pos.z + PLAYER_POSITION_OFFSET;
-  
   // Skybox, basically
   double timeCoef;
   switch (world.dayNightMode) {
@@ -442,14 +435,14 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         f29 = f24 * f28;
         f30 = f23 * f28;
         f31 = f25 * f28;
-        f32 = playerOffsetPos.x - (int)playerOffsetPos.x;
-        if (blockFace == 1) f32 = playerOffsetPos.y - (int)playerOffsetPos.y;
-        if (blockFace == 2) f32 = playerOffsetPos.z - (int)playerOffsetPos.z;
+        f32 = player->pos.x - floor(player->pos.x);
+        if (blockFace == 1) f32 = player->pos.y - floor(player->pos.y);
+        if (blockFace == 2) f32 = player->pos.z - floor(player->pos.z);
         if (f27 > 0.0)      f32 = 1.0 - f32; 
         f33 = f28 * f32;
-        f34 = playerOffsetPos.x + f29 * f32;
-        f35 = playerOffsetPos.y + f30 * f32;
-        f36 = playerOffsetPos.z + f31 * f32;
+        f34 = player->pos.x + f29 * f32;
+        f35 = player->pos.y + f30 * f32;
+        f36 = player->pos.z + f31 * f32;
         if (f27 < 0.0) {
           if (blockFace == 0) f34--; 
           if (blockFace == 1) f35--; 
@@ -459,9 +452,9 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
         /* Whatever's in this loop needs to run *extremely*
         fast */
         while (f33 < rayDistanceLimit) {
-          blockRayPosition.x = (int)f34 - PLAYER_POSITION_OFFSET;
-          blockRayPosition.y = (int)f35 - PLAYER_POSITION_OFFSET;
-          blockRayPosition.z = (int)f36 - PLAYER_POSITION_OFFSET;
+          blockRayPosition.x = floor(f34);
+          blockRayPosition.y = floor(f35);
+          blockRayPosition.z = floor(f36);
           
           /* Imitate getBlock so we don't have to launch
           into a function then another function a zillion
@@ -536,15 +529,15 @@ static void gameLoop_gameplay (SDL_Renderer *renderer, Inputs *inputs) {
             !(headInWater && intersectedBlock == BLOCK_WATER)
           ) {
             // Determine what texel the ray hit
-            int textureX = (int)((f34 + f36) * 16.0) & 0xF;
-            int textureY = ((int)(f35 * 16.0) & 0xF) + 16;
+            int textureX = (int)floor((f34 + f36) * 16.0) & 0xF;
+            int textureY = ((int)floor(f35 * 16.0) & 0xF) + 16;
             if (blockFace == 1) {
-              textureX = (int)(f34 * 16.0) & 0xF;
-              textureY = (int)(f36 * 16.0) & 0xF;
+              textureX = (int)floor(f34 * 16.0) & 0xF;
+              textureY = (int)floor(f36 * 16.0) & 0xF;
               if (f30 < 0.0)
                 textureY += 32; 
             }
-            
+
             // Block outline color
             int pixelColor = 0xFFFFFF;
             if (
@@ -811,18 +804,14 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                         player->pos.y + playerMovement.y * (double)((axis + 1) % 3 / 2),
                         player->pos.z + playerMovement.z * (double)((axis + 3) % 3 / 2),
                 };
-
-                playerPosTry.x += PLAYER_POSITION_OFFSET;
-                playerPosTry.y += PLAYER_POSITION_OFFSET;
-                playerPosTry.z += PLAYER_POSITION_OFFSET;
                 
                 for (int step = 0; step < 12; step++) {
-                        int blockX = playerPosTry.x +
-                                ((step >> 0) & 1) * 0.6 - 0.3;
-                        int blockY = playerPosTry.y +
-                                ((step >> 2) - 1) * 0.8 + 0.65;
-                        int blockZ = playerPosTry.z +
-                                ((step >> 1) & 1) * 0.6 - 0.3;
+                        int blockX = floor(playerPosTry.x +
+                                ((step >> 0) & 1) * 0.6 - 0.3);
+                        int blockY = floor(playerPosTry.y +
+                                ((step >> 2) - 1) * 0.8 + 0.65);
+                        int blockZ = floor(playerPosTry.z +
+                                ((step >> 1) & 1) * 0.6 - 0.3);
 
                         // Very ad-hoc. TODO: look into a deeper fix than this.
                         // blockX -= (blockX < 0);
@@ -831,9 +820,9 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                         // ---
 
                         Block block = World_getBlock (&world,
-                                blockX - PLAYER_POSITION_OFFSET,
-                                blockY - PLAYER_POSITION_OFFSET,
-                                blockZ - PLAYER_POSITION_OFFSET);
+                                blockX,
+                                blockY,
+                                blockZ);
 
                         int shouldCollide = 1;
                         // Blocks that have collision disabled
@@ -860,10 +849,6 @@ static void gameLoop_processMovement (Inputs *inputs, int inWater) {
                                 goto stopCheck;
                         }
                 }
-
-                playerPosTry.x -= PLAYER_POSITION_OFFSET;
-                playerPosTry.y -= PLAYER_POSITION_OFFSET;
-                playerPosTry.z -= PLAYER_POSITION_OFFSET;
 
                 player->pos.x = playerPosTry.x;
                 player->pos.y = playerPosTry.y;
