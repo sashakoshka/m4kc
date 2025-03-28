@@ -54,6 +54,17 @@ Visit [the wiki](https://github.com/sashakoshka/m4kc/wiki/Building-From-Source) 
 ### Windows
 The exact same as above, but you need to do it within an MSYS2/MINGW64 shell. Instructions on how to do this can be found [here](https://www.msys2.org/docs/terminals/).
 
+### macOS with Xcode
+Open Xcode and do a Product -> Build or Command+B. You can also Archive and then export the archive with Organizer -> Distribute App -> Copy App.
+
+Command-line version of the build:
+```
+# cd apple
+# xcodebuild
+```
+
+Note: This app won't be distributable without code signing.
+
 ## Places
 
 There is a forum thread for this project [here](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/minecraft-mods/3081789-minecraft-4k-c-rewrite)
