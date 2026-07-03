@@ -57,10 +57,7 @@ int main (int argc, char *argv[]) {
                 goto exit;
         }
 
-        renderer = SDL_CreateRenderer (
-                window,
-                -1, SDL_RENDERER_ACCELERATED
-        );
+        renderer = SDL_CreateRenderer(window, -1, 0);
         if (renderer == NULL) {
                 printf("%s\n", SDL_GetError());
                 goto exit;
@@ -97,7 +94,6 @@ int main (int argc, char *argv[]) {
                 running &= gameLoop(&inputs, renderer);
                 
                 SDL_RenderPresent(renderer);
-                SDL_UpdateWindowSurface(window);
 
                 // Clean up input struct
                 inputs.keyTyped = 0;
