@@ -32,9 +32,10 @@ void chatAdd           (const char*);
 void white             (SDL_Renderer *);
 void tblack            (SDL_Renderer *);
 
-extern const int BUFFER_W;
-extern const int BUFFER_H;
-extern const int BUFFER_SCALE;
+#define BUFFER_W     214
+#define BUFFER_H     120
+#define BUFFER_SCALE 4
+
 extern const int BUFFER_HALF_W;
 extern const int BUFFER_HALF_H;
 extern const int WINDOW_W;

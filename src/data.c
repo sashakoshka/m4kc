@@ -307,12 +307,22 @@ static uint32_t getSurfacePixel (SDL_Surface *surface, int x, int y) {
  */
 static int findDirectoryName (char *path, const char *subDirectory) {
         if (subDirectory[0] != '/') { return 2; }
-        
+
         #ifdef _WIN32
         char *homeDirectory = getenv("APPDATA");
+        #elif defined(_KOLIBRI)
+        // use game directory if it's writable, else fall back to HOME
+        char cwd[PATH_MAX];
+        char *homeDirectory;
+        if (getcwd(cwd, sizeof(cwd)) != NULL && !mkdir(".m4kc", 0755)) {
+                homeDirectory = cwd;
+        } else {
+                homeDirectory = getenv("HOME");
+        }
         #else
         char *homeDirectory = getenv("HOME");
         #endif
+
         if (homeDirectory == NULL) { return 3; }
 
         snprintf(path, PATH_MAX, "%s%s", homeDirectory, subDirectory);

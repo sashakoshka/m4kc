@@ -1,9 +1,6 @@
 #include "gui.h"
 #include "blocks.h"
 
-const int BUFFER_W     = 214;
-const int BUFFER_H     = 120;
-const int BUFFER_SCALE = 4;
 const int BUFFER_HALF_W = BUFFER_W / 2;
 const int BUFFER_HALF_H = BUFFER_H / 2;
 const int WINDOW_W     = BUFFER_W * BUFFER_SCALE;
